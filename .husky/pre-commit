@@ -1,0 +1,4 @@
+
+sh .husky/validate-branch-name.sh
+
+pnpm exec lint-staged
