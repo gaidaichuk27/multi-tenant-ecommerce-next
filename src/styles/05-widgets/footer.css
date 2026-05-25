@@ -1,0 +1,14 @@
+@layer components {
+    .footer {
+        @apply bg-section-secondary-background text-foreground border-border flex items-center justify-center border-t p-4;
+    }
+
+    .footer__top {
+    }
+
+    .footer__bottom {
+    }
+
+    .footer__copy {
+    }
+}
