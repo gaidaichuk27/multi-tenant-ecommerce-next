@@ -1,6 +1,6 @@
 @layer components {
     .header {
-        @apply text-foreground custom-shadow-25 absolute top-0 flex w-full items-center justify-center p-4 backdrop-blur-sm backdrop-brightness-[0.9] backdrop-saturate-[1.4];
+        @apply text-foreground absolute top-0 flex w-full items-center justify-center p-4;
 
         /* Shared fixed positioning */
         &.m-sticky,
@@ -20,5 +20,9 @@
 
     .header__inner {
         @apply flex w-full max-w-[98%] flex-col rounded-3xl py-4;
+    }
+
+    .header__backdrop {
+        @apply absolute inset-x-0 -inset-y-4 top-0 -z-1 h-full w-full bg-[rgba(225,225,225,0.05)] mask-[linear-gradient(rgb(0,0,0)_50%,rgba(0,0,0,0.8)_70%,rgba(0,0,0,0)_100%)] backdrop-blur-[30px] [-webkit-mask-image:linear-gradient(rgb(0,0,0)_50%,rgba(0,0,0,0.8)_70%,rgba(0,0,0,0)_100%)];
     }
 }

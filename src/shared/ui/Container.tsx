@@ -14,7 +14,7 @@ export const Container = ({
 }: ContainerProps) => {
     return (
         <div
-            className={cn(className, {
+            className={cn(className, 'container', {
                 ['m-secondary']: secondary,
             })}
         >
