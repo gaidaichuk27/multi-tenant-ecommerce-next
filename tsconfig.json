@@ -20,12 +20,15 @@
         ],
         "paths": {
             "@/*": ["./*"],
-            "@lib/*": ["./src/lib/*"],
+            "@features/*": ["./src/features/*"],
             "@helpers/*": ["./src/helpers/*"],
             "@hooks/*": ["./src/hooks/*"],
             "@hocs/*": ["./src/hocs/*"],
             "@layouts/*": ["./src/layouts/*"],
+            "@lib/*": ["./src/lib/*"],
+            "@providers/*": ["./src/providers/*"],
             "@shared/*": ["./src/shared/*"],
+            "@services/*": ["./src/services/*"],
             "@styles/*": ["./src/styles/*"],
             "@widgets/*": ["./src/widgets/*"]
         }

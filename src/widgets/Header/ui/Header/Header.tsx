@@ -1,8 +1,8 @@
 'use client';
 
-import { Container } from '@/src/shared/ui/Container';
 import { useHeaderSticky } from '@hooks/useStickyHeader';
 import { useStickyHeaderHeight } from '@hooks/useStickyHeaderHeight';
+import { ThemeSelector, ThemeToggle } from '@/src/features/theme';
 import { cn } from '@lib/utils';
 
 interface HeaderProps {
@@ -17,8 +17,12 @@ export const Header = ({ className, isSticky = true }: HeaderProps) => {
     return (
         <header className={cn(className, 'js-header header')}>
             <div className="header__inner">
-                <Container>header</Container>
+                <div className="ml-auto flex gap-1.5">
+                    <ThemeToggle />
+                    <ThemeSelector />
+                </div>
             </div>
+            <div className="header__backdrop"></div>
         </header>
     );
 };

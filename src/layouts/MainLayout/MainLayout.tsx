@@ -2,7 +2,8 @@ import { ReactNode } from 'react';
 import { Footer } from '@widgets/Footer';
 import { Content } from '@widgets/Content';
 import { Header } from '@widgets/Header';
-import { Container } from '@shared/ui';
+import { Container } from '@shared/ui/Container';
+import { Button } from '@shared/ui/Button';
 import { cn } from '@lib/utils';
 
 interface MainLayoutProps {
@@ -20,7 +21,9 @@ export const MainLayout = ({
         <div className={cn('flex h-full flex-col', className)}>
             <Header />
             <Content className="grow">
-                <Container secondary={withoutContainer}>{children}</Container>
+                <Container secondary={withoutContainer}>
+                    {children} <Button>Button</Button>
+                </Container>
             </Content>
             <Footer />
             <div id="portal" />
