@@ -2,13 +2,12 @@
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
 
-@custom-variant dark (&:is(.dark *));
-
 @import './themes.css';
 @import './01-base/index.css';
 @import './02-utility/index.css';
 @import './05-widgets/index.css';
 
+@custom-variant dark (&:is(.dark *));
 :root {
     --background: oklch(1 0 0);
     --foreground: oklch(0.2863 0.0224 195.9691);
@@ -16,7 +15,7 @@
     --card-foreground: oklch(0.2863 0.0224 195.9691);
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.2863 0.0224 195.9691);
-    --primary: oklch(0.5318 0.0956 218.0718);
+    --primary: oklch(0.43 0.0762 216.54);
     --primary-foreground: oklch(1 0 0);
     --secondary: oklch(0.903 0.2101 117.9443);
     --secondary-foreground: oklch(0.3075 0.0713 117.6532);
@@ -45,7 +44,7 @@
     --font-sans: 'Inter', system-ui, sans-serif;
     --font-serif: Georgia, serif;
     --font-mono: 'JetBrains Mono', monospace;
-    --radius: 1.5rem;
+    --radius: 0.5rem;
     --shadow-x: 0px;
     --shadow-y: 8px;
     --shadow-blur: 24px;

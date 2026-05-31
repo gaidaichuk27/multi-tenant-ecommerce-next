@@ -1,0 +1,62 @@
+services:
+    # Production build (next build + node server.js)
+    app:
+        profiles:
+            - prod
+        build:
+            context: .
+            target: runner
+        ports:
+            - "3000:3000"
+        environment:
+            NODE_ENV: production
+
+    # Next.js dev server with hot reload
+    dev:
+        profiles:
+            - dev
+        build:
+            context: .
+            target: dev
+        ports:
+            - "3000:3000"
+        volumes:
+            - .:/app
+            - dev_node_modules:/app/node_modules
+            - dev_next:/app/.next
+        environment:
+            NODE_ENV: development
+            WATCHPACK_POLLING: "true"
+        command: ["pnpm", "dev", "--hostname", "0.0.0.0"]
+
+    storybook:
+        profiles:
+            - storybook
+        build:
+            context: .
+            target: storybook
+        ports:
+            - "6006:6006"
+        volumes:
+            - .:/app
+            - storybook_node_modules:/app/node_modules
+        environment:
+            NODE_ENV: development
+            WATCHPACK_POLLING: "true"
+        command:
+            [
+                "pnpm",
+                "exec",
+                "storybook",
+                "dev",
+                "--ci",
+                "-p",
+                "6006",
+                "--host",
+                "0.0.0.0",
+            ]
+
+volumes:
+    dev_node_modules:
+    dev_next:
+    storybook_node_modules:

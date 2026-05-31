@@ -1,0 +1,13 @@
+node_modules
+.pnpm-store
+.next
+out
+storybook-static
+.git
+.gitignore
+.env*
+*.md
+.DS_Store
+coverage
+.husky
+*storybook.log

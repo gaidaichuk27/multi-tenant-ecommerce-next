@@ -1,0 +1,80 @@
+#!/usr/bin/env sh
+set -e
+
+cd "$(dirname "$0")/.."
+
+COMPOSE="docker compose"
+
+usage() {
+    cat <<'EOF'
+Usage:
+  multi dev up              Start Next.js dev (port 3000)
+  multi dev down            Stop Next.js dev
+  multi story up            Start Storybook (port 6006)
+  multi story down          Stop Storybook
+  multi up                  Start dev + Storybook
+  multi down                Stop dev + Storybook
+  multi prod up             Start production app (port 3000)
+  multi prod down           Stop production app
+
+If `multi` is not found:
+  • Cursor terminal: reopen terminal (uses .vscode/settings.json)
+  • Any shell with direnv: direnv allow  (uses .envrc)
+  • Otherwise: source scripts/shell-env.sh
+  • Fallback: pnpm run multi dev up
+EOF
+    exit 1
+}
+
+profile="${1:-}"
+action="${2:-}"
+
+if [ -z "$profile" ]; then
+    usage
+fi
+
+# "multi up" / "multi down" → all dev services
+if [ "$profile" = "up" ] || [ "$profile" = "down" ]; then
+    action="$profile"
+    profile="all"
+fi
+
+case "$action" in
+    up|down) ;;
+    *) usage ;;
+esac
+
+run() {
+    # shellcheck disable=SC2086
+    $COMPOSE "$@"
+}
+
+case "${profile}-${action}" in
+    dev-up)
+        run --profile dev up --build dev
+        ;;
+    dev-down)
+        run --profile dev down
+        ;;
+    story-up)
+        run --profile storybook up --build storybook
+        ;;
+    story-down)
+        run --profile storybook down
+        ;;
+    all-up)
+        run --profile dev --profile storybook up --build
+        ;;
+    all-down)
+        run --profile dev --profile storybook down
+        ;;
+    prod-up)
+        run --profile prod up --build app
+        ;;
+    prod-down)
+        run --profile prod down
+        ;;
+    *)
+        usage
+        ;;
+esac

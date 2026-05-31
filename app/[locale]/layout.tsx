@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import { ThemeProvider, ActiveThemeProvider } from '@providers/theme';
-import type { Theme } from '@features/theme';
+import { getThemeClassName, resolveTheme } from '@features/theme';
 import { Orbitron, Rajdhani, Fira_Code } from 'next/font/google';
 import '@styles/globals.css';
 
@@ -32,14 +32,14 @@ export default async function RootLayout({
     children: React.ReactNode;
 }>) {
     const cookieStore = await cookies();
-    const theme = cookieStore.get('active_theme')?.value as Theme['value'];
+    const theme = resolveTheme(cookieStore.get('active_theme')?.value);
     return (
         <html
             lang="en"
             suppressHydrationWarning
         >
             <body
-                className={`${fontSans.variable} ${fontSerif.variable} ${fontMono.variable} antialiased`}
+                className={`${fontSans.variable} ${fontSerif.variable} ${fontMono.variable} antialiased ${getThemeClassName(theme)}`}
             >
                 <ThemeProvider>
                     <ActiveThemeProvider initialTheme={theme}>

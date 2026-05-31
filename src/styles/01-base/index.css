@@ -1,7 +1,7 @@
 @layer base {
     html,
     body {
-        @apply h-[5000px];
+        @apply h-full;
     }
     .page {
         @apply h-full;
