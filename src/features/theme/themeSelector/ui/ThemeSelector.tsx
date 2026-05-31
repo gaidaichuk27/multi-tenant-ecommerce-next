@@ -30,7 +30,6 @@ export function ThemeSelector() {
             >
                 <SelectTrigger
                     id="theme-selector"
-                    size="sm"
                     className="text-primary justify-start *:data-[slot=select-value]:w-12"
                 >
                     <span className="text-muted-foreground hidden sm:block">
