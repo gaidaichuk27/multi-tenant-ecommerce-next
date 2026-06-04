@@ -361,7 +361,7 @@ export const Form: Story = {
                                 <SelectItem value="us">
                                     United States
                                 </SelectItem>
-                                <SelectItem value="uk">
+                                <SelectItem value="en">
                                     United Kingdom
                                 </SelectItem>
                                 <SelectItem value="ca">Canada</SelectItem>

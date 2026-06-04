@@ -2,6 +2,7 @@
 
 import { useHeaderSticky } from '@hooks/useStickyHeader';
 import { useStickyHeaderHeight } from '@hooks/useStickyHeaderHeight';
+import { LangSelector } from '@features/langSelector';
 import { ThemeSelector, ThemeToggle } from '@features/theme';
 import { cn } from '@lib/utils';
 
@@ -18,6 +19,7 @@ export const Header = ({ className, isSticky = true }: HeaderProps) => {
         <header className={cn(className, 'js-header header')}>
             <div className="header__inner">
                 <div className="ml-auto flex gap-1.5">
+                    <LangSelector slim />
                     <ThemeToggle />
                     <ThemeSelector />
                 </div>

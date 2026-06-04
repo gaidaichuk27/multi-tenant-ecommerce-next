@@ -69,7 +69,7 @@ const meta = {
     argTypes: {
         size: {
             control: 'select',
-            options: ['default', 'sm'],
+            options: ['default', 'sm', 'lg'],
         },
     },
     args: {
@@ -99,6 +99,8 @@ function OpenButton({
 function StoryAvatar({ src, alt }: { src: string; alt: string }) {
     return (
         <span className="bg-muted relative flex size-8 shrink-0 overflow-hidden rounded-full">
+            {/* Storybook demo avatars from external URLs */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
                 src={src}
                 alt={alt}
