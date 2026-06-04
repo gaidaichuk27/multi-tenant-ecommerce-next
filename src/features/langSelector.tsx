@@ -41,17 +41,17 @@ export function LangSelector({
     const router = useRouter();
     const pathname = usePathname();
 
-    const routeLocale = useMemo(() => {
+    const routeLanguage = useMemo((): Language => {
         const segment = pathname.split('/').filter(Boolean)[0];
         return isValidLocale(segment) ? segment : i18nConfig.defaultLocale;
     }, [pathname]);
 
     const selectedOption = useMemo(
         () =>
-            getLanguageOptionByLocale(routeLocale) ??
+            getLanguageOptionByLocale(routeLanguage) ??
             options.find((option) => option.preSelected) ??
             options[0],
-        [options, routeLocale],
+        [options, routeLanguage],
     );
 
     const handleSelect = useCallback(
@@ -138,9 +138,11 @@ export function LangSelector({
                     <DropdownMenuGroup>
                         <DropdownMenuRadioGroup
                             value={selectedOption.value}
-                            onValueChange={(value) =>
-                                handleSelect(value as Language)
-                            }
+                            onValueChange={(value) => {
+                                if (isValidLocale(value)) {
+                                    handleSelect(value);
+                                }
+                            }}
                         >
                             {options.map((option) => (
                                 <DropdownMenuRadioItem

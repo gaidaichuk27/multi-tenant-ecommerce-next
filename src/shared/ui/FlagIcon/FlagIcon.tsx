@@ -1,7 +1,7 @@
 import Image from 'next/image';
 
 import { cn } from '@lib/utils';
-import { getFlagSrc } from '@shared/config/locales/locale';
+import { getSvgSrc } from '@shared/config/types';
 import type { LanguageOption } from '@shared/config/locales/types';
 
 interface FlagIconProps {
@@ -12,7 +12,7 @@ interface FlagIconProps {
 export function FlagIcon({ option, className }: FlagIconProps) {
     return (
         <Image
-            src={getFlagSrc(option.icon)}
+            src={getSvgSrc(option.icon)}
             alt={option.label}
             width={24}
             height={24}

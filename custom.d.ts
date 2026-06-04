@@ -1,8 +1,8 @@
 declare module '*.css';
 
 declare module '*.svg' {
-    import type { FlagIconSource } from '@/src/shared/config/locales/types';
+    import type { SvgImport } from '@shared/config/types';
 
-    const content: FlagIconSource;
+    const content: SvgImport;
     export default content;
 }

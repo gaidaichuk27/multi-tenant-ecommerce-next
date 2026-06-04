@@ -1,19 +1,19 @@
 import { Languages } from '@shared/config/locales/const';
-import type { AppLocale, FlagIconSource } from '@shared/config/locales/types';
+import { Language } from '@shared/config/locales/types';
 
 export function isValidLocale(
     segment: string | undefined,
-): segment is AppLocale {
+): segment is Language {
     return (
         segment !== undefined &&
         segment !== '' &&
-        (Languages as readonly string[]).includes(segment)
+        (Languages as readonly Language[]).includes(segment as Language)
     );
 }
 
 export function buildLocalizedPathname(
     pathname: string,
-    locale: string,
+    locale: Language,
 ): string {
     const segments = pathname.split('/').filter(Boolean);
 
@@ -23,8 +23,4 @@ export function buildLocalizedPathname(
 
     segments[0] = locale;
     return `/${segments.join('/')}`;
-}
-
-export function getFlagSrc(icon: FlagIconSource): string {
-    return typeof icon === 'string' ? icon : icon.src;
 }
