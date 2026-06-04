@@ -40,7 +40,10 @@ export function ThemeSelector() {
                     </span>
                     <SelectValue placeholder="Select a theme" />
                 </SelectTrigger>
-                <SelectContent align="end">
+                <SelectContent
+                    align="end"
+                    position="popper"
+                >
                     <SelectGroup>
                         <SelectLabel>Default</SelectLabel>
                         {DEFAULT_THEMES.map((theme) => (

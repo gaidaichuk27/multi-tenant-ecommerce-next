@@ -4,12 +4,14 @@
         "plugins": [],
         "noEmit": true,
         "jsx": "react-jsx",
-        "baseUrl": "..",
-        "paths": {
-            "@storybook/react": ["node_modules/@storybook/react"],
-            "@storybook/nextjs-vite": ["node_modules/@storybook/nextjs-vite"]
-        }
+        "baseUrl": ".."
     },
-    "include": ["./**/*.ts", "./**/*.tsx"],
-    "exclude": ["../node_modules"]
+    "include": [
+        "./**/*.ts",
+        "./**/*.tsx",
+        "../src/**/*.stories.ts",
+        "../src/**/*.stories.tsx",
+        "../src/**/*.stories.mjs"
+    ],
+    "exclude": ["../node_modules", "../.next"]
 }

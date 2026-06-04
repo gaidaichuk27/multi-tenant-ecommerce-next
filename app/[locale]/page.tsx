@@ -1,6 +1,10 @@
 import { WithMainLayout } from '@hocs/WithMainLayout';
 
-function Home() {
+type HomePageProps = {
+    params: Promise<{ locale: string }>;
+};
+
+function Home(_: HomePageProps) {
     return <div>home</div>;
 }
 

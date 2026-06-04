@@ -2,7 +2,7 @@ import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 
 import { cn } from '@lib/utils';
-import { Button } from '@shared/ui/Button';
+import { Button } from '@shared/ui/Form/Button';
 import { Input } from '@shared/ui/Form/Input';
 import { Textarea } from '@shared/ui/Form/Textarea';
 

@@ -3,7 +3,7 @@ import { Footer } from '@widgets/Footer';
 import { Content } from '@widgets/Content';
 import { Header } from '@widgets/Header';
 import { Container } from '@shared/ui/Container';
-import { Button } from '@shared/ui/Button';
+import { Button } from '@shared/ui/Form/Button';
 import { cn } from '@lib/utils';
 
 interface MainLayoutProps {
@@ -21,7 +21,7 @@ export const MainLayout = ({
         <div className={cn('flex h-full flex-col', className)}>
             <Header />
             <Content className="grow">
-                <Container secondary={withoutContainer}>
+                <Container variant={withoutContainer ? 'secondary' : 'primary'}>
                     {children} <Button>Button</Button>
                 </Container>
             </Content>
