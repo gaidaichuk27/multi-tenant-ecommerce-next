@@ -32,7 +32,7 @@ export const LANGUAGE_OPTIONS: LanguageOption[] = [
 ];
 
 export function getLanguageOptionByLocale(
-    locale: string,
+    locale: Language,
 ): LanguageOption | undefined {
     return LANGUAGE_OPTIONS.find((option) => option.value === locale);
 }

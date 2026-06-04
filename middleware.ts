@@ -4,14 +4,15 @@ import {
     buildLocalizedPathname,
     isValidLocale,
 } from '@shared/config/locales/locale';
+import { Language } from '@shared/config/locales/types';
 import i18nConfig from './i18nConfig';
 
 const PUBLIC_PATHS = ['/_next', '/favicon.ico', '/api', '/static'];
 
 function resolveLocale(
     langCookie: string | undefined,
-    defaultLocale: string,
-): string {
+    defaultLocale: Language,
+): Language {
     if (langCookie && isValidLocale(langCookie)) {
         return langCookie;
     }
