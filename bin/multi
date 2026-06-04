@@ -14,6 +14,7 @@ Usage:
   multi story down          Stop Storybook
   multi up                  Start dev + Storybook
   multi down                Stop dev + Storybook
+  multi refresh             Recreate node_modules volumes and restart dev + Storybook
   multi prod up             Start production app (port 3000)
   multi prod down           Stop production app
 
@@ -33,14 +34,14 @@ if [ -z "$profile" ]; then
     usage
 fi
 
-# "multi up" / "multi down" → all dev services
-if [ "$profile" = "up" ] || [ "$profile" = "down" ]; then
+# "multi up" / "multi down" / "multi refresh" → all dev services
+if [ "$profile" = "up" ] || [ "$profile" = "down" ] || [ "$profile" = "refresh" ]; then
     action="$profile"
     profile="all"
 fi
 
 case "$action" in
-    up|down) ;;
+    up|down|refresh) ;;
     *) usage ;;
 esac
 
@@ -67,6 +68,10 @@ case "${profile}-${action}" in
         ;;
     all-down)
         run --profile dev --profile storybook down
+        ;;
+    all-refresh)
+        run --profile dev --profile storybook down -v
+        run --profile dev --profile storybook up --build
         ;;
     prod-up)
         run --profile prod up --build app

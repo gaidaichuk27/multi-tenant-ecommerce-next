@@ -2,6 +2,7 @@
 
 import type { CSSProperties, ReactNode } from 'react';
 
+import { LangSelector } from '@features/langSelector';
 import { ThemeSelector, ThemeToggle } from '@features/theme';
 import { ActiveThemeProvider, ThemeProvider } from '@providers/theme';
 
@@ -31,6 +32,7 @@ export function StorybookThemeDecorator({ children }: { children: ReactNode }) {
                             } as CSSProperties
                         }
                     >
+                        <LangSelector slim />
                         <ThemeToggle />
                         <ThemeSelector />
                     </div>

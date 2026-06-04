@@ -5,7 +5,29 @@ import { DropdownMenu as DropdownMenuPrimitive } from 'radix-ui';
 import { cn } from '@lib/utils';
 import { CheckIcon, ChevronRightIcon } from 'lucide-react';
 
-type DropdownMenuSize = 'default' | 'sm';
+type DropdownMenuSize = 'default' | 'sm' | 'lg';
+
+function dropdownMenuItemInsetPadding(size: DropdownMenuSize) {
+    switch (size) {
+        case 'sm':
+            return 'pr-7 pl-1';
+        case 'lg':
+            return 'min-h-10 pr-9 pl-2';
+        default:
+            return 'pr-8 pl-1.5';
+    }
+}
+
+function dropdownMenuCheckIconClass(size: DropdownMenuSize) {
+    switch (size) {
+        case 'sm':
+            return 'size-3.5';
+        case 'lg':
+            return 'size-5';
+        default:
+            return 'size-4';
+    }
+}
 
 const DropdownMenuSizeContext =
     React.createContext<DropdownMenuSize>('default');
@@ -21,6 +43,7 @@ const dropdownMenuContentVariants = cva(
             size: {
                 default: 'min-w-32 rounded-lg p-1',
                 sm: 'min-w-28 rounded-md p-0.5',
+                lg: 'min-w-36 rounded-lg p-1.5',
             },
         },
         defaultVariants: {
@@ -37,6 +60,7 @@ const dropdownMenuItemVariants = cva(
                 default:
                     "gap-1.5 rounded-md px-1.5 py-1 text-sm data-inset:pl-7 [&_svg:not([class*='size-'])]:size-4",
                 sm: "gap-1 rounded-md px-1 py-0.5 text-xs data-inset:pl-6 [&_svg:not([class*='size-'])]:size-3.5",
+                lg: "gap-2 rounded-md px-2 py-2 text-base min-h-10 data-inset:pl-8 [&_svg:not([class*='size-'])]:size-5",
             },
             variant: {
                 default: '',
@@ -55,6 +79,7 @@ const dropdownMenuLabelVariants = cva('text-muted-foreground font-medium', {
         size: {
             default: 'px-1.5 py-1 text-xs data-inset:pl-7',
             sm: 'px-1 py-0.5 text-[0.65rem] data-inset:pl-6',
+            lg: 'px-2 py-1.5 text-sm data-inset:pl-8',
         },
     },
     defaultVariants: {
@@ -178,7 +203,7 @@ function DropdownMenuCheckboxItem({
             data-size={size}
             className={cn(
                 dropdownMenuItemVariants({ size, variant: 'default' }),
-                size === 'default' ? 'pr-8 pl-1.5' : 'pr-7 pl-1',
+                dropdownMenuItemInsetPadding(size),
                 className,
             )}
             checked={checked}
@@ -189,9 +214,7 @@ function DropdownMenuCheckboxItem({
                 data-slot="dropdown-menu-checkbox-item-indicator"
             >
                 <DropdownMenuPrimitive.ItemIndicator>
-                    <CheckIcon
-                        className={size === 'sm' ? 'size-3.5' : 'size-4'}
-                    />
+                    <CheckIcon className={dropdownMenuCheckIconClass(size)} />
                 </DropdownMenuPrimitive.ItemIndicator>
             </span>
             {children}
@@ -227,7 +250,7 @@ function DropdownMenuRadioItem({
             data-size={size}
             className={cn(
                 dropdownMenuItemVariants({ size, variant: 'default' }),
-                size === 'default' ? 'pr-8 pl-1.5' : 'pr-7 pl-1',
+                dropdownMenuItemInsetPadding(size),
                 className,
             )}
             {...props}
@@ -237,9 +260,7 @@ function DropdownMenuRadioItem({
                 data-slot="dropdown-menu-radio-item-indicator"
             >
                 <DropdownMenuPrimitive.ItemIndicator>
-                    <CheckIcon
-                        className={size === 'sm' ? 'size-3.5' : 'size-4'}
-                    />
+                    <CheckIcon className={dropdownMenuCheckIconClass(size)} />
                 </DropdownMenuPrimitive.ItemIndicator>
             </span>
             {children}
@@ -279,7 +300,11 @@ function DropdownMenuSeparator({
             data-size={size}
             className={cn(
                 'bg-border h-px',
-                size === 'default' ? '-mx-1 my-1' : '-mx-0.5 my-0.5',
+                size === 'sm'
+                    ? '-mx-0.5 my-0.5'
+                    : size === 'lg'
+                      ? '-mx-1.5 my-1.5'
+                      : '-mx-1 my-1',
                 className,
             )}
             {...props}
@@ -298,7 +323,11 @@ function DropdownMenuShortcut({
             data-slot="dropdown-menu-shortcut"
             className={cn(
                 'text-muted-foreground group-focus/dropdown-menu-item:text-accent-foreground ml-auto tracking-widest',
-                size === 'default' ? 'text-xs' : 'text-[0.65rem]',
+                size === 'sm'
+                    ? 'text-[0.65rem]'
+                    : size === 'lg'
+                      ? 'text-sm'
+                      : 'text-xs',
                 className,
             )}
             {...props}
@@ -341,7 +370,7 @@ function DropdownMenuSubTrigger({
         >
             {children}
             <ChevronRightIcon
-                className={cn('ml-auto', size === 'sm' ? 'size-3.5' : 'size-4')}
+                className={cn('ml-auto', dropdownMenuCheckIconClass(size))}
             />
         </DropdownMenuPrimitive.SubTrigger>
     );
@@ -359,9 +388,11 @@ function DropdownMenuSubContent({
             data-size={size}
             className={cn(
                 'bg-popover text-popover-foreground ring-foreground/10 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 z-50 origin-(--radix-dropdown-menu-content-transform-origin) overflow-hidden shadow-lg ring-1 duration-100',
-                size === 'default'
-                    ? 'min-w-[96px] rounded-lg p-1'
-                    : 'min-w-[88px] rounded-md p-0.5',
+                size === 'sm'
+                    ? 'min-w-[88px] rounded-md p-0.5'
+                    : size === 'lg'
+                      ? 'min-w-[112px] rounded-lg p-1.5'
+                      : 'min-w-[96px] rounded-lg p-1',
                 className,
             )}
             {...props}

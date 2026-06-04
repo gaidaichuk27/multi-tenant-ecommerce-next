@@ -1,9 +1,11 @@
-import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import { ThemeProvider, ActiveThemeProvider } from '@providers/theme';
 import { getThemeClassName, resolveTheme } from '@features/theme';
 import { Orbitron, Rajdhani, Fira_Code } from 'next/font/google';
+import initTranslations from '@/i18n';
+import i18nConfig from '@/i18nConfig';
 import '@styles/globals.css';
+import TranslationProvider from '@/src/providers/TranslationProvider';
 
 const fontSans = Orbitron({
     subsets: ['latin'],
@@ -21,21 +23,26 @@ const fontMono = Fira_Code({
     variable: '--font-mono',
 });
 
-export const metadata: Metadata = {
-    title: 'Create your own comunity',
-    description: 'Build a community around your passion',
-};
+const i18nNamespaces = ['common'];
+
+export function generateStaticParams() {
+    return i18nConfig.locales.map((locale) => ({ locale }));
+}
 
 export default async function RootLayout({
     children,
+    params,
 }: Readonly<{
     children: React.ReactNode;
+    params: Promise<{ locale: string }>;
 }>) {
+    const { locale } = await params;
     const cookieStore = await cookies();
     const theme = resolveTheme(cookieStore.get('active_theme')?.value);
+    const { resources } = await initTranslations(locale, i18nNamespaces);
     return (
         <html
-            lang="en"
+            lang={locale}
             suppressHydrationWarning
         >
             <body
@@ -43,7 +50,15 @@ export default async function RootLayout({
             >
                 <ThemeProvider>
                     <ActiveThemeProvider initialTheme={theme}>
-                        <div className="js-page page h-full">{children}</div>
+                        <TranslationProvider
+                            locale={locale}
+                            resources={resources}
+                            namespaces={i18nNamespaces}
+                        >
+                            <div className="js-page page h-full">
+                                {children}
+                            </div>
+                        </TranslationProvider>
                     </ActiveThemeProvider>
                 </ThemeProvider>
             </body>
