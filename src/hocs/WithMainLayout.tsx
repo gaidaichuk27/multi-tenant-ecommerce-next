@@ -1,15 +1,21 @@
 import { MainLayout } from '@layouts/MainLayout';
-import { FunctionComponent, JSX } from 'react';
+import type { ComponentType } from 'react';
 
-export const WithMainLayout = <T extends Record<string, unknown>>(
-    Component: FunctionComponent<T>,
-    withoutContainer?: boolean | undefined,
-) => {
-    return function withLayoutComponent(props: T): JSX.Element {
+export function WithMainLayout<P extends object = object>(
+    Component: ComponentType<P>,
+    withoutContainer?: boolean,
+) {
+    function WithLayoutComponent(props: P) {
         return (
             <MainLayout withoutContainer={withoutContainer}>
-                <Component {...props}></Component>
+                <Component {...props} />
             </MainLayout>
         );
-    };
-};
+    }
+
+    WithLayoutComponent.displayName = `WithMainLayout(${
+        Component.displayName ?? Component.name ?? 'Component'
+    })`;
+
+    return WithLayoutComponent;
+}

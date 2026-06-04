@@ -2,7 +2,7 @@
 
 import { useHeaderSticky } from '@hooks/useStickyHeader';
 import { useStickyHeaderHeight } from '@hooks/useStickyHeaderHeight';
-import { ThemeSelector, ThemeToggle } from '@/src/features/theme';
+import { ThemeSelector, ThemeToggle } from '@features/theme';
 import { cn } from '@lib/utils';
 
 interface HeaderProps {
