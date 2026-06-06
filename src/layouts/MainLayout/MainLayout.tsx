@@ -9,19 +9,19 @@ import { cn } from '@lib/utils';
 interface MainLayoutProps {
     className?: string;
     children: ReactNode | ReactNode[];
-    withoutContainer: boolean | undefined;
+    withContainer: 'primary' | 'secondary' | 'tertiary' | 'fullwidth';
 }
 
 export const MainLayout = ({
     className,
     children,
-    withoutContainer,
+    withContainer,
 }: MainLayoutProps) => {
     return (
         <div className={cn('flex h-full flex-col', className)}>
             <Header />
             <Content className="grow">
-                <Container variant={withoutContainer ? 'secondary' : 'primary'}>
+                <Container variant={withContainer}>
                     {children} <Button>Button</Button>
                 </Container>
             </Content>

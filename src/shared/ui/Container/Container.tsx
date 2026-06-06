@@ -5,8 +5,7 @@ interface ContainerProps {
     className?: string;
     children: ReactNode | ReactNode[];
     bgcolor?: 'section-primary-background' | 'section-secondary-background';
-    variant?: 'primary' | 'secondary' | 'tertiary';
-    fullwidth?: boolean;
+    variant?: 'primary' | 'secondary' | 'tertiary' | 'fullwidth';
     rounded?: boolean;
     lightness?: number;
 }
@@ -16,17 +15,15 @@ export const Container = ({
     children,
     bgcolor = 'section-primary-background',
     variant = 'primary',
-    fullwidth = false,
     rounded = true,
     lightness = 100,
 }: ContainerProps) => {
     return (
         <div
             data-slot="container"
-            data-variant={fullwidth ? 'fullwidth' : variant}
-            className={cn('container', !fullwidth && variant, className, {
-                fullwidth,
-                'rounded-[25px]': rounded && !fullwidth,
+            data-variant={variant}
+            className={cn('container', variant, className, {
+                'rounded-[25px]': rounded && variant !== 'fullwidth',
             })}
             style={
                 {
