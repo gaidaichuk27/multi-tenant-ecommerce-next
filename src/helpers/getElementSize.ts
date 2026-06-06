@@ -1,12 +1,21 @@
-export const getElementSize = ($element: string): DOMRect | undefined => {
-    let elementParams: DOMRect | undefined = undefined;
-    if (typeof window !== 'undefined') {
-        const node = document.querySelector($element);
+export type ElementSize = {
+    clientRect: DOMRect;
+    element: Element;
+};
 
-        if (node) {
-            elementParams = node.getBoundingClientRect();
-        }
+export const getElementSize = ($element: string): ElementSize | undefined => {
+    if (typeof window === 'undefined') {
+        return;
     }
 
-    return elementParams;
+    const node = document.querySelector($element);
+
+    if (!node) {
+        return;
+    }
+
+    return {
+        clientRect: node.getBoundingClientRect(),
+        element: node,
+    };
 };

@@ -1,23 +1,17 @@
-'use client';
-
-import { useHeaderSticky } from '@hooks/useStickyHeader';
-import { useStickyHeaderHeight } from '@hooks/useStickyHeaderHeight';
+import { memo } from 'react';
 import { LangSelector } from '@features/langSelector';
 import { ThemeSelector, ThemeToggle } from '@features/theme';
-import { cn } from '@lib/utils';
 import { Logo } from '@shared/ui/Logo';
+import { HeaderClient } from './HeaderClient';
 
 interface HeaderProps {
     className?: string;
     isSticky?: boolean;
 }
 
-export const Header = ({ className, isSticky = true }: HeaderProps) => {
-    useHeaderSticky(isSticky);
-    useStickyHeaderHeight();
-
+export const Header = memo(({ isSticky = true }: HeaderProps) => {
     return (
-        <header className={cn(className, 'js-header header')}>
+        <HeaderClient isSticky={isSticky}>
             <div className="header__inner">
                 <div className="header__top">
                     <Logo />
@@ -30,6 +24,8 @@ export const Header = ({ className, isSticky = true }: HeaderProps) => {
                 </div>
             </div>
             <div className="header__backdrop"></div>
-        </header>
+        </HeaderClient>
     );
-};
+});
+
+Header.displayName = 'Header';
