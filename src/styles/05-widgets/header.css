@@ -1,7 +1,7 @@
 @layer components {
     .header {
-        @apply text-foreground absolute top-0 flex w-full items-center justify-center p-4;
-
+        @apply text-foreground relative top-0 flex w-full items-center justify-center p-4;
+        position: var(--header-position, relative);
         /* Shared fixed positioning */
         &.m-sticky,
         &.m-hidden {
