@@ -3,11 +3,11 @@ import type { ComponentType } from 'react';
 
 export function WithMainLayout<P extends object = object>(
     Component: ComponentType<P>,
-    withoutContainer?: boolean,
+    withContainer?: 'primary' | 'secondary' | 'tertiary' | 'fullwidth',
 ) {
     function WithLayoutComponent(props: P) {
         return (
-            <MainLayout withoutContainer={withoutContainer}>
+            <MainLayout withContainer={withContainer ?? 'primary'}>
                 <Component {...props} />
             </MainLayout>
         );

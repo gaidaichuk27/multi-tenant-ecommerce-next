@@ -1,4 +1,5 @@
 import getTranslations from '@/i18n';
+import { HomeView } from '@/src/views/HomeView';
 import { WithMainLayout } from '@hocs/WithMainLayout';
 import { Metadata } from 'next';
 
@@ -20,10 +21,9 @@ export async function generateMetadata({
     };
 }
 
-async function Home({ params }: HomePageProps) {
-    const { locale } = await params;
-    const { t } = await getTranslations(locale, i18nNamespaces);
-    return <div>{t('common:page.test.title')}</div>;
+export default function Home({ params }: HomePageProps) {
+    // const { locale } = await params;
+    // const { t } = await getTranslations(locale, i18nNamespaces);
+    const Layouted = WithMainLayout(HomeView);
+    return <Layouted />;
 }
-
-export default WithMainLayout(Home);
