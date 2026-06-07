@@ -1,15 +1,23 @@
 import { memo } from 'react';
 
-import { Container } from '@shared/ui/Container';
 import getTranslations from '@/i18n';
 import { getCurrentLangFromPathname } from '@helpers/getCurrentLangFromPathname';
+import { previewCardsData } from '@features/grids/previewCardGrid/mock/previewCardsData';
+import { PreviewCardGrid } from '@features/grids/previewCardGrid/ui/PreviewCardGrid';
+import { AnimationType } from '@shared/config/types';
 
 const i18nNamespaces = ['common'];
 
 export const HomeView = memo(async () => {
     const pathName = await getCurrentLangFromPathname();
     const { t } = await getTranslations(pathName, i18nNamespaces);
-    return <>{t('common:page.test.title')}</>;
+    return (
+        <PreviewCardGrid
+            items={previewCardsData}
+            animation={AnimationType.FADE_IN}
+            delay={100}
+        />
+    );
 });
 
 HomeView.displayName = 'HomeView';

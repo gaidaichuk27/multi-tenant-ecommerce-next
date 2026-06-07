@@ -1,0 +1,15 @@
+@layer components {
+    .grid-layout {
+        .grid-inner {
+            @apply gap-y-[var(--grid-row-gap)] sm:gap-y-[var(--grid-row-gap-mobile-wide)] md:gap-y-[var(--grid-row-gap-tablet)] lg:gap-y-[var(--grid-row-gap-desktop)] xl:gap-y-[var(--grid-row-gap-desktop-wide)];
+
+            &.list-view {
+                @apply grid grid-cols-1;
+            }
+
+            &.grid-view {
+                @apply grid grid-cols-[repeat(var(--grid-columns-qty),minmax(0,_1fr))] gap-x-[var(--grid-column-gap)] sm:grid-cols-[repeat(var(--grid-columns-qty-mobile-wide),minmax(0,_1fr))] sm:gap-x-[var(--grid-column-gap-mobile-wide)] md:grid-cols-[repeat(var(--grid-columns-qty-tablet),minmax(0,_1fr))] md:gap-x-[var(--grid-column-gap-tablet)] lg:grid-cols-[repeat(var(--grid-columns-qty-desktop),minmax(0,_1fr))] lg:gap-x-[var(--grid-column-gap-desktop)] xl:grid-cols-[repeat(var(--grid-columns-qty-desktop-wide),minmax(0,_1fr))] xl:gap-x-[var(--grid-column-gap-desktop-wide)];
+            }
+        }
+    }
+}
