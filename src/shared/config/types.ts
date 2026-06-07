@@ -19,3 +19,27 @@ export function getSvgSrc(asset: SvgImport): string {
 export type SvgType = FC<SVGProps<SVGSVGElement>> & {
     displayName?: string;
 };
+
+interface GridDataDevices {
+    desktopWide: number;
+    desktop: number;
+    tablet: number;
+    mobileWide: number;
+    mobile: number;
+}
+
+export interface GridData {
+    gapCol: GridDataDevices;
+    gapRow: GridDataDevices;
+    columns: GridDataDevices;
+}
+
+export enum AnimationType {
+    SLIDE_UP_FADE_IN_SLOW = 'slide-up-fade-in-slow',
+    FADE_IN = 'fade-in',
+    SLIDE_IN_LEFT = 'slide-in-left',
+    SLIDE_IN_RIGHT = 'slide-in-right',
+    SCALE_IN = 'scale-in',
+    BOUNCE_IN = 'bounce-in',
+    NONE = 'none',
+}

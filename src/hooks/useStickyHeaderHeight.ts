@@ -4,14 +4,19 @@ import { useEffect } from 'react';
 
 const HEADER_HEIGHT_VAR = '--header-height';
 const HEADER_POSITION_VAR = '--header-position';
-export const setHeaderHeightVariable = (height: number) => {
-    document.documentElement.style.setProperty(
-        HEADER_HEIGHT_VAR,
-        `${Math.round(height)}px`,
-    );
+export const setHeaderHeightVariable = (
+    height: number,
+    node: HTMLElement | null,
+) => {
+    if (!node) return;
+    node.style.setProperty(HEADER_HEIGHT_VAR, `${Math.round(height)}px`);
 };
-export const setHeaderPositionVariable = (position: string) => {
-    document.documentElement.style.setProperty(HEADER_POSITION_VAR, position);
+export const setHeaderPositionVariable = (
+    position: string,
+    node: HTMLElement | null,
+) => {
+    if (!node) return;
+    node.style.setProperty(HEADER_POSITION_VAR, position);
 };
 export const useStickyHeaderHeight = () => {
     useEffect(() => {
@@ -21,15 +26,18 @@ export const useStickyHeaderHeight = () => {
         const resizeHandler = () => {
             const elementParams = getElementSize('.js-header');
             if (elementParams && page) {
-                setHeaderHeightVariable(elementParams.clientRect.height ?? 0);
-                setHeaderPositionVariable('absolute');
+                setHeaderHeightVariable(
+                    elementParams.clientRect.height ?? 0,
+                    page,
+                );
+                setHeaderPositionVariable('absolute', page);
             }
         };
 
         if (elementParams && page) {
             window.addEventListener('resize', resizeHandler);
-            setHeaderHeightVariable(elementParams.clientRect.height ?? 0);
-            setHeaderPositionVariable('absolute');
+            setHeaderHeightVariable(elementParams.clientRect.height ?? 0, page);
+            setHeaderPositionVariable('absolute', page);
         }
 
         return () => window.removeEventListener('resize', resizeHandler);

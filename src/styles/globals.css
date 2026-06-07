@@ -5,6 +5,7 @@
 @import './themes.css';
 @import './01-base/index.css';
 @import './02-utility/index.css';
+@import './03-components/index.css';
 @import './05-widgets/index.css';
 
 @custom-variant dark (&:is(.dark *));
