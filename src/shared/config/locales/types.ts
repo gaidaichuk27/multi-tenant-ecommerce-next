@@ -1,5 +1,3 @@
-import { FC, SVGProps } from 'react';
-
 import type { SvgImport } from '@shared/config/types';
 
 export type LanguageLabels = 'Eng' | 'De' | 'Pl' | 'Укр';

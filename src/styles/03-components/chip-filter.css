@@ -1,0 +1,29 @@
+@layer components {
+    .chip-filter {
+        @apply relative w-full overflow-visible;
+    }
+
+    .chip-filter__track {
+        @apply flex w-full overflow-x-auto overflow-y-visible;
+        min-height: calc(2.5rem + var(--shadow-y, 0px) + 4px);
+
+        scrollbar-width: none;
+
+        &::-webkit-scrollbar {
+            display: none;
+        }
+    }
+
+    .chip-filter__list {
+        @apply flex w-max gap-1.5;
+    }
+
+    .chip-filter__chip {
+        @apply h-10 w-fit min-w-0 shrink-0 px-3 font-normal shadow-xs;
+    }
+
+    .chip-filter [data-slot='button'] {
+        margin-bottom: 0;
+        margin-right: 0;
+    }
+}
