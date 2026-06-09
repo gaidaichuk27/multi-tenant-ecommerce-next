@@ -68,13 +68,7 @@ export const Grid = memo(
                     '--grid-row-gap-desktop-wide': `${gapRow.desktopWide}px`,
                 }),
             }),
-            [
-                gapRow,
-                gapRow.mobile,
-                gapRow.tablet,
-                gapRow.desktop,
-                gapRow.desktopWide,
-            ],
+            [gapRow],
         );
 
         const columnGapStyles = useMemo(
@@ -95,13 +89,7 @@ export const Grid = memo(
                     '--grid-column-gap-desktop-wide': `${gapCol.desktopWide}px`,
                 }),
             }),
-            [
-                gapCol,
-                gapCol.mobile,
-                gapCol.tablet,
-                gapCol.desktop,
-                gapCol.desktopWide,
-            ],
+            [gapCol],
         );
 
         const columnQtyStyles = useMemo(
@@ -120,13 +108,7 @@ export const Grid = memo(
                     '--grid-columns-qty-desktop-wide': columns.desktopWide,
                 }),
             }),
-            [
-                columns,
-                columns.mobile,
-                columns.tablet,
-                columns.desktop,
-                columns.desktopWide,
-            ],
+            [columns],
         );
 
         if (!items || items.length === 0) {

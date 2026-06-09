@@ -1,0 +1,95 @@
+@layer components {
+    .filters-row {
+        @apply relative mb-6 flex items-start gap-3;
+    }
+
+    .filters-row__content {
+        @apply flex min-w-0 flex-1 items-start gap-3;
+        flex-wrap: nowrap;
+    }
+
+    .filters-row__content--wrapped {
+        flex-wrap: wrap;
+    }
+
+    .filters-row__content--wrapped .chip-filter__track {
+        @apply overflow-x-visible;
+    }
+
+    .filters-row__content--wrapped .chip-filter__list {
+        @apply w-full flex-wrap;
+    }
+
+    .filters-row__chips {
+        @apply mb-0 min-w-0 flex-1;
+    }
+
+    .filters-row__dropdown {
+        @apply shrink-0;
+    }
+
+    .filters-row__more {
+        @apply text-primary h-10 shrink-0 px-2 font-medium;
+    }
+
+    .filter-dropdown__trigger {
+        @apply h-10 gap-2 px-4 font-normal shadow-xs;
+    }
+
+    .filter-dropdown__content {
+        @apply !w-auto max-w-none rounded-xl border p-0 shadow-md;
+    }
+
+    .filter-dropdown__panel {
+        @apply flex w-max flex-col;
+    }
+
+    .filter-dropdown__columns {
+        @apply grid auto-cols-max grid-flow-col gap-6 p-5;
+    }
+
+    .filter-dropdown__column {
+        @apply flex flex-col gap-3;
+    }
+
+    .filter-dropdown__column-title {
+        @apply text-foreground text-sm font-semibold;
+    }
+
+    .filter-dropdown__group {
+        @apply gap-3;
+    }
+
+    .filter-dropdown__option {
+        @apply flex items-center gap-2.5;
+    }
+
+    .filter-dropdown__option-label {
+        @apply text-foreground cursor-pointer text-sm font-normal;
+    }
+
+    .filter-dropdown__footer {
+        @apply border-border flex items-center justify-end gap-3 border-t px-5 py-3;
+    }
+
+    .filter-dropdown__actions {
+        @apply border-border flex items-center justify-end gap-2 border-t px-5 py-3;
+    }
+
+    .filter-dropdown__action {
+        @apply min-w-24;
+    }
+
+    .filter-dropdown__footer-label {
+        @apply text-muted-foreground text-sm;
+    }
+
+    .filter-dropdown__language-trigger {
+        @apply text-foreground inline-flex items-center gap-1 text-sm font-medium;
+    }
+
+    .filters-row [data-slot='button'] {
+        margin-bottom: 0;
+        margin-right: 0;
+    }
+}

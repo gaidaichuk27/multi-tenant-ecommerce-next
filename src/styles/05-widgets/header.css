@@ -19,7 +19,7 @@
     }
 
     .header__inner {
-        @apply flex w-full max-w-[98%] flex-col rounded-3xl py-4;
+        @apply flex w-full flex-col rounded-3xl py-4 lg:max-w-[98%];
     }
 
     .header__top {

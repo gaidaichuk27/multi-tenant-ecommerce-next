@@ -20,7 +20,7 @@ interface PreviewCardGridProps {
 export const PreviewCardGrid = memo(
     ({ className, items, animation, delay }: PreviewCardGridProps) => {
         return (
-            <div className={cn('w-full px-4 lg:px-8', className)}>
+            <div className={cn('w-full', className)}>
                 <Grid
                     items={items}
                     gapCol={previewCardGridConfig.gapCol}

@@ -355,6 +355,23 @@
             3px 8px 10px -1px hsl(206.1538 28.0576% 27.2549% / 1);
         --shadow-2xl: 3px 3px 0px 0px hsl(206.1538 28.0576% 27.2549% / 2.5);
     }
+
+    [data-slot='button']:not([data-variant='ghost']):not(
+            [data-variant='link']
+        ) {
+        box-shadow: var(--shadow-xs);
+        margin-bottom: var(--shadow-y);
+        margin-right: var(--shadow-x);
+    }
+
+    [data-slot='button'][data-variant='default'] {
+        @apply border-primary bg-primary text-primary-foreground hover:bg-primary/80 hover:text-primary-foreground;
+    }
+
+    [data-slot='button']:active:not([aria-haspopup='true']) {
+        transform: translate(var(--shadow-x), var(--shadow-y));
+        box-shadow: none;
+    }
 }
 
 .theme-neo-brutalism {
@@ -473,6 +490,19 @@
         --shadow-xl:
             4px 4px 0px 0px hsl(0 0% 0% / 1), 4px 8px 10px -1px hsl(0 0% 0% / 1);
         --shadow-2xl: 4px 4px 0px 0px hsl(0 0% 0% / 2.5);
+    }
+
+    [data-slot='button']:not([data-variant='ghost']):not(
+            [data-variant='link']
+        ) {
+        box-shadow: var(--shadow-xs);
+        margin-bottom: var(--shadow-y);
+        margin-right: var(--shadow-x);
+    }
+
+    [data-slot='button']:active:not([aria-haspopup='true']) {
+        transform: translate(var(--shadow-x), var(--shadow-y));
+        box-shadow: none;
     }
 
     * {
