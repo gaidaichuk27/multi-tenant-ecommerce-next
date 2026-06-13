@@ -1,0 +1,1 @@
+export { TypographyTrans } from './TypographyTrans';

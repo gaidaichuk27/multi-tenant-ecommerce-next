@@ -1,0 +1,1 @@
+export { HomeSubtitle } from './ui';

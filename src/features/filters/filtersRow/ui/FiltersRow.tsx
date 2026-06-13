@@ -9,8 +9,10 @@ import { useMoreButton } from '@hooks/useMoreButton';
 import { Button } from '@shared/ui/Form/Button';
 
 import { cn } from '@lib/utils';
+import { useTranslation } from 'react-i18next';
 
-export const HomeViewFilters = () => {
+export const FiltersRow = () => {
+    const { t } = useTranslation('common');
     const {
         containerRef,
         contentRef,
@@ -44,7 +46,9 @@ export const HomeViewFilters = () => {
                         className="filters-row__more"
                         onClick={toggleExpanded}
                     >
-                        {isExpanded ? 'Show less' : 'Show more'}
+                        {isExpanded
+                            ? t('filters.show.less')
+                            : t('filters.show.more')}
                     </Button>
                 )}
             </div>

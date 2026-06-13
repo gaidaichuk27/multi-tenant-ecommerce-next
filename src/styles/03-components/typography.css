@@ -1,0 +1,35 @@
+@layer components {
+    .typography {
+        color: var(--color);
+        text-decoration: var(--text-decoration);
+        text-align: var(--text-align);
+        font-weight: var(--font-weight);
+    }
+    .title-1 {
+        @apply text-[size:var(--title-1-font-size-mobile)] leading-[var(--title-1-line-height-mobile)] md:text-[size:var(--title-1-font-size-tablet)] md:leading-[var(--title-1-line-height-tablet)] xl:text-[size:var(--title-1-font-size-desktop)] xl:leading-[var(--title-1-line-height-desktop)];
+    }
+    .title-2 {
+        @apply text-[size:var(--title-2-font-size-mobile)] leading-[var(--title-2-line-height-mobile)] md:text-[size:var(--title-2-font-size-tablet)] md:leading-[var(--title-2-line-height-tablet)] xl:text-[size:var(--title-2-font-size-desktop)] xl:leading-[var(--title-2-line-height-desktop)];
+    }
+    .title-3 {
+        @apply text-[size:var(--title-3-font-size-mobile)] leading-[var(--title-3-line-height-mobile)] md:text-[size:var(--title-3-font-size-tablet)] md:leading-[var(--title-3-line-height-tablet)] xl:text-[size:var(--title-3-font-size-desktop)] xl:leading-[var(--title-3-line-height-desktop)];
+    }
+    .title-4 {
+        @apply text-[size:var(--title-4-font-size-mobile)] leading-[var(--title-4-line-height-mobile)] md:text-[size:var(--title-4-font-size-tablet)] md:leading-[var(--title-4-line-height-tablet)] xl:text-[size:var(--title-4-font-size-desktop)] xl:leading-[var(--title-4-line-height-desktop)];
+    }
+    .title-5 {
+        @apply text-[size:var(--title-5-font-size-mobile)] leading-[var(--title-5-line-height-mobile)] md:text-[size:var(--title-5-font-size-tablet)] md:leading-[var(--title-5-line-height-tablet)] xl:text-[size:var(--title-5-font-size-desktop)] xl:leading-[var(--title-5-line-height-desktop)];
+    }
+    .title-6 {
+        @apply text-[size:var(--title-6-font-size-mobile)] leading-[var(--title-6-line-height-mobile)] md:text-[size:var(--title-6-font-size-tablet)] md:leading-[var(--title-6-line-height-tablet)] xl:text-[size:var(--title-6-font-size-desktop)] xl:leading-[var(--title-6-line-height-desktop)];
+    }
+    .body-1 {
+        @apply text-[size:var(--body-1-font-size-mobile)] leading-[var(--body-1-line-height-mobile)] xl:text-[size:var(--body-1-font-size-desktop)] xl:leading-[var(--body-1-line-height-desktop)];
+    }
+    .body-2 {
+        @apply text-[size:var(--body-2-font-size-mobile)] leading-[var(--body-2-line-height-mobile)] xl:text-[size:var(--body-2-font-size-desktop)] xl:leading-[var(--body-2-line-height-desktop)];
+    }
+    .body-3 {
+        @apply text-[size:var(--body-3-font-size-mobile)] leading-[var(--body-3-line-height-mobile)] xl:text-[size:var(--body-3-font-size-desktop)] xl:leading-[var(--body-3-line-height-desktop)];
+    }
+}

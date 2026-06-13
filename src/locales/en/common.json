@@ -1,4 +1,28 @@
 {
+    "home.title": "Discover shops",
+    "home.subtitle": "or <anchor>create your own</anchor>",
+
     "page.test.title": "Multi-Tenant Ecommerce EN",
-    "page.test.description": "Test Page Description"
+    "page.test.description": "Test Page Description",
+
+    "settings.title": "Site Settings",
+    "settings.description": "Choose your preferred options",
+    "settings.language": "Language",
+    "settings.theme": "Theme",
+    "settings.theme-selector": "Theme Selector",
+    "settings.theme-toggle": "Theme Toggle",
+
+    "filters.title": "Filters",
+    "filters.show.more": "Show more",
+    "filters.show.less": "Show less",
+
+    "theme.light": "Light",
+    "theme.dark": "Dark",
+    "theme.system": "System",
+    "theme.select": "Select Theme",
+    "theme.theme": "Theme",
+    "theme.default": "Default",
+    "theme.toggle": "Toggle Theme",
+    "theme.neo-brutalism": "Neo Brutalism",
+    "theme.bubble-gum": "Bubble Gum"
 }

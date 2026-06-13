@@ -1,4 +1,28 @@
 {
+    "home.title": "Entdecken Sie Shops",
+    "home.subtitle": "oder <anchor>erstellen Sie Ihren eigenen</anchor>",
+
     "page.test.title": "Multi-Tenant Ecommerce DE",
-    "page.test.description": "Beschreibung der Testseite DE"
+    "page.test.description": "Beschreibung der Testseite DE",
+
+    "settings.title": "Site Einstellungen",
+    "settings.description": "Wählen Sie Ihre bevorzugten Optionen",
+    "settings.language": "Sprache",
+    "settings.theme": "Thema",
+    "settings.theme-selector": "Thema Auswählen",
+    "settings.theme-toggle": "Thema Umschalten",
+
+    "filters.title": "Filter",
+    "filters.show.more": "Mehr anzeigen",
+    "filters.show.less": "Weniger anzeigen",
+
+    "theme.light": "Hell",
+    "theme.dark": "Dunkel",
+    "theme.system": "System",
+    "theme.select": "Thema Auswählen",
+    "theme.theme": "Thema",
+    "theme.default": "Standard",
+    "theme.toggle": "Thema Umschalten",
+    "theme.neo-brutalism": "Neo Brutalism",
+    "theme.bubble-gum": "Bubble Gum"
 }
