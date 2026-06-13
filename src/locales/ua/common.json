@@ -1,4 +1,28 @@
 {
+    "home.title": "Відвідайте магазин",
+    "home.subtitle": "або <anchor>створіть власний</anchor>",
+
     "page.test.title": "Multi-Tenant Ecommerce UA",
-    "page.test.description": "Опис тестової сторінки"
+    "page.test.description": "Опис тестової сторінки",
+
+    "settings.title": "Налаштування сайту",
+    "settings.description": "Виберіть бажані параметри",
+    "settings.language": "Мова",
+    "settings.theme": "Тема",
+    "settings.theme-selector": "Виберіть Тему",
+    "settings.theme-toggle": "Переключити Тему",
+
+    "filters.title": "Фільтри",
+    "filters.show.more": "Показати більше",
+    "filters.show.less": "Показати менше",
+
+    "theme.light": "Світла",
+    "theme.dark": "Темна",
+    "theme.system": "Системна",
+    "theme.select": "Виберіть Тему",
+    "theme.theme": "Тема",
+    "theme.default": "Типова",
+    "theme.toggle": "Переключити Тему",
+    "theme.neo-brutalism": "Нео-бруталізм",
+    "theme.bubble-gum": "Бабл-гум"
 }

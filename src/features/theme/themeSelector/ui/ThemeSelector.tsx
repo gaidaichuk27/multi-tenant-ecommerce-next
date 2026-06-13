@@ -12,17 +12,20 @@ import {
 } from '@shared/ui/Form/Select';
 import { Label } from '@shared/ui/Form/Label';
 import { DEFAULT_THEMES } from '../constants/themes';
+import { cn } from '@lib/utils';
+import { useTranslation } from 'react-i18next';
 
-export function ThemeSelector() {
+export function ThemeSelector({ className }: { className?: string }) {
     const { activeTheme, setActiveTheme } = useThemeConfig();
+    const { t } = useTranslation();
 
     return (
-        <div className="flex items-center gap-2">
+        <div className={cn('flex items-center gap-2', className)}>
             <Label
                 htmlFor="theme-selector"
                 className="sr-only"
             >
-                Theme
+                {t('theme.theme')}
             </Label>
             <Select
                 value={activeTheme}
@@ -33,25 +36,25 @@ export function ThemeSelector() {
                     className="text-primary justify-start *:data-[slot=select-value]:w-12"
                 >
                     <span className="text-muted-foreground hidden sm:block">
-                        Select a theme:
+                        {t('theme.select')}
                     </span>
                     <span className="text-muted-foreground block sm:hidden">
-                        Theme
+                        {t('theme.select')}
                     </span>
-                    <SelectValue placeholder="Select a theme" />
+                    <SelectValue placeholder={t('theme.select')} />
                 </SelectTrigger>
                 <SelectContent
                     align="end"
                     position="popper"
                 >
                     <SelectGroup>
-                        <SelectLabel>Default</SelectLabel>
+                        <SelectLabel>{t('theme.default')}</SelectLabel>
                         {DEFAULT_THEMES.map((theme) => (
                             <SelectItem
                                 key={theme.name}
                                 value={theme.value}
                             >
-                                {theme.name}
+                                {t(`theme.${theme.value}`)}
                             </SelectItem>
                         ))}
                     </SelectGroup>

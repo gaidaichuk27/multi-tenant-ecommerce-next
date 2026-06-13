@@ -7,7 +7,7 @@ import {
 } from 'react';
 
 import { cn } from '@lib/utils';
-import { AnimationType } from '@shared/config/types';
+import { AnimationType } from '@/src/shared/config/types';
 
 export type TypographyVariants =
     | 'title-1'
@@ -27,8 +27,6 @@ interface TypographyOwnProps<E extends ElementType = ElementType> {
     children?: ReactNode;
     variant?: TypographyVariants;
     underlined?: boolean;
-    animation?: AnimationType;
-    delay?: number;
     align?: 'left' | 'right' | 'center';
     weight?: 300 | 400 | 500 | 600 | 700;
     as?: E;
@@ -77,12 +75,18 @@ export const Typography = <E extends ElementType = ElementType>(
 
     const getStyle = () => {
         const result: CSSProperties & {
+            '--color'?: string;
             '--text-decoration'?: 'underline' | 'none';
             '--text-align'?: 'left' | 'right' | 'center';
             '--font-weight'?: number;
         } = {
             ...style,
         };
+
+        if (style?.color) {
+            result['--color'] = style.color as string;
+            delete result.color;
+        }
 
         result['--text-decoration'] = underlined ? 'underline' : 'none';
         result['--text-align'] = align;
@@ -96,8 +100,6 @@ export const Typography = <E extends ElementType = ElementType>(
         <Component
             style={typographyStyles as CSSProperties}
             className={cn('typography', [variant], className)}
-            data-animation={props.animation}
-            data-delay={props.delay}
             {...rest}
         >
             {children}

@@ -31,6 +31,7 @@ import {
     filterDropdownFields,
     type FilterDropdownFieldKey,
 } from '../mock/filterOptions';
+import { useTranslation } from 'react-i18next';
 
 const FILTER_COLUMN_KEYS = filterDropdownFieldKeys.filter(
     (key) => key !== 'language',
@@ -124,7 +125,7 @@ export function FilterDropdown({
     const pathname = usePathname();
     const routerSearchParams = useRouterSearchParams();
     const currentQuery = routerSearchParams.toString();
-
+    const { t } = useTranslation('common');
     const getUrlValue = useCallback(
         (key: AvailableSearchParams) => routerSearchParams.get(key),
         [routerSearchParams],
@@ -254,7 +255,7 @@ export function FilterDropdown({
                         className="size-4"
                         aria-hidden
                     />
-                    Filter
+                    {t('filters.title')}
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent

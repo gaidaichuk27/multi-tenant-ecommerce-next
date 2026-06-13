@@ -1,4 +1,28 @@
 {
+    "home.title": "Odkryj sklepy",
+    "home.subtitle": "lub <anchor>stwórz swoje</anchor>",
+
     "page.test.title": "Multi-Tenant Ecommerce PL",
-    "page.test.description": "Opis strony testowej"
+    "page.test.description": "Opis strony testowej",
+
+    "settings.title": "Ustawienia strony",
+    "settings.description": "Wybierz swoje ulubione opcje",
+    "settings.language": "Język",
+    "settings.theme": "Motyw",
+    "settings.theme-selector": "Wybierz Motyw",
+    "settings.theme-toggle": "Przełącz Motyw",
+
+    "filters.title": "Filtry",
+    "filters.show.more": "Pokaż więcej",
+    "filters.show.less": "Pokaż mniej",
+
+    "theme.light": "Jasny",
+    "theme.dark": "Ciemny",
+    "theme.system": "System",
+    "theme.select": "Wybierz Motyw",
+    "theme.theme": "Motyw",
+    "theme.default": "Domyślny",
+    "theme.toggle": "Przełącz Motyw",
+    "theme.neo-brutalism": "Neo Brutalism",
+    "theme.bubble-gum": "Bubble Gum"
 }
