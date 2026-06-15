@@ -10,7 +10,7 @@ import Image, { type ImageProps } from 'next/image';
 import type { ImageType } from '@shared/config/types';
 import fallbackImage from '@images/image-placeholder.jpg';
 
-import cn from 'classnames';
+import { cn } from '@lib/utils';
 
 interface AppImage extends Omit<ImageProps, 'alt' | 'src' | 'lazy'> {
     alt: string;

@@ -23,7 +23,7 @@ export function ThemeToggle({ className }: { className?: string }) {
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button
-                        variant="ghost"
+                        variant="outline"
                         size="icon"
                         className="relative"
                     >

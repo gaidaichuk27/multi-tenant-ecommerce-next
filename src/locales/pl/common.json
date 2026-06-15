@@ -5,6 +5,92 @@
     "page.test.title": "Multi-Tenant Ecommerce PL",
     "page.test.description": "Opis strony testowej",
 
+    "page.register.title": "Strona rejestracji",
+    "page.register.description": "Ta strona służy do logowania się do pulpitu administratora Multi-Tenant Ecommerce",
+
+    "page.login.title": "Strona logowania",
+    "page.login.description": "Ta strona służy do logowania do panelu administracyjnego Multi-Tenant Ecommerce",
+
+    "page.password.forgot.title": "Zapomniałem hasła",
+    "page.password.forgot.description": "Ta strona służy do wysyłania wiadomości e-mail z przypomnieniem o zapomnianym haśle",
+
+    "page.password.restore.title": "Przywracanie hasła",
+    "page.password.restore.description": "Ta strona służy do wysyłania wiadomości e-mail z prośbą o przywrócenie hasła",
+
+    "page.password.change.title": "Zmiana hasła",
+    "page.password.change.description": "Ta strona służy do zmiany hasła",
+
+    "page.verify.email.title": "Zweryfikuj adres e-mail",
+    "page.verify.email.description": "Ta strona odpowiada za status weryfikacji adresu e-mail klienta",
+    "page.verify.email.already.verified": "Adres e-mail {{email}} został już zweryfikowany!",
+    "page.verify.email.verified": "Gratulacje! Twój adres e-mail {{email}} został zweryfikowany!",
+    "page.verify.email.no.token.title": "Jesteś już zarejestrowany?",
+    "page.verify.email.no.token.description": "Otrzymałeś wiadomość e-mail z potwierdzeniem poprawności Twojego adresu e-mail. Znajdź ją i kliknij w link, aby potwierdzić.",
+
+    "form.register.title": "Zarejestruj się",
+    "form.register.subtitle": "Proszę założyć konto.",
+
+    "form.register.success.title": "Gratulacje! Twoje konto zostało utworzone!",
+    "form.register.success.subtitle": "Sprawdź swoją skrzynkę e-mail, aby zobaczyć link weryfikacyjny konta. Zweryfikuj swój adres e-mail, aby otrzymywać najnowsze wiadomości",
+
+    "form.login.title": "Zaloguj sie",
+    "form.login.subtitle": "Proszę zalogować się przy użyciu swoich danych uwierzytelniających.",
+
+    "form.password.forgot.title": "Zapomniałeś hasła?",
+    "form.password.forgot.subtitle": "Proszę podać swój adres e-mail, aby otrzymać link umożliwiający przywrócenie hasła",
+
+    "form.password.restore.title": "Przywróć hasło",
+    "form.password.restore.subtitle": "Utwórz nowe hasło",
+
+    "form.password.change.title": "Zmień hasło",
+    "form.password.change.subtitle": "Utwórz nowe hasło",
+
+    "form.label.no.account": "Nie masz konta?",
+
+    "form.placeholder.firstname": "Imię",
+    "form.placeholder.lastname": "Nazwisko",
+    "form.placeholder.email": "Email",
+    "form.placeholder.password": "Hasło",
+    "form.placeholder.password.repeat": "Powtórz hasło",
+
+    "form.label.password.forgot": "Zapomniałeś hasła?",
+    "form.label.have.account": "Masz już konto?",
+    "form.link.password.restore": "Obserwuj, aby przywrócić",
+    "form.label.success": "Gratulacje!",
+
+    "form.button.register": "Zarejestruj się",
+    "form.button.signin": "Zaloguj się",
+    "form.button.send": "Wyślij",
+    "form.button.restore": "Przywróć",
+    "form.button.create": "Utwórz",
+    "form.button.home": "Przejdź do strony głównej",
+
+    "form.button.google.singin": "Zaloguj się za pomocą Google",
+    "form.validation.error": "Sprawdź, czy wprowadzone dane są poprawne",
+    "form.validation.required": "Pole {{field}} jest wymagane",
+    "form.validation.min.length": "Pole {{field}} powinno mieć długość co najmniej {{length}} znaków",
+    "form.validation.max.length": "Pole {{field}} powinno mieć maksimum {{length}} znaków",
+    "form.validation.email.invalid": "Wprowadzony email jest nieprawidłowy",
+    "form.validation.password.pattern": "Hasło powinno zawierać przynajmniej jedną wielką literę, jedną małą literę, jedną liczbę i jeden znak specjalny",
+    "form.validation.passwords.should.match": "Hasła powinny się zgadzać",
+    "form.validation.one.capital.letter": "Pole {{field}} powinno zawierać przynajmniej jedną wielką literę",
+    "form.validation.should_match_with_new_password": "Пароль підтвердження має збігатися з новим паролем",
+    "form.validation.one.lowercase": "Pole {{field}} powinno zawierać przynajmniej jedną małą literę",
+    "form.validation.one.number": "Pole {{field}} powinno zawierać co najmniej jedną liczbę",
+    "form.validation.password.repeat": "Pole {{field}} powinno być takie samo",
+
+    "form.validation.numbers.only": "Pole {{field}} powinno zawierać wyłącznie liczby",
+    "form.validation.should.be.valid.year": "Pole {{field}} powinno zawierać rok od 00 do 99",
+    "form.validation.should.be.valid.month": "Pole {{field}} powinno zawierać miesiąc od 01 do 12",
+
+    "form.validation.images.amount.uploaded": "Próbujesz przesłać {{amount}} obrazów, ale dostępnych jest maksymalnie {{available}}",
+    "form.validation.image.supported.format": ".{{format}} format obrazu nie jest obsługiwany i zostanie usunięty. Zamiast tego wybierz .png, .jpeg, .webp",
+    "form.validation.image.max.size": "Rozmiar {{name}} jest za duży i zostanie usunięty. Maksymalny rozmiar to 2MB",
+
+    "loading": "ładowanie, Proszę czekać...",
+
+    "error.global": "Coś poszło nie tak. Spróbuj ponownie później",
+
     "settings.title": "Ustawienia strony",
     "settings.description": "Wybierz swoje ulubione opcje",
     "settings.language": "Język",

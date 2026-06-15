@@ -5,6 +5,93 @@
     "page.test.title": "Multi-Tenant Ecommerce UA",
     "page.test.description": "Опис тестової сторінки",
 
+    "page.register.title": "Сторінка реєстрації",
+    "page.register.description": "Ця сторінка використовується для входу в інформаційну панель адміністратора Multi-Tenant Ecommerce",
+
+    "page.login.title": "Сторінка входу",
+    "page.login.description": "Ця сторінка використовується для входу до адміністративної панелі Multi-Tenant Ecommerce",
+
+    "page.password.forgot.title": "Забутий пароль",
+    "page.password.forgot.description": "Ця сторінка використовується для надсилання електронного листа про забутий пароль",
+
+    "page.password.restore.title": "Відновлення пароля",
+    "page.password.restore.description": "Ця сторінка використовується для надсилання електронного листа для відновлення пароля",
+
+    "page.password.change.title": "Зміна пароля",
+    "page.password.change.description": "Ця сторінка використовується для зміни пароля",
+
+    "page.verify.email.title": "Підтвердження електронної адреси",
+    "page.verify.email.description": "Ця сторінка відповідає за статус підтвердження електронної пошти клієнта",
+    "page.verify.email.already.verified": "Електронна адреса {{email}} вже підтверджена!",
+    "page.verify.email.verified": "Вітаємо! Вашу електронну адресу {{email}} підтверджено!",
+    "page.verify.email.no.token.title": "Вже зареєстровані?",
+    "page.verify.email.no.token.description": "Ви отримали електронного листа для підтвердження дійсності вашої електронної адреси. Будь ласка, знайдіть його та перейдіть за посиланням для підтвердження",
+
+    "form.register.title": "Реєстрація",
+    "form.register.subtitle": "Будь-ласка, зареєструйте акаутн",
+
+    "form.register.success.title": "Вітаємо! Ваш обліковий запис створено!",
+    "form.register.success.subtitle": "Будь ласка, перевірте свою електронну пошту, щоб отримати посилання для підтвердження облікового запису. Підтвердьте свою електронну пошту, щоб отримувати останні новини",
+
+    "form.login.title": "Увійти",
+    "form.login.subtitle": "Будь ласка, увійдіть, використовуючи свої облікові дані",
+
+    "form.password.forgot.title": "Забули пароль?",
+    "form.password.forgot.subtitle": "Будь ласка, введіть свою електронну адресу, щоб отримати посилання для відновлення пароля",
+
+    "form.password.restore.title": "Відновити пароль",
+    "form.password.restore.subtitle": "Будь ласка, створіть свій новий пароль",
+
+    "form.password.change.title": "Змінити пароль",
+    "form.password.change.subtitle": "Будь ласка, створіть свій новий пароль",
+
+    "form.label.no.account": "Не маєте облікового запису?",
+
+    "form.placeholder.firstname": "Ім'я",
+    "form.placeholder.lastname": "Прізвище",
+    "form.placeholder.email": "Електронна пошта",
+    "form.placeholder.password": "Пароль",
+    "form.placeholder.password.repeat": "Повторити Пароль",
+
+    "form.label.password.forgot": "Забули пароль?",
+    "form.label.have.account": "Вже маєте обліковий запис?",
+    "form.link.password.restore": "Натисніть для відновлення",
+    "form.label.success": "Вітаємо!",
+
+    "form.button.register": "Зареєструватися",
+    "form.button.signin": "Увійти",
+    "form.button.send": "Надіслати",
+    "form.button.restore": "Відновити",
+    "form.button.create": "Створити",
+    "form.button.home": "Перейти на головну сторінку",
+
+    "form.button.google.singin": "Увійти за допомогою Google",
+
+    "form.validation.error": "Перевірте правильність введених даних",
+    "form.validation.required": "Поле {{field}} обов'язкове",
+    "form.validation.min_length": "Поле {{field}} повинно містити щонайменше {{length}} символів",
+    "form.validation.max_length": "Поле {{field}} повинно містити максимум {{length}} символів",
+    "form.validation.email.invalid": "Некоректно введена електронна адреса",
+    "form.validation.password.pattern": "Пароль повинен містити принаймні одну велику літеру, одну маленьку літеру, одне число та один спеціальний символ",
+    "form.validation.passwords_should_match": "Паролі мають співпадати",
+    "form.validation.should_match_with_new_password": "Пароль підтвердження має збігатися з новим паролем",
+    "form.validation.one.capital.letter": "Поле {{field}} має містити принаймні одну велику літеру",
+    "form.validation.one.lowercase": "Поле {{field}} має містити принаймні одну маленьку літеру",
+    "form.validation.one.number": "Поле {{field}} має містити принаймні одне число",
+    "form.validation.password.repeat": "Поле {{field}} має бути таким самим",
+
+    "form.validation.numbers.only": "Поле {{field}} має містити тілки числа",
+    "form.validation.should.be.valid.year": "Поле {{field}} має містити рік від 00 до 99",
+    "form.validation.should.be.valid.month": "Поле {{field}} має містити місяць від 01 до 12",
+
+    "form.validation.images.amount.uploaded": "Ви намагаєтеся завантажити {{amount}} зображень, але доступно максимум {{available}}",
+    "form.validation.image.supported.format": "Формат зображення {{format}} не підтримується та буде видалено. Виберіть натомість .png, .jpeg, .webp",
+    "form.validation.image.max.size": "Розмір .{{name}} завеликий і буде видалено. Максимальний розмір становить 2 МБ",
+
+    "loading": "Будь ласка, зачекайте...",
+
+    "error.global": "Щось пішло не так. Спробуйте пізніше",
+
     "settings.title": "Налаштування сайту",
     "settings.description": "Виберіть бажані параметри",
     "settings.language": "Мова",

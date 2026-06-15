@@ -1,0 +1,13 @@
+.legend {
+    display: flex;
+    align-items: center;
+    margin: 1.5rem 0;
+    gap: var(--gap);
+    color: var(--color);
+}
+
+.legend__line {
+    height: 1px;
+    background-color: var(--color);
+    flex-grow: 1;
+}
