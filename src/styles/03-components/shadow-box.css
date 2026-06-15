@@ -1,0 +1,107 @@
+@layer components {
+    .shadow-box {
+        --shadow-box-glow: color-mix(in oklch, var(--primary) 38%, transparent);
+        --shadow-box-accent: color-mix(
+            in oklch,
+            var(--accent) 28%,
+            transparent
+        );
+        --shadow-box-ring: color-mix(
+            in oklch,
+            var(--primary) 14%,
+            var(--border) 86%
+        );
+
+        position: relative;
+        background: linear-gradient(
+            180deg,
+            color-mix(in oklch, var(--card) 92%, var(--primary) 8%) 0%,
+            var(--card) 100%
+        );
+        color: var(--card-foreground);
+        border: 1px solid var(--shadow-box-ring);
+        border-radius: var(--radius-lg);
+        box-shadow:
+            var(--shadow-md),
+            0 0 0 1px color-mix(in oklch, var(--primary) 8%, transparent),
+            0 12px 36px -10px var(--shadow-box-glow),
+            0 28px 56px -18px var(--shadow-box-accent),
+            inset 0 1px 0 color-mix(in oklch, white 18%, var(--card) 82%);
+
+        &.small {
+            padding: 1.5rem;
+        }
+
+        &.medium {
+            padding: 2rem;
+
+            @media (min-width: 768px) {
+                padding: 3rem;
+            }
+        }
+
+        &.large {
+            padding: 2.5rem;
+
+            @media (min-width: 768px) {
+                padding: 5rem;
+            }
+        }
+    }
+
+    .theme-neo-brutalism .shadow-box {
+        --shadow-box-ring: var(--border);
+
+        background: var(--card);
+        border-width: 2px;
+        border-color: var(--border);
+        border-radius: 0;
+        box-shadow: var(--shadow-lg);
+        margin-bottom: var(--shadow-y);
+        margin-right: var(--shadow-x);
+    }
+
+    .theme-bubble-gum .shadow-box {
+        --shadow-box-glow: color-mix(in oklch, var(--primary) 52%, transparent);
+        --shadow-box-accent: color-mix(
+            in oklch,
+            var(--accent) 42%,
+            transparent
+        );
+        --shadow-box-ring: var(--primary);
+
+        border-width: 2px;
+        box-shadow:
+            var(--shadow-md),
+            0 0 0 1px color-mix(in oklch, var(--primary) 20%, transparent),
+            0 14px 40px -8px var(--shadow-box-glow),
+            0 32px 64px -16px var(--shadow-box-accent),
+            inset 0 1px 0 color-mix(in oklch, white 22%, var(--card) 78%);
+    }
+
+    :is(.dark *) .shadow-box {
+        --shadow-box-glow: color-mix(in oklch, var(--primary) 48%, transparent);
+        --shadow-box-accent: color-mix(
+            in oklch,
+            var(--accent) 36%,
+            transparent
+        );
+
+        background: linear-gradient(
+            180deg,
+            color-mix(in oklch, var(--card) 88%, var(--primary) 12%) 0%,
+            var(--card) 100%
+        );
+        box-shadow:
+            var(--shadow-md),
+            0 0 0 1px color-mix(in oklch, var(--primary) 16%, transparent),
+            0 16px 44px -8px var(--shadow-box-glow),
+            0 32px 72px -20px var(--shadow-box-accent),
+            inset 0 1px 0 color-mix(in oklch, white 10%, var(--card) 90%);
+    }
+
+    .theme-neo-brutalism:is(.dark *) .shadow-box {
+        background: var(--card);
+        box-shadow: var(--shadow-lg);
+    }
+}

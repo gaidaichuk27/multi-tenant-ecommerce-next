@@ -5,6 +5,93 @@
     "page.test.title": "Multi-Tenant Ecommerce EN",
     "page.test.description": "Test Page Description",
 
+    "page.register.title": "Register page",
+    "page.register.description": "This page is used to signin in to the Multi-Tenant Ecommerce",
+
+    "page.login.title": "Login page",
+    "page.login.description": "This page is used to loggin in to the Multi-Tenant Ecommerce",
+
+    "page.password.forgot.title": "Password forgot",
+    "page.password.forgot.description": "This page is used to send password forgot email",
+
+    "page.password.restore.title": "Password restore",
+    "page.password.restore.description": "This page is used to send password restore email",
+
+    "page.password.change.title": "Password change",
+    "page.password.change.description": "This page is used to change password",
+
+    "page.verify.email.title": "Verify email",
+    "page.verify.email.description": "This page provides a response on customer verification email",
+    "page.verify.email.already.verified": "Email {{email}} already verified!",
+    "page.verify.email.verified": "Congratulate! Your email {{email}} is verified!",
+    "page.verify.email.no.token.title": "Already registered?",
+    "page.verify.email.no.token.description": "You have received an email to confirm your email is valid. Please, find it and follow its link to confirm",
+
+    "form.register.title": "Register",
+    "form.register.subtitle": "Please create an account",
+
+    "form.register.success.title": "Congratulate! Your account has been created!",
+    "form.register.success.subtitle": "Please, check your email box for account verification link. Verify your email to receive latest news",
+
+    "form.login.title": "Sign In",
+    "form.login.subtitle": "Please, sign in with your credentials",
+
+    "form.password.forgot.title": "Forgot Password?",
+    "form.password.forgot.subtitle": "Please, enter your email to receive restore password link",
+
+    "form.password.restore.title": "Restore Password",
+    "form.password.restore.subtitle": "Please, create your new password",
+
+    "form.password.change.title": "Change Password",
+    "form.password.change.subtitle": "Please, create your new password",
+
+    "form.label.no.account": "Don't have an account?",
+
+    "form.placeholder.firstname": "First name",
+    "form.placeholder.lastname": "Last name",
+    "form.placeholder.email": "Email",
+    "form.placeholder.password": "Password",
+    "form.placeholder.password.repeat": "Repeat password",
+
+    "form.label.password.forgot": "Forgot password?",
+    "form.label.have.account": "Already have an account?",
+    "form.link.password.restore": "Follow to restore",
+    "form.label.success": "Congratulate!",
+
+    "form.button.register": "Register",
+    "form.button.signin": "Sign in",
+    "form.button.send": "Send",
+    "form.button.restore": "Restore",
+    "form.button.create": "Create",
+    "form.button.home": "Go Home Page",
+
+    "form.button.google.singin": "Sign in with Google",
+
+    "form.validation.error": "Verify your entered data is correct",
+    "form.validation.required": "Field {{field}} is required",
+    "form.validation.min.length": "Field {{field}} should contain at least {{length}} characters",
+    "form.validation.max.length": "Field {{field}} should contain maximum {{length}} characters",
+    "form.validation.email.invalid": "Entered email is not valid",
+    "form.validation.password.pattern": "Password must contain at least one uppercase letter, one lowercase letter, one number and one special character",
+    "form.validation.passwords.should.match": "Passwords should match",
+    "form.validation.should.match.with.new.password": "Confirmation password should match with new password",
+    "form.validation.one.capital.letter": "Field {{field}} should have at least one capital letter",
+    "form.validation.one.lowercase": "Field {{field}} should have at least one lowercase letter",
+    "form.validation.one.number": "Field {{field}} should have at least one number",
+    "form.validation.password.repeat": "Field {{field}} should be the same",
+
+    "form.validation.numbers.only": "Field {{field}} should contain numbers only",
+    "form.validation.should.be.valid.year": "Field {{field}} should contain be a year from 00 to 99",
+    "form.validation.should.be.valid.month": "Field {{field}} should contain be a month from 01 to 12",
+
+    "form.validation.images.amount.uploaded": "You are trying to upload {{amount}} images but available maximum {{available}}",
+    "form.validation.image.supported.format": ".{{format}} image format isn't supported and will be removed. Select instead .png, .jpeg, .webp",
+    "form.validation.image.max.size": ".{{name}} size is too large and will be removed. Max size is 2MB",
+
+    "loading": "Please wait...",
+
+    "error.global": "Something went wrong. Try again later",
+
     "settings.title": "Site Settings",
     "settings.description": "Choose your preferred options",
     "settings.language": "Language",

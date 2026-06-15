@@ -1,4 +1,8 @@
+'use client';
+
 import Image from 'next/image';
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
 
 import { cn } from '@lib/utils';
 import { getSvgSrc, type SvgImport } from '@shared/config/types';
@@ -17,15 +21,24 @@ interface LogoProps {
 }
 
 export function Logo({ className, src = logoSrc }: LogoProps) {
+    const params = useParams();
+    const locale = params?.locale ?? 'en';
+
     return (
-        <Image
-            src={getSvgSrc(src)}
-            alt="Logo"
-            width={LOGO_DISPLAY_WIDTH}
-            height={LOGO_DISPLAY_HEIGHT}
-            priority
-            unoptimized
-            className={cn('h-14 shrink-0 dark:invert', className)}
-        />
+        <Link
+            href={`/${locale}`}
+            aria-label="Home"
+            className="inline-flex shrink-0"
+        >
+            <Image
+                src={getSvgSrc(src)}
+                alt="Logo"
+                width={LOGO_DISPLAY_WIDTH}
+                height={LOGO_DISPLAY_HEIGHT}
+                priority
+                unoptimized
+                className={cn('h-14 shrink-0 dark:invert', className)}
+            />
+        </Link>
     );
 }

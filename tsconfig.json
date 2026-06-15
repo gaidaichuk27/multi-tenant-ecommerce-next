@@ -33,7 +33,8 @@
             "@shared/*": ["./src/shared/*"],
             "@services/*": ["./src/services/*"],
             "@styles/*": ["./src/styles/*"],
-            "@widgets/*": ["./src/widgets/*"]
+            "@widgets/*": ["./src/widgets/*"],
+            "@views/*": ["./src/views/*"]
         }
     },
     "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

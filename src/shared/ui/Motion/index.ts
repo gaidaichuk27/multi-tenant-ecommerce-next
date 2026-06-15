@@ -1,0 +1,1 @@
+export { TextShimmerWave } from './TextShimmerWave';

@@ -1,0 +1,22 @@
+.auth-form__wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: var(--form-group-fiields-gap);
+}
+
+.auth-form__actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.auth-form__label {
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
+.auth-form__link {
+    color: var(--primary);
+    font-size: 1rem;
+}

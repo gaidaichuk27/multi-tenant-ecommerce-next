@@ -5,6 +5,94 @@
     "page.test.title": "Multi-Tenant Ecommerce DE",
     "page.test.description": "Beschreibung der Testseite DE",
 
+    "page.register.title": "Registrierungsseite",
+    "page.register.description": "Auf dieser Seite wird die Anmeldung beim Multi-Tenant Ecommerce durchgeführt",
+
+    "page.login.title": "Anmeldeseite",
+    "page.login.description": "Diese Seite dient zum Anmelden im Multi-Tenant Ecommerce",
+
+    "page.password.forgot.title": "Passwort vergessen",
+    "page.password.forgot.description": "Diese Seite dient zum Versenden einer E-Mail zum Zurücksetzen des Passworts",
+
+    "page.password.restore.title": "Passwort wiederherstellen",
+    "page.password.restore.description": "Diese Seite dient zum Versenden einer E-Mail zur Passwortwiederherstellung",
+
+    "page.password.change.title": "Passwort ändern",
+    "page.password.change.description": "Diese Seite dient zum Ändern des Passworts",
+
+    "page.verify.email.title": "E-Mail bestätigen",
+    "page.verify.email.description": "Diese Seite dient der Überprüfung des E-Mail-Verifizierungsstatus",
+    "page.verify.email.already.verified": "E-Mail {{email}} wurde bereits verifiziert!",
+    "page.verify.email.verified": "Herzlichen Glückwunsch! Ihre E-Mail-Adresse {{email}} wurde verifiziert!",
+    "page.verify.email.no.token.title": "Bereits registriert?",
+    "page.verify.email.no.token.description": "Sie haben eine E-Mail zur Bestätigung Ihrer E-Mail-Adresse erhalten. Bitte suchen Sie diese und folgen Sie dem Link in der E-Mail, um Ihre E-Mail-Adresse zu bestätigen.",
+
+    "form.register.title": "Registrieren",
+    "form.register.subtitle": "Bitte erstellen Sie ein Konto",
+
+    "form.register.success.title": "Herzlichen Glückwunsch! Ihr Konto wurde erstellt!",
+
+    "form.register.success.subtitle": "Bitte überprüfen Sie Ihr E-Mail-Postfach. Dort finden Sie einen Link zur Kontobestätigung. Bestätigen Sie Ihre E-Mail-Adresse, um die neuesten Nachrichten zu erhalten.",
+
+    "form.login.title": "Anmeldung",
+    "form.login.subtitle": "Bitte melden Sie sich an, um dieses Produkt zu bewerten",
+
+    "form.password.forgot.title": "Passwort vergessen?",
+    "form.password.forgot.subtitle": "Bitte geben Sie Ihre E-Mail-Adresse ein, um den Link zum Wiederherstellen Ihres Passworts zu erhalten.",
+
+    "form.password.restore.title": "Passwort wiederherstellen",
+    "form.password.restore.subtitle": "Bitte erstellen Sie ein neues Passwort",
+
+    "form.password.change.title": "Passwort ändern",
+    "form.password.change.subtitle": "Bitte erstellen Sie Ihr neues Passwort",
+
+    "form.label.no.account": "Sie haben kein Konto?",
+
+    "form.placeholder.firstname": "Vorname",
+    "form.placeholder.lastname": "Nachname",
+    "form.placeholder.email": "Email",
+    "form.placeholder.password": "Passwort",
+    "form.placeholder.password.repeat": "Passwort wiederholen",
+
+    "form.label.password.forgot": "Passwort vergessen?",
+    "form.label.have.account": "Haben Sie bereits ein Konto?",
+    "form.link.password.restore": "Folgen Sie zum Wiederherstellen",
+    "form.label.success": "Herzlichen Glückwunsch!",
+
+    "form.button.register": "Registrieren",
+    "form.button.signin": "Anmelden",
+    "form.button.send": "Senden",
+    "form.button.restore": "Wiederherstellen",
+    "form.button.create": "Erstellen",
+    "form.button.home": "Zur Startseite",
+
+    "form.button.google.singin": "Mit Google anmelden",
+
+    "form.validation.error": "Bitte überprüfen Sie, ob Ihre eingegebenen Daten korrekt sind.",
+    "form.validation.required": "Feld {{field}} ist erforderlich",
+    "form.validation.min.length": "Field {{field}} sollte mindestens {{length}} Zeichen lang sein",
+    "form.validation.max.length": "Das Feld {{field}} darf maximal {{length}} Zeichen enthalten",
+    "form.validation.email.invalid": "Die eingegebene email ist ungültig",
+    "form.validation.password.pattern": "Passwort muss mindestens einen Großbuchstaben, einen Kleinbuchstaben, eine Zahl und ein Sonderzeichen enthalten",
+    "form.validation.passwords.should.match": "Passwörter sollten übereinstimmen",
+    "form.validation.should.match.with.new.password": "Bestätigungspasswort sollte mit neuem Passwort übereinstimmen",
+    "form.validation.one.capital.letter": "Feld {{field}} sollte mindestens einen Großbuchstaben haben",
+    "form.validation.one.lowercase": "Feld {{field}} sollte mindestens einen Kleinbuchstaben haben",
+    "form.validation.one.number": "Feld {{field}} sollte mindestens eine Zahl haben",
+    "form.validation.password.repeat": "Das Feld {{field}} sollte identisch sein",
+
+    "form.validation.numbers.only": "Field {{field}} sollte nur zahlen enthalten",
+    "form.validation.should.be.valid.year": "Field {{field}} sollte ein jahr von 00 bis 99 enthalten",
+    "form.validation.should.be.valid.month": "Field {{field}} sollte einen Monat von 01 bis 12 enthalten",
+
+    "form.validation.images.amount.uploaded": "Sie versuchen, {{amount}} Bilder hochzuladen, aber maximal sind {{available}} verfügbar",
+    "form.validation.image.supported.format": ".{{format}} Bildformat wird nicht unterstützt und wird entfernt. Wählen Sie stattdessen .png, .jpeg, .webp",
+    "form.validation.image.max.size": ".{{name}} Größe ist zu groß und wird entfernt. Maximale Größe beträgt 2 MB",
+
+    "loading": "Bitte warten...",
+
+    "error.global": "Etwas ist schiefgelaufen. Versuchen Sie es später erneut.",
+
     "settings.title": "Site Einstellungen",
     "settings.description": "Wählen Sie Ihre bevorzugten Optionen",
     "settings.language": "Sprache",

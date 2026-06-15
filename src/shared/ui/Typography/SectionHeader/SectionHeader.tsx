@@ -47,7 +47,7 @@ export const SectionHeader = ({
             className={cn(
                 'flex flex-col gap-2',
                 className,
-                hasBottomMargin ? 'mb-20' : 'mb-0',
+                hasBottomMargin ? 'mb-14' : 'mb-0',
             )}
         >
             <Typography
