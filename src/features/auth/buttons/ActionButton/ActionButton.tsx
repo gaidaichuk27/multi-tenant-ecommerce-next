@@ -4,7 +4,12 @@ import { memo } from 'react';
 import type { VariantProps } from 'class-variance-authority';
 import { Button, buttonVariants } from '@shared/ui/Form/Button';
 import { useTranslation } from 'react-i18next';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import {
+    buildLocalizedPathname,
+    isValidLocale,
+} from '@shared/config/locales/locale';
+import i18nConfig from '@/i18nConfig';
 
 interface ActionButtonProps {
     className?: string;
@@ -22,9 +27,15 @@ export const ActionButton = memo(
     }: ActionButtonProps) => {
         const { t } = useTranslation(['common']);
         const router = useRouter();
+        const pathname = usePathname();
 
         const clickButtonHandler = () => {
-            router.push(route);
+            const segment = pathname.split('/').filter(Boolean)[0];
+            const locale = isValidLocale(segment)
+                ? segment
+                : i18nConfig.defaultLocale;
+
+            router.push(buildLocalizedPathname(route, locale));
         };
         return (
             <Button

@@ -21,6 +21,10 @@ export function buildLocalizedPathname(
         return `/${locale}`;
     }
 
-    segments[0] = locale;
-    return `/${segments.join('/')}`;
+    if (isValidLocale(segments[0])) {
+        segments[0] = locale;
+        return `/${segments.join('/')}`;
+    }
+
+    return `/${locale}/${segments.join('/')}`;
 }

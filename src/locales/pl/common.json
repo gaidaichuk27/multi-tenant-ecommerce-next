@@ -47,8 +47,7 @@
 
     "form.label.no.account": "Nie masz konta?",
 
-    "form.placeholder.firstname": "Imię",
-    "form.placeholder.lastname": "Nazwisko",
+    "form.placeholder.username": "Nazwa użytkownika",
     "form.placeholder.email": "Email",
     "form.placeholder.password": "Hasło",
     "form.placeholder.password.repeat": "Powtórz hasło",
