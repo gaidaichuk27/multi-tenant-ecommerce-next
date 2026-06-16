@@ -50,6 +50,8 @@
     "form.placeholder.username": "Nazwa użytkownika",
     "form.placeholder.email": "Email",
     "form.placeholder.password": "Hasło",
+    "form.placeholder.password.old": "Aktualne hasło",
+    "form.placeholder.password.new": "Nowe hasło",
     "form.placeholder.password.repeat": "Powtórz hasło",
 
     "form.label.password.forgot": "Zapomniałeś hasła?",
