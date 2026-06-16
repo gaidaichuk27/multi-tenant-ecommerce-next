@@ -9,7 +9,7 @@ import {
     InputGroupAddon,
     InputGroupInput,
     InputGroupText,
-} from '@shared/ui/Form/InputGroup';
+} from '@/src/shared/ui/Form';
 import {
     Select,
     SelectContent,

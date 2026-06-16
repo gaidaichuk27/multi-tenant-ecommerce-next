@@ -17,8 +17,16 @@ import {
     InputGroup,
     InputGroupAddon,
     InputGroupInput,
-} from '@/src/shared/ui/Form/InputGroup';
+} from '@/src/shared/ui/Form';
 import { GoogleButton } from '@features/auth/buttons';
+import {
+    EMAIL_PATTERN,
+    PASSWORD_PATTERN,
+} from '@/src/shared/config/forms/validationPatterns';
+import {
+    EMAIL_VALIDATION,
+    PASSWORD_VALIDATION,
+} from '@/src/shared/config/forms/fieldValidation';
 
 interface SignInFormProps {
     className?: string;
@@ -94,17 +102,7 @@ export const SignInForm = memo(({ className, onSubmit }: SignInFormProps) => {
                         <InputGroupInput
                             id="email"
                             type="email"
-                            {...register('email', {
-                                required: t('common:form.validation.required', {
-                                    field: t('common:form.placeholder.email'),
-                                }),
-                                pattern: {
-                                    value: /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/g,
-                                    message: t(
-                                        'common:form.validation.email.invalid',
-                                    ),
-                                },
-                            })}
+                            {...register('email', EMAIL_VALIDATION(t))}
                             placeholder={t('common:form.placeholder.email')}
                         />
                     </InputGroup>
@@ -124,19 +122,7 @@ export const SignInForm = memo(({ className, onSubmit }: SignInFormProps) => {
                         <InputGroupInput
                             id="password"
                             type={showPassword ? 'text' : 'password'}
-                            {...register('password', {
-                                required: t('common:form.validation.required', {
-                                    field: t(
-                                        'common:form.placeholder.password',
-                                    ),
-                                }),
-                                pattern: {
-                                    value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-                                    message: t(
-                                        'common:form.validation.password.pattern',
-                                    ),
-                                },
-                            })}
+                            {...register('password', PASSWORD_VALIDATION(t))}
                             placeholder={t('common:form.placeholder.password')}
                         />
                         <InputGroupAddon align="inline-end">

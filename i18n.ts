@@ -33,6 +33,9 @@ export default async function getTranslations(
         preload: resources ? [] : i18nConfig.locales,
         // JSON uses flat keys like "page.test.title", not nested objects
         keySeparator: false,
+        interpolation: {
+            escapeValue: false,
+        },
     });
 
     return {

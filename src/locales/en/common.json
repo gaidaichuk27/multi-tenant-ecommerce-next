@@ -47,8 +47,7 @@
 
     "form.label.no.account": "Don't have an account?",
 
-    "form.placeholder.firstname": "First name",
-    "form.placeholder.lastname": "Last name",
+    "form.placeholder.username": "Username",
     "form.placeholder.email": "Email",
     "form.placeholder.password": "Password",
     "form.placeholder.password.repeat": "Repeat password",

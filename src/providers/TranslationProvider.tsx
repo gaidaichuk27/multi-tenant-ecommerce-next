@@ -30,6 +30,9 @@ export default function TranslationProvider({
             defaultNS: namespaces[0],
             fallbackNS: namespaces[0],
             keySeparator: false,
+            interpolation: {
+                escapeValue: false,
+            },
             react: { useSuspense: false },
         });
         return instance;

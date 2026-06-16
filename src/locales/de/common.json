@@ -48,8 +48,7 @@
 
     "form.label.no.account": "Sie haben kein Konto?",
 
-    "form.placeholder.firstname": "Vorname",
-    "form.placeholder.lastname": "Nachname",
+    "form.placeholder.username": "Benutzername",
     "form.placeholder.email": "Email",
     "form.placeholder.password": "Passwort",
     "form.placeholder.password.repeat": "Passwort wiederholen",

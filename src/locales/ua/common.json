@@ -47,11 +47,10 @@
 
     "form.label.no.account": "Не маєте облікового запису?",
 
-    "form.placeholder.firstname": "Ім'я",
-    "form.placeholder.lastname": "Прізвище",
+    "form.placeholder.username": "Ім'я користувача",
     "form.placeholder.email": "Електронна пошта",
     "form.placeholder.password": "Пароль",
-    "form.placeholder.password.repeat": "Повторити Пароль",
+    "form.placeholder.password.repeat": "Повторити пароль",
 
     "form.label.password.forgot": "Забули пароль?",
     "form.label.have.account": "Вже маєте обліковий запис?",
@@ -69,12 +68,12 @@
 
     "form.validation.error": "Перевірте правильність введених даних",
     "form.validation.required": "Поле {{field}} обов'язкове",
-    "form.validation.min_length": "Поле {{field}} повинно містити щонайменше {{length}} символів",
-    "form.validation.max_length": "Поле {{field}} повинно містити максимум {{length}} символів",
+    "form.validation.min.length": "Поле {{field}} повинно містити щонайменше {{length}} символів",
+    "form.validation.max.length": "Поле {{field}} повинно містити максимум {{length}} символів",
     "form.validation.email.invalid": "Некоректно введена електронна адреса",
     "form.validation.password.pattern": "Пароль повинен містити принаймні одну велику літеру, одну маленьку літеру, одне число та один спеціальний символ",
-    "form.validation.passwords_should_match": "Паролі мають співпадати",
-    "form.validation.should_match_with_new_password": "Пароль підтвердження має збігатися з новим паролем",
+    "form.validation.passwords.should.match": "Паролі мають співпадати",
+    "form.validation.should.match.with.new.password": "Пароль підтвердження має збігатися з новим паролем",
     "form.validation.one.capital.letter": "Поле {{field}} має містити принаймні одну велику літеру",
     "form.validation.one.lowercase": "Поле {{field}} має містити принаймні одну маленьку літеру",
     "form.validation.one.number": "Поле {{field}} має містити принаймні одне число",

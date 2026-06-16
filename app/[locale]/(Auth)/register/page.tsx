@@ -1,9 +1,8 @@
 import getTranslations from '@/i18n';
-import { LoginView } from '@views/auth/LoginView';
 import { WithMainLayout } from '@hocs/WithMainLayout';
 import { Metadata } from 'next';
-
-type LoginPageProps = {
+import { RegisterView } from '@views/auth/RegisterView';
+type RegisterPageProps = {
     params: Promise<{ locale: string }>;
 };
 
@@ -11,17 +10,17 @@ const i18nNamespaces = ['common'];
 
 export async function generateMetadata({
     params,
-}: LoginPageProps): Promise<Metadata> {
+}: RegisterPageProps): Promise<Metadata> {
     const { locale } = await params;
     const { t } = await getTranslations(locale, i18nNamespaces);
 
     return {
-        title: t('common:page.login.title'),
-        description: t('common:page.login.description'),
+        title: t('common:page.register.title'),
+        description: t('common:page.register.description'),
     };
 }
 
-export default function LoginPage() {
-    const Layouted = WithMainLayout(LoginView);
+export default function RegisterPage() {
+    const Layouted = WithMainLayout(RegisterView);
     return <Layouted />;
 }
