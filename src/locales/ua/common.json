@@ -50,6 +50,8 @@
     "form.placeholder.username": "Ім'я користувача",
     "form.placeholder.email": "Електронна пошта",
     "form.placeholder.password": "Пароль",
+    "form.placeholder.password.old": "Поточний пароль",
+    "form.placeholder.password.new": "Новий пароль",
     "form.placeholder.password.repeat": "Повторити пароль",
 
     "form.label.password.forgot": "Забули пароль?",
