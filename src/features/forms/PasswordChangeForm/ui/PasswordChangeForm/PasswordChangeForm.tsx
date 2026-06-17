@@ -10,15 +10,11 @@ import { Button } from '@shared/ui/Form/Button';
 import { cn } from '@lib/utils';
 import { Field, FieldGroup, FieldLabel } from '@shared/ui/Form/Field';
 import { ErrorMessage } from '@shared/ui/Form/ErrorMessage';
-import {
-    InputGroup,
-    InputGroupAddon,
-    InputGroupInput,
-} from '@/src/shared/ui/Form';
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@shared/ui/Form';
 import {
     PASSWORD_VALIDATION,
     REPEAT_PASSWORD_VALIDATION,
-} from '@/src/shared/config/forms/fieldValidation';
+} from '@shared/config/forms/fieldValidation';
 
 interface PasswordChangeFormProps {
     className?: string;
@@ -153,7 +149,7 @@ export const PasswordChangeForm = memo(
                         aria-invalid={Boolean(
                             errors.repeatNewPassword?.message,
                         )}
-                        className="mb-8"
+                        className="mb-6"
                     >
                         <FieldLabel htmlFor="repeatNewPassword">
                             {t('common:form.placeholder.password.repeat')}{' '}
