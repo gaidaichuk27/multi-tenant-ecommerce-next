@@ -2,6 +2,8 @@ import getTranslations from '@/i18n';
 import { HomeView } from '@views/HomeView';
 import { WithMainLayout } from '@hocs/WithMainLayout';
 import { Metadata } from 'next';
+import { HydrateClient, getQueryClient, trpc } from '@TRPC/server';
+import { ClientGreeting } from '@features/greeting';
 
 type HomePageProps = {
     params: Promise<{ locale: string }>;
@@ -21,7 +23,22 @@ export async function generateMetadata({
     };
 }
 
-export default function Home() {
+export default async function Home() {
+    const queryClient = getQueryClient();
+    const sayHello = trpc.greeting.sayHello;
+    const greeting = await queryClient.fetchQuery(sayHello.queryOptions());
+    const serverHello = greeting[0]?.hello;
+
     const Layouted = WithMainLayout(HomeView);
-    return <Layouted />;
+    return (
+        <HydrateClient>
+            {serverHello && (
+                <p data-testid="server-greeting">
+                    Greeting (server): {serverHello}
+                </p>
+            )}
+            <ClientGreeting />
+            <Layouted />
+        </HydrateClient>
+    );
 }

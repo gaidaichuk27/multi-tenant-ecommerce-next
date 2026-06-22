@@ -5,7 +5,8 @@ import { Orbitron, Rajdhani, Fira_Code } from 'next/font/google';
 import initTranslations from '@/i18n';
 import i18nConfig from '@/i18nConfig';
 import '@styles/globals.css';
-import TranslationProvider from '@/src/providers/TranslationProvider';
+import TranslationProvider from '@providers/TranslationProvider';
+import { TRPCReactProvider } from '@providers/TRPCProvider';
 
 const fontSans = Orbitron({
     subsets: ['latin'],
@@ -56,7 +57,9 @@ export default async function RootLayout({
                             namespaces={i18nNamespaces}
                         >
                             <div className="js-page page h-full">
-                                {children}
+                                <TRPCReactProvider>
+                                    {children}
+                                </TRPCReactProvider>
                             </div>
                         </TranslationProvider>
                     </ActiveThemeProvider>

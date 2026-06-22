@@ -33,6 +33,7 @@
             "@shared/*": ["./src/shared/*"],
             "@services/*": ["./src/services/*"],
             "@styles/*": ["./src/styles/*"],
+            "@TRPC/*": ["./src/TRPC/*"],
             "@widgets/*": ["./src/widgets/*"],
             "@views/*": ["./src/views/*"]
         }
