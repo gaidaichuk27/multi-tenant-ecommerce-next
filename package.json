@@ -3,11 +3,21 @@
     "version": "0.1.0",
     "private": true,
     "packageManager": "pnpm@10.15.0",
+    "pnpm": {
+        "onlyBuiltDependencies": [
+            "@prisma/client",
+            "@prisma/engines",
+            "prisma"
+        ]
+    },
     "bin": {
         "multi": "./bin/multi"
     },
     "scripts": {
-        "dev": "next dev",
+        "dev": "concurrently -k -n next,backend -c blue,green \"pnpm dev:next\" \"pnpm dev:backend\"",
+        "predev": "pnpm db:generate",
+        "dev:next": "next dev --hostname 0.0.0.0 -p 3000",
+        "dev:backend": "pnpm --filter backend start",
         "build": "next build",
         "start": "next start",
         "lint": "eslint .",
@@ -17,10 +27,23 @@
         "prepare": "husky",
         "multi": "sh bin/multi",
         "storybook": "storybook dev -p 6006",
-        "build-storybook": "storybook build"
+        "build-storybook": "storybook build",
+        "db:generate": "pnpm --filter @repo/database db:generate",
+        "db:migrate": "pnpm --filter @repo/database db:migrate:dev",
+        "db:migrate:deploy": "pnpm --filter @repo/database db:migrate",
+        "db:studio": "pnpm --filter @repo/database db:studio",
+        "db:push": "pnpm --filter @repo/database db:push",
+        "db:pull": "pnpm --filter @repo/database db:pull",
+        "typecheck:backend": "pnpm --filter backend build",
+        "typecheck": "pnpm db:generate && pnpm typecheck:backend",
+        "docker:dev": "sh bin/multi dev up",
+        "docker:dev:down": "sh bin/multi dev down",
+        "docker:dev:down:force": "sh bin/multi dev down force",
+        "docker:dev:logs": "docker compose --profile dev logs -f dev"
     },
     "dependencies": {
         "@base-ui/react": "^1.5.0",
+        "@repo/api": "workspace:*",
         "@tanstack/react-query": "^5.101.0",
         "@trpc/client": "11.16.0",
         "@trpc/server": "11.16.0",
@@ -63,6 +86,7 @@
         "@types/react-dom": "^19",
         "@typescript-eslint/eslint-plugin": "^8.59.4",
         "@typescript-eslint/parser": "^8.59.4",
+        "concurrently": "^10.0.3",
         "eslint": "^9",
         "eslint-config-next": "15.5.18",
         "eslint-config-prettier": "^10.1.8",
