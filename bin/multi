@@ -8,8 +8,9 @@ COMPOSE="docker compose"
 usage() {
     cat <<'EOF'
 Usage:
-  multi dev up              Start Next.js dev (port 3000)
-  multi dev down            Stop Next.js dev
+  multi dev up              Install deps, db:generate, start Docker dev (uses host Postgres :5432)
+  multi dev down            Stop Docker dev stack
+  multi dev down force      Kill containers immediately, then remove them
   multi story up            Start Storybook (port 6006)
   multi story down          Stop Storybook
   multi up                  Start dev + Storybook
@@ -29,6 +30,7 @@ EOF
 
 profile="${1:-}"
 action="${2:-}"
+extra="${3:-}"
 
 if [ -z "$profile" ]; then
     usage
@@ -50,12 +52,31 @@ run() {
     $COMPOSE "$@"
 }
 
+# docker-compose.yml references ${DOCKER_DATABASE_URL}; load it for up/down/logs.
+load_compose_env() {
+    # shellcheck disable=SC1091
+    . scripts/docker-env.sh
+    load_root_env
+    derive_docker_db_env
+    export DOCKER_DATABASE_URL
+    if [ "${DOCKER_USE_BUNDLED_POSTGRES:-}" = "1" ]; then
+        export DOCKER_POSTGRES_USER DOCKER_POSTGRES_PASSWORD
+    fi
+}
+
 case "${profile}-${action}" in
     dev-up)
-        run --profile dev up --build dev
+        sh scripts/docker-dev-up.sh
         ;;
     dev-down)
-        run --profile dev down
+        load_compose_env
+        if [ "$extra" = "force" ] || [ "$extra" = "--force" ]; then
+            run --profile dev kill 2>/dev/null || true
+            run --profile dev-db kill 2>/dev/null || true
+            run --profile dev --profile dev-db down --remove-orphans --timeout 0
+        else
+            run --profile dev --profile dev-db down --remove-orphans
+        fi
         ;;
     story-up)
         run --profile storybook up --build storybook
@@ -67,9 +88,11 @@ case "${profile}-${action}" in
         run --profile dev --profile storybook up --build
         ;;
     all-down)
+        load_compose_env
         run --profile dev --profile storybook down
         ;;
     all-refresh)
+        load_compose_env
         run --profile dev --profile storybook down -v
         run --profile dev --profile storybook up --build
         ;;

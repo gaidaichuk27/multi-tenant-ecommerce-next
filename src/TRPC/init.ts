@@ -1,4 +1,5 @@
 import { initTRPC } from '@trpc/server';
+
 /**
  * This context creator accepts `headers` so it can be reused in both
  * the RSC server caller (where you pass `next/headers`) and the
@@ -6,7 +7,7 @@ import { initTRPC } from '@trpc/server';
  */
 export const createTRPCContext = async (opts: { headers: Headers }) => {
     // const user = await auth(opts.headers);
-    return { userId: 'user_123' };
+    return { userId: 'user_123', headers: opts.headers };
 };
 // Avoid exporting the entire t-object
 // since it's not very descriptive.

@@ -1,2 +1,7 @@
+packages:
+    - .
+    - backend
+    - packages/*
+
 ignoredBuiltDependencies:
-  - msw
+    - msw

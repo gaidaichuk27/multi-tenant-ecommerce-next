@@ -1,0 +1,34 @@
+{
+    "name": "backend",
+    "version": "1.0.0",
+    "description": "",
+    "main": "server.js",
+    "scripts": {
+        "start": "nodemon --exec \"pnpm exec ts-node\" server.ts",
+        "prestart": "sh ../scripts/check-prisma-generated.sh",
+        "build": "tsc --project . --noEmit",
+        "start:prod": "NODE_ENV=production pnpm exec tsx server.ts"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "packageManager": "pnpm@10.15.0",
+    "devDependencies": {
+        "@types/cors": "^2.8.19",
+        "@types/express": "^5.0.3",
+        "@types/node": "^20",
+        "nodemon": "^3.1.14",
+        "tsconfig-paths": "^4.2.0",
+        "typescript": "^5.9.3"
+    },
+    "dependencies": {
+        "@repo/api": "workspace:*",
+        "@repo/database": "workspace:*",
+        "cors": "^2.8.6",
+        "dotenv": "^17.4.2",
+        "express": "^5.2.1",
+        "helmet": "^8.2.0",
+        "ts-node": "^10.9.2",
+        "tsx": "^4.19.4"
+    }
+}
