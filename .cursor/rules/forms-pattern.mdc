@@ -1,0 +1,44 @@
+---
+description: Form submit pattern — useForm, client-api, isApiError, fieldValidation
+globs: src/features/**/ui/**/*Form*.tsx,src/features/forms/**/*.tsx
+alwaysApply: false
+---
+
+# Form submit pattern
+
+All forms follow the same self-contained pattern (see `RegisterForm`).
+
+## Structure
+
+- `useForm` with `mode: 'onChange'`
+- `onSubmit={handleSubmit(submitFormHandler)}`
+- Internal `isSubmitting` and `submitError` state
+- Validation via `@/src/shared/config/forms/fieldValidation` — pass `VALIDATION(t)` to `register()`
+- Redirects use `buildLocalizedPathname(path, locale)` when `locale` is needed
+
+## API calls
+
+- Do **not** call `fetch`, tRPC, or `useMutation` directly inside forms
+- Use a `client-api` module:
+  - Auth: `@lib/auth/client-api`, `@lib/auth/password-client-api`
+  - Groups: `@lib/groups/client-api`
+
+## Error handling
+
+```typescript
+const getSubmitError = useFormApiError();
+
+} catch (error) {
+    setSubmitError(getSubmitError(error));
+} finally {
+    setIsSubmitting(false);
+}
+```
+
+`useFormApiError` wraps `resolveSubmitError` — use it instead of inlining `isApiError` checks.
+
+## Avoid
+
+- `FormContainer` / `use*Submit` hook wrappers (logic lives in the form)
+- `pathname.split('/')[1]` for locale inside forms — receive `locale: Language` as a prop
+- Inline validation rules — add shared rules to `fieldValidation.ts` + `validationPatterns.ts`

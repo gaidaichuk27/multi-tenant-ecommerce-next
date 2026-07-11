@@ -1,35 +1,31 @@
 'use client';
 
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { LogInIcon } from 'lucide-react';
 
 import { PasswordForgotFormData } from '../../model/types/types';
+import { requestPasswordForgot } from '@lib/auth/password-client-api';
+import { PASSWORD_AUTH_ENABLED } from '@shared/config/auth';
+import { useFormApiError } from '@shared/hooks/useFormApiError';
 import { Button } from '@shared/ui/Form/Button';
+import { cn } from '@lib/utils';
 import { Field, FieldGroup, FieldLabel } from '@shared/ui/Form/Field';
 import { ErrorMessage } from '@shared/ui/Form/ErrorMessage';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@shared/ui/Form';
 import { EMAIL_VALIDATION } from '@shared/config/forms/fieldValidation';
 
-import cn from 'classnames';
-
 interface PasswordForgotFormProps {
     className?: string;
-    onSubmit?: (data: PasswordForgotFormData) => void;
 }
 
 export const PasswordForgotForm = memo(
-    ({ className, onSubmit }: PasswordForgotFormProps) => {
+    ({ className }: PasswordForgotFormProps) => {
         const { t } = useTranslation(['common']);
-        const submitFormHandler = async (data: PasswordForgotFormData) => {
-            try {
-                console.log('password forgot data', data);
-                onSubmit?.(data);
-            } catch (error) {
-                console.log('error from password forgot form', error);
-            }
-        };
+        const getSubmitError = useFormApiError();
+        const [submitError, setSubmitError] = useState<string | null>(null);
+        const [isSubmitting, setIsSubmitting] = useState(false);
 
         const {
             register,
@@ -40,12 +36,30 @@ export const PasswordForgotForm = memo(
             defaultValues: { email: '' },
         });
 
+        const submitFormHandler = async ({ email }: PasswordForgotFormData) => {
+            try {
+                setSubmitError(null);
+                setIsSubmitting(true);
+                await requestPasswordForgot({ email });
+            } catch (error) {
+                setSubmitError(getSubmitError(error));
+            } finally {
+                setIsSubmitting(false);
+            }
+        };
+
         return (
             <form
                 onSubmit={handleSubmit(submitFormHandler)}
                 noValidate
             >
                 <FieldGroup className={cn('auth-form__wrapper', className)}>
+                    {!PASSWORD_AUTH_ENABLED && (
+                        <p className="text-muted-foreground text-sm">
+                            {t('common:auth.password.not_implemented')}
+                        </p>
+                    )}
+
                     <Field aria-invalid={Boolean(errors.email?.message)}>
                         <FieldLabel htmlFor="email">
                             {t('common:form.placeholder.email')}
@@ -67,13 +81,19 @@ export const PasswordForgotForm = memo(
                         )}
                     </Field>
 
+                    {submitError && <ErrorMessage error={submitError} />}
+
                     <Button
                         type="submit"
                         className="auth-form__button"
                         aria-label={t('common:form.button.send')}
-                        disabled={!isValid}
+                        disabled={
+                            !PASSWORD_AUTH_ENABLED || !isValid || isSubmitting
+                        }
                     >
-                        {t('common:form.button.send')}
+                        {isSubmitting
+                            ? t('common:loading')
+                            : t('common:form.button.send')}
                     </Button>
                 </FieldGroup>
             </form>

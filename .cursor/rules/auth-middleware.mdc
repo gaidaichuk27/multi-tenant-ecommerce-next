@@ -1,0 +1,37 @@
+---
+description: Express auth middleware — requireAuth vs optionalAuth
+globs: backend/middleware/**/*.ts,backend/routers/**/*.ts
+alwaysApply: false
+---
+
+# Auth middleware
+
+Defined in `backend/middleware/requireAuth.ts`. Token is extracted from `Authorization: Bearer <jwt>`.
+
+## requireAuth — session required
+
+Use on protected routes (e.g. `GET /api/auth/me`, mutations that need a user).
+
+- No token → `401` + `sendApiError`, stop
+- Invalid/expired token → `401`, stop
+- Valid token → set `req.userId`, `next()`
+
+## optionalAuth — session optional
+
+Use on routes that work for guests and logged-in users (public feed, group about page).
+
+- No token → `next()` immediately (guest, `req.userId` unset)
+- Invalid token → ignore, continue as guest
+- Valid token → set `req.userId`, `next()`
+
+Never return `401` from `optionalAuth`.
+
+## Choosing middleware
+
+| Need | Middleware |
+|------|------------|
+| Must be logged in | `requireAuth` |
+| Works with or without login | `optionalAuth` |
+| Public, no user context | neither |
+
+In route handlers, read `req.userId` only after the appropriate middleware is applied.

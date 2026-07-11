@@ -1,8 +1,8 @@
-# Skool Clone — Implementation Plan
+# Platform Plan — Communities + Ecommerce
 
-> **Product:** Multi-tenant community + membership + courses platform (Skool-style).  
-> **Stack:** Next.js 15 (App Router) · tRPC · PostgreSQL · Redis · Express Auth (existing) · AWS (production).  
-> **Tenancy:** Path-based groups at `/{group-slug}` (matches Skool’s `skool.com/{group}` model).
+> **Product:** Multi-tenant platform where creators choose a **community** (Skool-style) or an **online store** (ecommerce, see `demo_project/`). Both modes share auth, billing primitives, and the same monorepo.  
+> **Stack:** Next.js 15 (App Router) · tRPC · PostgreSQL · Prisma · Redis · Express Auth · AWS (production).  
+> **Tenancy:** Path-based workspaces — communities at `/{group-slug}`, shops at `/s/{shop-slug}` (subdomain optional in v2, see Phase Ecommerce).
 
 ---
 
@@ -17,6 +17,8 @@
 7. [AWS scaling map](#7-aws-scaling-map)
 8. [MVP vs v2 scope](#8-mvp-vs-v2-scope)
 9. [Repo structure (FSD)](#9-repo-structure-fsd)
+10. [Dual workspace model (community vs shop)](#10-dual-workspace-model-community-vs-shop)
+11. [Phase Ecommerce](#11-phase-ecommerce)
 
 ---
 
@@ -38,7 +40,7 @@ flowchart TB
     subgraph backend [Backend]
         TRPCRouter[tRPC App Router]
         AuthMW[Auth middleware]
-        TenantMW[Group context middleware]
+        TenantMW[Workspace context middleware]
         ExpressAuth[Express Auth Service]
         Workers[Background workers]
     end
@@ -71,21 +73,23 @@ flowchart TB
 
 ### Service responsibilities
 
-| Layer            | Responsibility                                                                              |
-| ---------------- | ------------------------------------------------------------------------------------------- |
-| **Next.js**      | UI, SSR/ISR, SEO (about pages), tRPC client, cookie/session bridge to Express Auth          |
-| **tRPC**         | Type-safe API for all community/product features (groups, posts, courses, billing metadata) |
-| **Express Auth** | Login, signup, JWT/session, password reset, OAuth — **no group business logic**             |
-| **PostgreSQL**   | Source of truth; every group-owned row has `group_id`                                       |
-| **Redis**        | Sessions cache, feed cache, rate limits, pub/sub for realtime (later)                       |
-| **Workers**      | Email broadcasts, digests, analytics snapshots, Stripe webhook side effects                 |
+| Layer            | Responsibility                                                                        |
+| ---------------- | ------------------------------------------------------------------------------------- |
+| **Next.js**      | UI, SSR/ISR, SEO (about pages), tRPC client, cookie/session bridge to Express Auth    |
+| **tRPC**         | Type-safe API for community **and** shop features (groups, posts, products, checkout) |
+| **Express Auth** | Login, signup, JWT/session, password reset, OAuth — **no workspace business logic**   |
+| **PostgreSQL**   | Source of truth; group-owned rows have `group_id`, shop-owned rows have `shop_id`     |
+| **Redis**        | Sessions cache, feed cache, rate limits, pub/sub for realtime (later)                 |
+| **Workers**      | Email broadcasts, digests, analytics snapshots, Stripe webhook side effects           |
 
 ### Auth flow with tRPC
 
 1. User logs in via Express Auth → httpOnly cookie or JWT in cookie.
 2. Next.js `createContext` reads session → `ctx.userId`.
-3. Group-scoped procedures resolve `ctx.groupId` from URL slug + membership check.
-4. Never trust `groupId` from client body alone — always derive from slug + membership.
+3. Group-scoped **or** shop-scoped procedures resolve `ctx.groupId` / `ctx.shopId` from URL slug + membership check.
+4. Never trust `groupId` / `shopId` from client body alone — always derive from slug + membership.
+
+See [§10 Dual workspace model](#10-dual-workspace-model-community-vs-shop) for how communities and shops coexist.
 
 ---
 
@@ -119,11 +123,21 @@ packages/
         discovery.ts
         settings.ts
         plugin.ts
+        shop.ts
+        shopMembership.ts
+        catalog.ts
+        cart.ts
+        checkout.ts
+        order.ts
+        review.ts
       middleware/
         isAuthed.ts
         isGroupMember.ts
         isGroupAdmin.ts
         isGroupOwner.ts
+        isShopMember.ts
+        isShopAdmin.ts
+        isShopOwner.ts
   db/                     # Drizzle or Prisma schema
   validators/             # Zod schemas shared client/server
 ```
@@ -151,6 +165,13 @@ export const appRouter = createTRPCRouter({
     discovery: discoveryRouter,
     settings: settingsRouter,
     plugin: pluginRouter,
+    shop: shopRouter,
+    shopMembership: shopMembershipRouter,
+    catalog: catalogRouter,
+    cart: cartRouter,
+    checkout: checkoutRouter,
+    order: orderRouter,
+    review: reviewRouter,
 });
 
 export type AppRouter = typeof appRouter;
@@ -182,8 +203,11 @@ export type AppRouter = typeof appRouter;
 publicProcedure          → no auth
 protectedProcedure       → ctx.userId required
 groupMemberProcedure     → + valid membership in group
-groupAdminProcedure        → + role admin | owner | billing_manager
-groupOwnerProcedure        → + role owner | billing_manager
+groupAdminProcedure      → + role admin | owner | billing_manager
+groupOwnerProcedure      → + role owner | billing_manager
+shopMemberProcedure      → + valid membership in shop (customer or staff)
+shopAdminProcedure       → + role admin | owner
+shopOwnerProcedure       → + role owner
 ```
 
 ### Realtime (Phase 6+)
@@ -228,21 +252,22 @@ Legend: **P0** = MVP · **P1** = v1 · **P2** = v2
 
 ### 3.3 Platform — authenticated global
 
-| #   | Route                     | Page name                      | Access | Phase | tRPC procedures                              |
-| --- | ------------------------- | ------------------------------ | ------ | ----- | -------------------------------------------- |
-| 20  | `/app`                    | Dashboard / home redirect      | Auth   | P0    | `auth.me`, `group.listMine`                  |
-| 21  | `/backpack`               | My groups list                 | Auth   | P0    | `group.listMine`                             |
-| 22  | `/settings`               | User settings hub              | Auth   | P0    | `settings.getProfile`                        |
-| 23  | `/settings/profile`       | Edit profile                   | Auth   | P0    | `settings.updateProfile`                     |
-| 24  | `/settings/account`       | Email, password                | Auth   | P0    | Express Auth + `settings.updateAccount`      |
-| 25  | `/settings/notifications` | Notification prefs             | Auth   | P1    | `settings.updateNotifications`               |
-| 26  | `/settings/billing`       | User platform subscription     | Auth   | P1    | `billing.getUserSubscription`                |
-| 27  | `/chats`                  | DM inbox                       | Auth   | P1    | `chat.listThreads`                           |
-| 28  | `/chat`                   | Single DM (query: `?u=userId`) | Auth   | P1    | `chat.getThread`, `chat.sendMessage`         |
-| 29  | `/notifications`          | Notification center            | Auth   | P1    | `notification.list`, `notification.markRead` |
-| 30  | `/create`                 | Create new group wizard        | Auth   | P0    | `group.create`                               |
-| 31  | `/live/[callId]`          | Live call room                 | Auth   | P2    | External/LiveKit integration                 |
-| 32  | `/transactions/[id]`      | Transaction detail             | Auth   | P1    | `billing.getTransaction`                     |
+| #   | Route                     | Page name                      | Access | Phase | tRPC procedures                                   |
+| --- | ------------------------- | ------------------------------ | ------ | ----- | ------------------------------------------------- |
+| 20  | `/app`                    | Dashboard / home redirect      | Auth   | P0    | `auth.me`, `group.listMine`                       |
+| 21  | `/backpack`               | My groups list                 | Auth   | P0    | `group.listMine`                                  |
+| 22  | `/settings`               | User settings hub              | Auth   | P0    | `settings.getProfile`                             |
+| 23  | `/settings/profile`       | Edit profile                   | Auth   | P0    | `settings.updateProfile`                          |
+| 24  | `/settings/account`       | Email, password                | Auth   | P0    | Express Auth + `settings.updateAccount`           |
+| 25  | `/settings/notifications` | Notification prefs             | Auth   | P1    | `settings.updateNotifications`                    |
+| 26  | `/settings/billing`       | User platform subscription     | Auth   | P1    | `billing.getUserSubscription`                     |
+| 27  | `/chats`                  | DM inbox                       | Auth   | P1    | `chat.listThreads`                                |
+| 28  | `/chat`                   | Single DM (query: `?u=userId`) | Auth   | P1    | `chat.getThread`, `chat.sendMessage`              |
+| 29  | `/notifications`          | Notification center            | Auth   | P1    | `notification.list`, `notification.markRead`      |
+| 30  | `/create`                 | Create workspace wizard        | Auth   | P0    | `group.create` **or** `shop.create` (type picker) |
+| 31  | `/live/[callId]`          | Live call room                 | Auth   | P2    | External/LiveKit integration                      |
+| 32  | `/transactions/[id]`      | Transaction detail             | Auth   | P1    | `billing.getTransaction`                          |
+| 33  | `/my-shops`               | My stores list                 | Auth   | E1    | `shop.listMine`                                   |
 
 ### 3.4 Group — public (pre-join)
 
@@ -326,7 +351,44 @@ Legend: **P0** = MVP · **P1** = v1 · **P2** = v2
 | `/maintenance` | Maintenance mode   | P1    |
 | `/health`      | Health check (API) | P0    |
 
-**Total: ~57 routed pages + settings tabs + modals**
+**Total: ~57 community routed pages + shop pages (§3.10) + settings tabs + modals**
+
+### 3.10 Shop — public storefront (ecommerce · Phase Ecommerce)
+
+Legend: **E0** = shop MVP shell · **E1** = catalog + cart · **E2** = checkout + orders
+
+| #   | Route                        | Page name              | Access      | Phase | tRPC procedures (primary)                   |
+| --- | ---------------------------- | ---------------------- | ----------- | ----- | ------------------------------------------- |
+| 58  | `/s/{shop}`                  | Store home / catalog   | Public      | E1    | `catalog.listProducts`, `shop.getPublic`    |
+| 59  | `/s/{shop}/[category]`       | Category listing       | Public      | E1    | `catalog.listByCategory`                    |
+| 60  | `/s/{shop}/[category]/[sub]` | Subcategory listing    | Public      | E1    | `catalog.listByCategory`                    |
+| 61  | `/s/{shop}/products/[id]`    | Product detail         | Public      | E1    | `catalog.getProduct`, `review.list`         |
+| 62  | `/s/{shop}/cart`             | Shopping cart          | Public/Auth | E1    | `cart.get`, `cart.updateItem`               |
+| 63  | `/s/{shop}/checkout`         | Checkout               | Auth        | E2    | `checkout.getProducts`, `checkout.purchase` |
+| 64  | `/s/{shop}/checkout/success` | Order confirmation     | Auth        | E2    | `order.getBySession`                        |
+| 65  | `/s/{shop}/library`          | Purchased products     | Auth        | E2    | `order.listLibrary`                         |
+| 66  | `/s/{shop}/library/[id]`     | Purchased product view | Auth        | E2    | `order.getLibraryItem`, `review.*`          |
+
+### 3.11 Shop — seller admin
+
+| #   | Route                        | Page name                 | Access | Phase | tRPC procedures                               |
+| --- | ---------------------------- | ------------------------- | ------ | ----- | --------------------------------------------- |
+| 67  | `/s/{shop}/admin`            | Shop dashboard            | Admin  | E1    | `shop.getDashboard`                           |
+| 68  | `/s/{shop}/admin/products`   | Product list              | Admin  | E1    | `catalog.list`, `catalog.create`              |
+| 69  | `/s/{shop}/admin/orders`     | Orders                    | Admin  | E2    | `order.list`, `order.get`                     |
+| 70  | `/s/{shop}/admin/categories` | Categories                | Admin  | E1    | `catalog.*Category`                           |
+| 71  | `/s/{shop}/admin/tags`       | Tags                      | E1     | E1    | `catalog.*Tag`                                |
+| 72  | `/s/{shop}/admin/settings`   | Shop settings (SPA tabs)  | Admin  | E1    | `shop.update`, `settings.uploadMedia`         |
+| 73  | `/s/{shop}/admin/stripe`     | Stripe Connect onboarding | Owner  | E2    | `billing.getConnectStatus`, `checkout.verify` |
+
+### 3.12 Shop modals / overlays
+
+| UI              | Trigger              | Phase |
+| --------------- | -------------------- | ----- |
+| Add to cart     | Product card / PDP   | E1    |
+| Cart drawer     | Header cart icon     | E1    |
+| Review form     | Library product view | E2    |
+| Archive product | Admin product row    | E1    |
 
 ---
 
@@ -368,7 +430,8 @@ app/
       chats/page.tsx
       chat/page.tsx
       notifications/page.tsx
-      create/page.tsx
+      create/page.tsx                     # Workspace type picker → group | shop wizard
+      my-shops/page.tsx
       live/[callId]/page.tsx
       transactions/[id]/page.tsx
     [group]/
@@ -401,23 +464,58 @@ app/
       billing/
         connect/page.tsx
         invoices/[number]/page.tsx
+    s/
+      [shop]/
+        layout.tsx                      # Storefront shell (navbar, cart)
+        page.tsx                        # Catalog home
+        [category]/
+          page.tsx
+          [subcategory]/page.tsx
+        products/
+          [productId]/page.tsx
+        cart/page.tsx
+        checkout/
+          page.tsx
+          success/page.tsx
+        library/
+          page.tsx
+          [productId]/page.tsx
+        admin/
+          page.tsx
+          products/page.tsx
+          orders/page.tsx
+          categories/page.tsx
+          tags/page.tsx
+          settings/page.tsx
+          stripe/page.tsx
   api/
     trpc/[trpc]/route.ts
+    stripe/webhooks/route.ts            # Shared Stripe webhooks (groups + shops)
 ```
 
-Use `middleware.ts` to resolve `group` slug and inject `x-group-slug` header for RSC.
+Use `middleware.ts` to resolve workspace slug and inject headers for RSC:
+
+- `/{locale}/{group-slug}` → `x-group-slug` (reserved path segments exclude `s`, `app`, `login`, …)
+- `/{locale}/s/{shop-slug}` → `x-shop-slug`
+
+Optional v2: subdomain routing for shops (`{shop}.yourdomain.com`) — see [§11 Phase Ecommerce](#11-phase-ecommerce) and `demo_project/src/middleware.ts`.
 
 ---
 
 ## 5. Database entities (summary)
 
-PostgreSQL with `group_id` on all tenant tables. Suggested ORM: **Drizzle** (lightweight, SQL-friendly) or Prisma.
+PostgreSQL with `group_id` on community tables and `shop_id` on ecommerce tables. ORM: **Prisma** (current repo).
 
-### Core tables
+### Core tables — platform & auth
+
+| Table   | Key columns                                                                            |
+| ------- | -------------------------------------------------------------------------------------- |
+| `users` | id, email, username, name, avatar_url, roles, auth security fields (see Prisma schema) |
+
+### Core tables — community (Skool)
 
 | Table                  | Key columns                                                                            |
 | ---------------------- | -------------------------------------------------------------------------------------- |
-| `users`                | id, email, name, avatar_url (synced from Auth service)                                 |
 | `groups`               | id, slug, name, description, logo_url, cover_url, owner_id, visibility, discovery_meta |
 | `group_settings`       | group_id, tabs_config, rules, welcome_message, plugins_json                            |
 | `group_memberships`    | group_id, user_id, role, status, tier_id, level, points, joined_at                     |
@@ -442,6 +540,25 @@ PostgreSQL with `group_id` on all tenant tables. Suggested ORM: **Drizzle** (lig
 | `invoices`             | stripe_invoice_id, group_id, user_id, amount, status                                   |
 | `analytics_daily`      | group_id, date, members, mrr_cents, posts, engagement                                  |
 | `affiliate_referrals`  | referrer_id, referred_user_id, group_id                                                |
+
+### Core tables — ecommerce (shop · Phase Ecommerce)
+
+Mapped from `demo_project/` Payload collections → Prisma models.
+
+| Table                | Key columns                                                                                             | demo_project reference   |
+| -------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------ |
+| `shops`              | id, slug, name, image_url, stripe_account_id, stripe_details_submitted, owner_id                        | `tenants`                |
+| `shop_memberships`   | shop_id, user_id, role (`owner` \| `admin` \| `staff` \| `customer`), status                            | `users.tenants[]` plugin |
+| `shop_settings`      | shop_id, currency, checkout_config_json                                                                 | tenant fields            |
+| `product_categories` | shop_id, name, slug, parent_id, sort_order                                                              | `categories`             |
+| `tags`               | shop_id, name                                                                                           | `tags`                   |
+| `products`           | shop_id, name, description, price_cents, image_urls, category_id, content_json, is_private, is_archived | `products`               |
+| `product_tags`       | product_id, tag_id                                                                                      | M2M on `tags`            |
+| `orders`             | shop_id, user_id, product_id, stripe_checkout_session_id, stripe_account_id, amount_cents, status       | `orders`                 |
+| `reviews`            | shop_id, product_id, user_id, rating, body                                                              | `reviews`                |
+| `media`              | shop_id, url, alt, mime_type (or S3 keys)                                                               | `media`                  |
+
+**Cart (client-first):** persisted cart in Zustand + `localStorage` (see `demo_project/src/modules/checkout/store/use-cart-store.ts`). Optional `cart_items` table later for cross-device sync.
 
 ### Level thresholds (match Skool)
 
@@ -641,6 +758,18 @@ PostgreSQL with `group_id` on all tenant tables. Suggested ORM: **Drizzle** (lig
 - Platform affiliate program
 - Email broadcasts + digests
 
+### Platform modes — after community MVP (Phase Ecommerce)
+
+Ship **community MVP first** (Phases 0–7), then add shops so creators can choose at `/create`:
+
+- [ ] Workspace type picker: **Community** vs **Online store**
+- [ ] Shop shell: `shops`, `shop_memberships`, `shop_settings`
+- [ ] Catalog: categories, tags, products (port from `demo_project`)
+- [ ] Cart + checkout + Stripe Connect per shop
+- [ ] Customer library (purchased products) + reviews
+- [ ] Seller admin + order management
+- [ ] Optional: shop subdomain routing (`demo_project` pattern)
+
 ---
 
 ## 9. Repo structure (FSD)
@@ -658,6 +787,9 @@ src/
     post/
     course/
     membership/
+    shop/
+    product/
+    order/
   features/
     community-feed/
     post-composer/
@@ -665,8 +797,12 @@ src/
     calendar/
     gamification/
     checkout/
+    cart/
+    product-catalog/
     group-settings/
+    shop-settings/
     join-group/
+    create-workspace/           # type picker: community | shop
   widgets/
     GroupNav/
     GroupSidebar/
@@ -690,28 +826,275 @@ pnpm add -D drizzle-kit
 
 ---
 
+## 10. Dual workspace model (community vs shop)
+
+### Concept
+
+One platform, two workspace types. A **user** (identity) can own or belong to many workspaces of either type.
+
+```mermaid
+flowchart TB
+    User[users table]
+    User --> GM[group_memberships]
+    User --> SM[shop_memberships]
+    GM --> Group[groups]
+    SM --> Shop[shops]
+    Group --> Posts[posts courses events]
+    Shop --> Products[products orders reviews]
+```
+
+| Aspect               | Community (`groups`)             | Shop (`shops`)                          |
+| -------------------- | -------------------------------- | --------------------------------------- |
+| **Purpose**          | Skool-style membership + courses | Multi-tenant ecommerce (`demo_project`) |
+| **URL**              | `/{group-slug}`                  | `/s/{shop-slug}`                        |
+| **Membership table** | `group_memberships`              | `shop_memberships`                      |
+| **Scoped data**      | `group_id` on posts, courses, …  | `shop_id` on products, orders, …        |
+| **Monetization**     | Subscriptions / tiers (Phase 5)  | Product checkout + Stripe Connect       |
+| **Reference**        | Skool public product             | `demo_project/` Payload collections     |
+
+### Creator flow — `/create` wizard
+
+```
+Step 1: Choose workspace type
+  ┌─────────────────┐  ┌─────────────────┐
+  │   Community     │  │  Online store   │
+  │  (Skool-style)  │  │  (Ecommerce)    │
+  └─────────────────┘  └─────────────────┘
+Step 2: Name + slug + branding
+Step 3: (Community) visibility / join rules  OR  (Shop) currency + Stripe prompt
+Step 4: Redirect to /{group}/about  OR  /s/{shop}/admin
+```
+
+tRPC: `workspace.getTypes` (static) · `group.create` · `shop.create`
+
+### Shared infrastructure (do not duplicate)
+
+| Concern                | Shared? | Notes                                       |
+| ---------------------- | ------- | ------------------------------------------- |
+| `users` + Express Auth | Yes     | Single login for both modes                 |
+| `ApiResponse` + i18n   | Yes     | `@repo/api`                                 |
+| Stripe webhooks route  | Yes     | Dispatch by `metadata.workspaceType`        |
+| `billing` router       | Partial | Connect onboarding shared; checkout differs |
+| Middleware             | Yes     | `x-group-slug` **or** `x-shop-slug`         |
+| Media storage (S3)     | Yes     | Prefix by `group_id` or `shop_id`           |
+
+### What we deliberately do **not** put on `users`
+
+- `user.tenants[]` (demo Payload pattern) → use `shop_memberships` join table instead
+- `group_id` on user row → use `group_memberships`
+
+This keeps the same relational pattern for both workspace types.
+
+### `demo_project/` as implementation reference
+
+| demo_project                     | This repo (Phase Ecommerce)                    |
+| -------------------------------- | ---------------------------------------------- |
+| Payload CMS + built-in auth      | Express Auth + Prisma + tRPC                   |
+| `tenants` collection             | `shops` model                                  |
+| `users.tenants[]`                | `shop_memberships`                             |
+| `products`, `categories`, `tags` | `products`, `product_categories`, `tags`       |
+| `orders`                         | `orders`                                       |
+| `reviews`                        | `reviews`                                      |
+| Subdomain middleware             | Path `/s/{slug}` first; subdomain optional E2+ |
+| Zustand cart store               | Reuse pattern in `src/features/cart/`          |
+| `checkout` tRPC procedures       | Port to `checkoutRouter`                       |
+
+### SEO strategy (community + shop)
+
+**Goal:** One domain, two workspace URL namespaces — rank for platform keywords _and_ let each creator rank for niche community/product queries without cannibalizing their own pages.
+
+#### URL & indexation map
+
+| Surface            | URL pattern                                         | Index?                 | Primary schema                               |
+| ------------------ | --------------------------------------------------- | ---------------------- | -------------------------------------------- |
+| Platform marketing | `/{locale}/`, `/features`, `/pricing`, `/discovery` | Yes                    | `WebSite`, `Organization`                    |
+| Community about    | `/{locale}/{group-slug}/about`                      | Yes                    | `Organization` / `WebPage`                   |
+| Community feed     | `/{locale}/{group-slug}`                            | Configurable per group | `DiscussionForumPosting` (public posts only) |
+| Shop home          | `/{locale}/s/{shop-slug}`                           | Yes                    | `Store`, `WebPage`                           |
+| Product            | `/{locale}/s/{shop-slug}/products/{id}`             | Yes                    | `Product`, `Offer`                           |
+| Category           | `/{locale}/s/{shop-slug}/{category}`                | Yes                    | `CollectionPage`, `BreadcrumbList`           |
+| Cart / checkout    | `/cart`, `/checkout`                                | **No** (`noindex`)     | —                                            |
+| App shell          | `/app`, `/create`, `/settings`                      | **No**                 | —                                            |
+
+Reserve `/s/` as shop prefix (add `s` to `RESERVED_PATH_SEGMENTS`) so group slugs never collide with shop routes.
+
+#### Metadata conventions
+
+- **Platform pages:** target generic intent — title template `"[Brand] — Communities & Online Stores"`.
+- **Community about:** `"{Group Name} — Community | [Brand]"`; description from `groups.description` (truncate 155 chars).
+- **Shop home:** `"{Shop Name} — Shop | [Brand]"`.
+- **Product:** `"{Product Name} — {Shop Name}"`; unique `og:image` per product.
+- **Canonical:** always absolute URL on the workspace's primary path; no duplicate canonicals between `/about` and feed unless content differs materially.
+
+#### Sitemaps (implement Phase 6+ / E2)
+
+```
+/sitemap.xml              → index
+/sitemap-platform.xml     → marketing + discovery
+/sitemap-groups.xml       → all public group /about URLs
+/sitemap-shops.xml        → shop home URLs
+/sitemap-products.xml     → product detail URLs (chunked if >50k)
+```
+
+Regenerate on `group.create`, `shop.create`, `catalog.publishProduct`. Exclude empty or `hidden` workspaces.
+
+#### Internal linking
+
+- Group **about** page → CTA to seller's shop (`/s/{shop-slug}`) when same owner links both (Phase E2+).
+- Shop footer → "Join our community" when linked.
+- `/discovery` → separate tabs or filters for **Communities** vs **Stores** (unique listing pages, not duplicate content).
+- Creator dashboard `/app` → lists both workspace types with deep links.
+
+#### Example target search phrases
+
+| Layer                       | Example queries                                                                                                                           |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| **Platform**                | "skool alternative", "create paid membership community", "sell digital products and community", "creator platform with courses and store" |
+| **Community (per group)**   | "join [brand] community", "[niche] membership community", "[coach] paid community"                                                        |
+| **Shop (per store)**        | "buy [product name]", "[brand] digital downloads", "[category] templates online"                                                          |
+| **Combined differentiator** | "community and online store one platform", "membership site with product library"                                                         |
+
+#### Implementation checklist (future)
+
+- [ ] `generateMetadata` on `/{group}/about`, `/s/{shop}`, `/s/{shop}/products/[id]` with DB-driven title/description
+- [ ] JSON-LD components: `Organization` (group), `Product` + `Offer` (shop)
+- [ ] `robots` meta on auth, cart, checkout, admin routes
+- [ ] `hreflang` alternates for `[locale]` routes (en, pl, de, ua)
+- [ ] Open Graph images: group `cover_url`, product primary image
+- [ ] Prevent thin content: do not index groups/shops with default placeholder copy
+- [ ] Optional E3: shop subdomain `{shop}.platform.com` with path canonical pointing to primary URL
+
+#### Crawl budget & cannibalization risks
+
+- **Risk:** duplicate titles between community and shop owned by same creator.
+- **Mitigation:** distinct title templates and cross-link instead of merging URLs.
+- **Risk:** indexing empty workspaces.
+- **Mitigation:** `visibility: hidden` + `noindex` until owner publishes about page or first product.
+
+---
+
+## 11. Phase Ecommerce
+
+**When:** After community MVP is stable (post Phase 5 or in parallel with Phase 6–7 if team capacity allows).  
+**Goal:** Creator can choose **Online store** at `/create` and run a multi-tenant shop with catalog, cart, checkout, and library — parity with `demo_project/`.
+
+**Reference implementation:** `demo_project/src/modules/{products,checkout,library}/`, `demo_project/src/collections/*`.
+
+### E0 — Shop foundation (Weeks 37–39)
+
+| Task                                                                     | Deliverable    |
+| ------------------------------------------------------------------------ | -------------- |
+| Prisma: `shops`, `shop_memberships`, `shop_settings`                     | Schema v2      |
+| tRPC: `shop.create`, `shop.getBySlug`, `shop.getPublic`, `shop.listMine` | Shop router    |
+| `shopMemberProcedure` / `shopAdminProcedure` middleware                  | tRPC guards    |
+| Middleware: `/s/{shop-slug}` → `x-shop-slug`                             | Tenancy header |
+| `/create` workspace type picker (community \| shop)                      | UX fork        |
+| `/my-shops` + `/s/{shop}` placeholder storefront                         | P0 shell       |
+| Register shop owner as `shop_memberships.role = owner` on create         | Membership     |
+
+**Exit criteria:** User creates a shop, sees empty storefront and admin shell.
+
+### E1 — Catalog & cart (Weeks 40–43)
+
+| Feature                    | Pages                      | tRPC                         | demo_project          |
+| -------------------------- | -------------------------- | ---------------------------- | --------------------- |
+| Categories + subcategories | `/s/{shop}/[category]`     | `catalog.*Category`          | `categories`          |
+| Tags + filters             | Product list filters       | `catalog.*Tag`               | `tags`, `tags-filter` |
+| Product CRUD               | `/s/{shop}/admin/products` | `catalog.*Product`           | `products`            |
+| Product detail             | `/s/{shop}/products/[id]`  | `catalog.getProduct`         | `product-view`        |
+| Cart (Zustand persist)     | Cart drawer, `/cart`       | `cart.get` (validate)        | `use-cart-store`      |
+| Add to cart                | Product card               | client + `cart.add` optional | `cart-button`         |
+| Stripe Connect gate        | Admin banner               | `billing.getConnectStatus`   | `stripe-verify`       |
+
+**Exit criteria:** Seller publishes products; visitor browses catalog and manages cart locally.
+
+### E2 — Checkout & orders (Weeks 44–47)
+
+| Feature            | Pages                    | tRPC                                        | demo_project          |
+| ------------------ | ------------------------ | ------------------------------------------- | --------------------- |
+| Checkout session   | `/s/{shop}/checkout`     | `checkout.getProducts`, `checkout.purchase` | `checkout` procedures |
+| Stripe webhook     | `api/stripe/webhooks`    | `checkout.verify`, `order.fulfill`          | `stripe/webhooks`     |
+| Order records      | Admin orders             | `order.list`, `order.get`                   | `orders` collection   |
+| Customer library   | `/s/{shop}/library`      | `order.listLibrary`, `order.getLibraryItem` | `library` module      |
+| Reviews            | Library product          | `review.create`, `review.list`              | `reviews`             |
+| Connect onboarding | `/s/{shop}/admin/stripe` | `checkout.verify`                           | `stripe-verify` page  |
+
+**Exit criteria:** End-to-end purchase; buyer sees product in library; seller sees order.
+
+### E3 — Shop platform polish (Weeks 48–50) · optional
+
+| Feature                | Notes                                                         |
+| ---------------------- | ------------------------------------------------------------- |
+| Subdomain per shop     | `{shop}.platform.com` — port `demo_project/src/middleware.ts` |
+| Cross-device cart sync | `cart_items` table + Redis                                    |
+| Shop discovery         | `/discovery` lists shops alongside groups                     |
+| Inventory / variants   | v2 if needed                                                  |
+| Discount codes         | v2                                                            |
+
+### Phase Ecommerce — tRPC router summary
+
+| Router           | Key procedures                                                                      | Sub-phase |
+| ---------------- | ----------------------------------------------------------------------------------- | --------- |
+| `shop`           | `create`, `getBySlug`, `getPublic`, `update`, `listMine`, `getDashboard`            | E0–E1     |
+| `shopMembership` | `listStaff`, `invite`, `updateRole`, `remove`                                       | E1        |
+| `catalog`        | `listProducts`, `getProduct`, `createProduct`, `updateProduct`, `*Category`, `*Tag` | E1        |
+| `cart`           | `validate`, `getTotals` (server validation of client cart)                          | E1        |
+| `checkout`       | `getProducts`, `purchase`, `verify`                                                 | E2        |
+| `order`          | `list`, `get`, `listLibrary`, `getLibraryItem`, `fulfill`                           | E2        |
+| `review`         | `list`, `create`, `update`                                                          | E2        |
+
+### Phase Ecommerce — middleware & reserved paths
+
+Add to `RESERVED_PATH_SEGMENTS` in `middleware.ts`:
+
+- `s` — shop route prefix (not a group slug)
+- Shop slugs resolved from `/s/{shop}/...` only
+
+```typescript
+// /en/s/my-store/products/1 → x-shop-slug: my-store
+// /en/my-community → x-group-slug: my-community
+```
+
+### Phase Ecommerce — exit criteria (full)
+
+- [ ] Creator selects **Online store** at `/create` and completes shop setup
+- [ ] Seller adds categories, tags, products with images
+- [ ] Buyer adds to cart, checks out via Stripe
+- [ ] Order persisted; buyer accesses **library**; can leave review
+- [ ] Seller completes Stripe Connect onboarding
+- [ ] Same `users` account can own a **group** and a **shop**
+
+---
+
 ## Appendix A — tRPC router checklist
 
-| Router         | Key procedures                                                                          | Phase |
-| -------------- | --------------------------------------------------------------------------------------- | ----- |
-| `auth`         | `me`, `syncUser`                                                                        | 0     |
-| `group`        | `create`, `getBySlug`, `getPublic`, `update`, `listMine`                                | 0–1   |
-| `membership`   | `requestJoin`, `approve`, `decline`, `listMembers`, `listPending`, `updateRole`, `ban`  | 0–1   |
-| `category`     | `list`, `create`, `update`, `delete`, `reorder`                                         | 1     |
-| `post`         | `list`, `get`, `create`, `update`, `delete`, `like`, `pin`, `report`, `broadcastEmail`  | 1     |
-| `comment`      | `list`, `create`, `delete`                                                              | 1     |
-| `course`       | `list`, `get`, `create`, `update`, `delete`, `updateAccess`, `reorder`                  | 2     |
-| `lesson`       | `get`, `create`, `update`, `markComplete`, `addResource`                                | 2     |
-| `event`        | `list`, `get`, `create`, `update`, `rsvp`, `delete`                                     | 3     |
-| `gamification` | `getLeaderboard`, `getLevel`, `onLike`, `updateLevels`                                  | 4     |
-| `billing`      | `createCheckoutSession`, `createConnectLink`, `handleWebhook`, `getPortalUrl`, `refund` | 5     |
-| `analytics`    | `getDashboard`, `getMRR`, `getCohorts`                                                  | 5–6   |
-| `notification` | `list`, `markRead`, `getPreferences`                                                    | 6     |
-| `chat`         | `listThreads`, `getThread`, `sendMessage`                                               | 6     |
-| `search`       | `group`, `discovery`                                                                    | 6     |
-| `discovery`    | `list`, `search`, `updateGroupMeta`                                                     | 6     |
-| `settings`     | `getProfile`, `updateProfile`, `updateTabs`, `updateLinks`, `uploadMedia`               | 0–6   |
-| `plugin`       | `list`, `update`                                                                        | 6     |
+| Router           | Key procedures                                                                          | Phase |
+| ---------------- | --------------------------------------------------------------------------------------- | ----- |
+| `auth`           | `me`, `syncUser`                                                                        | 0     |
+| `group`          | `create`, `getBySlug`, `getPublic`, `update`, `listMine`                                | 0–1   |
+| `membership`     | `requestJoin`, `approve`, `decline`, `listMembers`, `listPending`, `updateRole`, `ban`  | 0–1   |
+| `category`       | `list`, `create`, `update`, `delete`, `reorder`                                         | 1     |
+| `post`           | `list`, `get`, `create`, `update`, `delete`, `like`, `pin`, `report`, `broadcastEmail`  | 1     |
+| `comment`        | `list`, `create`, `delete`                                                              | 1     |
+| `course`         | `list`, `get`, `create`, `update`, `delete`, `updateAccess`, `reorder`                  | 2     |
+| `lesson`         | `get`, `create`, `update`, `markComplete`, `addResource`                                | 2     |
+| `event`          | `list`, `get`, `create`, `update`, `rsvp`, `delete`                                     | 3     |
+| `gamification`   | `getLeaderboard`, `getLevel`, `onLike`, `updateLevels`                                  | 4     |
+| `billing`        | `createCheckoutSession`, `createConnectLink`, `handleWebhook`, `getPortalUrl`, `refund` | 5     |
+| `analytics`      | `getDashboard`, `getMRR`, `getCohorts`                                                  | 5–6   |
+| `notification`   | `list`, `markRead`, `getPreferences`                                                    | 6     |
+| `chat`           | `listThreads`, `getThread`, `sendMessage`                                               | 6     |
+| `search`         | `group`, `discovery`                                                                    | 6     |
+| `discovery`      | `list`, `search`, `updateGroupMeta`                                                     | 6     |
+| `settings`       | `getProfile`, `updateProfile`, `updateTabs`, `updateLinks`, `uploadMedia`               | 0–6   |
+| `plugin`         | `list`, `update`                                                                        | 6     |
+| `shop`           | `create`, `getBySlug`, `getPublic`, `listMine`, `update`                                | E0    |
+| `shopMembership` | `listStaff`, `invite`, `updateRole`                                                     | E1    |
+| `catalog`        | `listProducts`, `getProduct`, `createProduct`, `*Category`, `*Tag`                      | E1    |
+| `cart`           | `validate`, `getTotals`                                                                 | E1    |
+| `checkout`       | `getProducts`, `purchase`, `verify` (shop checkout)                                     | E2    |
+| `order`          | `list`, `get`, `listLibrary`, `getLibraryItem`                                          | E2    |
+| `review`         | `list`, `create`, `update`                                                              | E2    |
 
 ---
 
@@ -722,16 +1105,41 @@ pnpm add -D drizzle-kit
 | Login, signup, password reset                 | Express Auth                                       |
 | JWT / session cookie                          | Express Auth                                       |
 | `userId` in tRPC context                      | Next.js reads cookie → validates with Auth service |
-| Group roles, membership                       | tRPC + PostgreSQL only                             |
+| Group roles, membership                       | tRPC + PostgreSQL (`group_memberships`)            |
+| Shop roles, staff/customer                    | tRPC + PostgreSQL (`shop_memberships`)             |
 | Stripe customer for **member paying group**   | tRPC `billing` + Stripe                            |
+| Stripe customer for **shop product purchase** | tRPC `checkout` + Stripe Connect (per `shop_id`)   |
 | Stripe customer for **creator platform plan** | tRPC `billing` (platform account)                  |
 
 ---
 
 ## Appendix C — Legal note
 
-This plan documents **feature parity** for a community platform inspired by Skool’s public product. Use original branding, copy, and UI design. Do not copy Skool trademarks or proprietary assets.
+This plan documents **feature parity** for a community platform inspired by Skool’s public product, with an optional ecommerce mode inspired by common multi-tenant store patterns (`demo_project`). Use original branding, copy, and UI design. Do not copy Skool trademarks or proprietary assets.
 
 ---
 
-_Last updated: 2026-05-31_
+## Appendix D — `demo_project` file map (ecommerce porting guide)
+
+Use when implementing [§11 Phase Ecommerce](#11-phase-ecommerce).
+
+| Area                | demo_project path                                 | Target in main repo                   |
+| ------------------- | ------------------------------------------------- | ------------------------------------- |
+| Tenant / shop model | `src/collections/Tenants.ts`                      | `packages/database` → `shops`         |
+| Products            | `src/collections/Products.ts`                     | `catalog` router + Prisma `products`  |
+| Categories          | `src/collections/Categories.ts`                   | `product_categories`                  |
+| Tags                | `src/collections/Tags.ts`                         | `tags` + `product_tags`               |
+| Orders              | `src/collections/Orders.ts`                       | `orders` + `order` router             |
+| Reviews             | `src/collections/Reviews.ts`                      | `reviews` + `review` router           |
+| Cart state          | `src/modules/checkout/store/use-cart-store.ts`    | `src/features/cart/`                  |
+| Checkout UI         | `src/modules/checkout/ui/views/checkout-view.tsx` | `src/features/checkout/`              |
+| Checkout API        | `src/modules/checkout/server/procedures.ts`       | `checkoutRouter`                      |
+| Product listing     | `src/modules/products/`                           | `src/features/product-catalog/`       |
+| Library             | `src/modules/library/`                            | `src/features/library/`               |
+| Stripe verify       | `src/app/(app)/(tenants)/stripe-verify/page.tsx`  | `/s/{shop}/admin/stripe`              |
+| Subdomain MW        | `src/middleware.ts`                               | Optional E3 — path-first in main repo |
+| User ↔ tenant       | `src/collections/Users.ts` (`tenants[]`)          | `shop_memberships` (not on `users`)   |
+
+---
+
+_Last updated: 2026-07-02_

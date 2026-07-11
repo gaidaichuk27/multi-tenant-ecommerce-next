@@ -1,22 +1,25 @@
 import getTranslations from '@/i18n';
-import { getCurrentLangFromPathname } from '@helpers/getCurrentLangFromPathname';
 import { ActionButton } from '@features/auth/buttons';
 import { RegisterForm } from '@/src/features/forms/RegistrForm';
 import { ShadowBox } from '@shared/ui/ShadowBox/ShadowBox';
 import { SectionHeader } from '@shared/ui/Typography';
 import { Legend } from '@shared/ui/Legend';
+import type { Language } from '@shared/config/locales/types';
 
 import { cn } from '@lib/utils';
 
 interface RegisterViewProps {
     className?: string;
+    locale: Language;
 }
 
 const i18nNamespaces = ['common'];
 
-export const RegisterView = async ({ className }: RegisterViewProps) => {
-    const pathName = await getCurrentLangFromPathname();
-    const { t } = await getTranslations(pathName, i18nNamespaces);
+export const RegisterView = async ({
+    className,
+    locale,
+}: RegisterViewProps) => {
+    const { t } = await getTranslations(locale, i18nNamespaces);
 
     return (
         <div
@@ -31,7 +34,7 @@ export const RegisterView = async ({ className }: RegisterViewProps) => {
                     subTitle={t('common:form.register.subtitle')}
                     className="mb-4"
                 />
-                <RegisterForm />
+                <RegisterForm locale={locale} />
 
                 <Legend label={t('common:form.label.have.account')} />
 

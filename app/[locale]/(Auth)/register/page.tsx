@@ -2,6 +2,9 @@ import getTranslations from '@/i18n';
 import { WithMainLayout } from '@hocs/WithMainLayout';
 import { Metadata } from 'next';
 import { RegisterView } from '@views/auth/RegisterView';
+import { isValidLocale } from '@shared/config/locales/locale';
+import { Language } from '@shared/config/locales/types';
+import i18nConfig from '@/i18nConfig';
 type RegisterPageProps = {
     params: Promise<{ locale: string }>;
 };
@@ -20,7 +23,11 @@ export async function generateMetadata({
     };
 }
 
-export default function RegisterPage() {
+export default async function RegisterPage({ params }: RegisterPageProps) {
+    const { locale: localeParam } = await params;
+    const locale: Language = isValidLocale(localeParam)
+        ? localeParam
+        : i18nConfig.defaultLocale;
     const Layouted = WithMainLayout(RegisterView);
-    return <Layouted />;
+    return <Layouted locale={locale} />;
 }

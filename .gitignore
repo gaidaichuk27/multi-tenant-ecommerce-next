@@ -48,3 +48,5 @@ storybook-static
 
 # prisma generated client (run pnpm db:generate)
 packages/database/src/generated
+
+/demo_project

@@ -1,12 +1,19 @@
 'use client';
 
 import { memo, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
+import { buildLocalizedPathname } from '@shared/config/locales/locale';
+import type { Language } from '@shared/config/locales/types';
 import { LockIcon, EyeIcon, EyeOffIcon } from 'lucide-react';
 
 import { PasswordRestoreFormData } from '../../model/types/types';
+import { restorePassword } from '@lib/auth/password-client-api';
+import { PASSWORD_AUTH_ENABLED } from '@shared/config/auth';
+import { useFormApiError } from '@shared/hooks/useFormApiError';
 import { Button } from '@shared/ui/Form/Button';
+import { cn } from '@lib/utils';
 import { Field, FieldGroup, FieldLabel } from '@shared/ui/Form/Field';
 import { ErrorMessage } from '@shared/ui/Form/ErrorMessage';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@shared/ui/Form';
@@ -15,28 +22,21 @@ import {
     REPEAT_PASSWORD_VALIDATION,
 } from '@shared/config/forms/fieldValidation';
 
-import cn from 'classnames';
-
 interface PasswordRestoreFormProps {
     className?: string;
-    onSubmit?: (data: PasswordRestoreFormData) => void;
+    locale: Language;
 }
 
 export const PasswordRestoreForm = memo(
-    ({ className, onSubmit }: PasswordRestoreFormProps) => {
+    ({ className, locale }: PasswordRestoreFormProps) => {
         const { t } = useTranslation(['common']);
-
+        const getSubmitError = useFormApiError();
+        const router = useRouter();
+        const searchParams = useSearchParams();
         const [showPassword, setShowPassword] = useState(false);
         const [showRepeatPassword, setShowRepeatPassword] = useState(false);
-
-        const submitFormHandler = async (data: PasswordRestoreFormData) => {
-            try {
-                console.log('password restore data', data);
-                onSubmit?.(data);
-            } catch (error) {
-                console.log('error from password restore form', error);
-            }
-        };
+        const [submitError, setSubmitError] = useState<string | null>(null);
+        const [isSubmitting, setIsSubmitting] = useState(false);
 
         const {
             register,
@@ -53,12 +53,39 @@ export const PasswordRestoreForm = memo(
 
         const password = watch('password');
 
+        const submitFormHandler = async ({
+            password: newPassword,
+        }: PasswordRestoreFormData) => {
+            try {
+                setSubmitError(null);
+                setIsSubmitting(true);
+
+                await restorePassword({
+                    password: newPassword,
+                    token: searchParams.get('token') ?? undefined,
+                });
+
+                router.push(buildLocalizedPathname('/login', locale));
+                router.refresh();
+            } catch (error) {
+                setSubmitError(getSubmitError(error));
+            } finally {
+                setIsSubmitting(false);
+            }
+        };
+
         return (
             <form
                 onSubmit={handleSubmit(submitFormHandler)}
                 noValidate
             >
                 <FieldGroup className={cn('auth-form__wrapper', className)}>
+                    {!PASSWORD_AUTH_ENABLED && (
+                        <p className="text-muted-foreground text-sm">
+                            {t('common:auth.password.not_implemented')}
+                        </p>
+                    )}
+
                     <Field aria-invalid={Boolean(errors.password?.message)}>
                         <FieldLabel htmlFor="password">
                             {t('common:form.placeholder.password.new')}{' '}
@@ -156,13 +183,19 @@ export const PasswordRestoreForm = memo(
                         )}
                     </Field>
 
+                    {submitError && <ErrorMessage error={submitError} />}
+
                     <Button
                         type="submit"
                         className="auth-form__button"
                         aria-label={t('common:form.button.restore')}
-                        disabled={!isValid}
+                        disabled={
+                            !PASSWORD_AUTH_ENABLED || !isValid || isSubmitting
+                        }
                     >
-                        {t('common:form.button.restore')}
+                        {isSubmitting
+                            ? t('common:loading')
+                            : t('common:form.button.restore')}
                     </Button>
                 </FieldGroup>
             </form>

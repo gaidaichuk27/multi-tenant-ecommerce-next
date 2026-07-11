@@ -1,22 +1,23 @@
 import getTranslations from '@/i18n';
-import { getCurrentLangFromPathname } from '@helpers/getCurrentLangFromPathname';
+import { Suspense } from 'react';
 import { ActionButton } from '@features/auth/buttons';
 import { SignInForm } from '@features/forms/SignInForm';
 import { ShadowBox } from '@shared/ui/ShadowBox/ShadowBox';
 import { SectionHeader } from '@shared/ui/Typography';
 import { Legend } from '@shared/ui/Legend';
+import type { Language } from '@shared/config/locales/types';
 
 import { cn } from '@lib/utils';
 
 interface LoginViewProps {
     className?: string;
+    locale: Language;
 }
 
 const i18nNamespaces = ['common'];
 
-export const LoginView = async ({ className }: LoginViewProps) => {
-    const pathName = await getCurrentLangFromPathname();
-    const { t } = await getTranslations(pathName, i18nNamespaces);
+export const LoginView = async ({ className, locale }: LoginViewProps) => {
+    const { t } = await getTranslations(locale, i18nNamespaces);
 
     return (
         <div
@@ -31,7 +32,9 @@ export const LoginView = async ({ className }: LoginViewProps) => {
                     subTitle={t('common:form.login.subtitle')}
                     className="mb-4"
                 />
-                <SignInForm />
+                <Suspense fallback={<p>{t('common:loading')}</p>}>
+                    <SignInForm locale={locale} />
+                </Suspense>
 
                 <Legend label={t('common:form.label.no.account')} />
 
