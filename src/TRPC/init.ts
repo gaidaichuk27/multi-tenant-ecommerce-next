@@ -1,27 +1,43 @@
-import { initTRPC } from '@trpc/server';
+import { TRPCError, initTRPC } from '@trpc/server';
+import type { User } from '@entities/User';
+import { getAuthSession } from '@lib/auth/session';
 
-/**
- * This context creator accepts `headers` so it can be reused in both
- * the RSC server caller (where you pass `next/headers`) and the
- * API route handler (where you pass the request headers).
- */
-export const createTRPCContext = async (opts: { headers: Headers }) => {
-    // const user = await auth(opts.headers);
-    return { userId: 'user_123', headers: opts.headers };
+export type TRPCContext = {
+    userId: string | null;
+    user: User | null;
+    headers: Headers;
 };
-// Avoid exporting the entire t-object
-// since it's not very descriptive.
-// For instance, the use of a t variable
-// is common in i18n libraries.
-const t = initTRPC
-    .context<Awaited<ReturnType<typeof createTRPCContext>>>()
-    .create({
-        /**
-         * @see https://trpc.io/docs/server/data-transformers
-         */
-        // transformer: superjson,
+
+export async function createTRPCContext(opts: {
+    headers: Headers;
+}): Promise<TRPCContext> {
+    const session = await getAuthSession(opts.headers);
+
+    return {
+        userId: session?.user.id ?? null,
+        user: session?.user ?? null,
+        headers: opts.headers,
+    };
+}
+
+const t = initTRPC.context<TRPCContext>().create();
+
+const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
+    if (!ctx.userId || !ctx.user) {
+        throw new TRPCError({ code: 'UNAUTHORIZED' });
+    }
+
+    return next({
+        ctx: {
+            ...ctx,
+            userId: ctx.userId,
+            user: ctx.user,
+        },
     });
-// Base router and procedure helpers
+});
+
 export const createTRPCRouter = t.router;
 export const createCallerFactory = t.createCallerFactory;
-export const baseProcedure = t.procedure;
+export const publicProcedure = t.procedure;
+export const baseProcedure = publicProcedure;
+export const protectedProcedure = publicProcedure.use(enforceUserIsAuthed);

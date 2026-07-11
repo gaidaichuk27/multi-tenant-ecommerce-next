@@ -5,3 +5,5 @@ export const PASSWORD_PATTERN =
 
 export const NAME_PATTERN =
     /^([a-zA-Z]{2,}(?:\s[a-zA-Z]{1,}(?:['-][a-zA-Z]{2,})?\s?([a-zA-Z]{1,})?)?)$/;
+
+export const GROUP_SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;

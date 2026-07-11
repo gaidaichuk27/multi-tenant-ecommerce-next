@@ -2,6 +2,67 @@
 
 ## Node 24.15.0 · pnpm 10.15.0
 
+## Implementation status — Skool communities (Phase 0)
+
+Full product roadmap: [`docs/SKOOL_CLONE_PLAN.md`](docs/SKOOL_CLONE_PLAN.md).
+
+**Phase 0 goal:** User can sign up, create a group, and view a public about page.
+
+### Done in this branch
+
+| Area                | What shipped                                                                                                              |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| **Database**        | Prisma models `User`, `Group`, `GroupMembership`, `GroupSettings`; migration `20260702120000_phase_0_foundation`          |
+| **Express auth**    | `POST /api/auth/register`, `login`, `logout`; `GET /api/auth/me` (JWT httpOnly cookie via `JWT_TOKEN` in `backend/.env`)  |
+| **Next auth proxy** | `app/api/auth/{register,login,logout}/route.ts` → Express                                                                 |
+| **API contracts**   | `@repo/api` — `auth.ts`, `groups.ts`, `response.ts` (Zod inputs, `sendApiSuccess` / `parseApiErrorPayload`, `isApiError`) |
+| **tRPC**            | `auth.me`, `group.create`, `group.getBySlug`, `group.listMine` in `src/TRPC/routers/`                                     |
+| **Middleware**      | Locale routing, guest-only vs protected routes, `x-group-slug` for `/{group}/*` pages (`middleware.ts`)                   |
+| **Pages**           | `/login`, `/register`, `/app`, `/backpack`, `/create`, `/{group}/about` (+ password form shells)                          |
+| **Forms**           | `RegisterForm`, `SignInForm`, `CreateGroupForm`, password forms — unified `useForm` + `client-api` pattern                |
+| **Client APIs**     | `src/lib/auth/client-api.ts`, `src/lib/groups/client-api.ts` (browser tRPC for groups)                                    |
+| **Locale**          | `locale: Language` passed from page `params` → view → form (not parsed from pathname)                                     |
+| **Cursor rules**    | `.cursor/rules/` — forms, locale, auth middleware, API contracts                                                          |
+
+### Phase 0 exit criteria — remaining
+
+| Item                    | Notes                                                                                                              |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `superjson` transformer | Planned in Phase 0 deps; not wired yet                                                                             |
+| Password reset APIs     | Forms disabled with notice; enable via `PASSWORD_AUTH_ENABLED` when Express + Next routes land (Phase 0 follow-up) |
+| `/settings` shell       | Route reserved in middleware; page not built                                                                       |
+| Dedicated logout page   | Cookie cleared via API; full `/logout` flow TBD                                                                    |
+
+### Key paths
+
+```
+app/[locale]/(Auth)/login|register/     # auth pages
+app/[locale]/(App)/app|backpack|create/ # platform shell
+app/[locale]/[group]/about/             # public group about
+app/api/auth/                           # Next → Express auth proxy
+app/api/trpc/[trpc]/                    # tRPC handler
+backend/routers/authRouter.ts           # register / login / me
+src/TRPC/routers/group.ts               # group procedures
+src/features/forms/                     # auth + password forms
+src/features/create-group/              # CreateGroupForm
+src/lib/auth/client-api.ts              # browser auth fetch
+src/lib/groups/client-api.ts            # browser group tRPC
+packages/api/src/                       # shared Zod + response helpers
+packages/database/prisma/               # schema + migrations
+```
+
+### Auth env (required for Phase 0)
+
+Add to **`backend/.env`** (in addition to `PORT` / `STOREFRONT_URL`):
+
+```env
+JWT_TOKEN=your-long-random-secret
+```
+
+Without `JWT_TOKEN`, register/login will fail at token signing.
+
+---
+
 ## Quick reference — run commands
 
 ### First-time setup
@@ -56,11 +117,12 @@ pnpm db:migrate               # team dev: create + apply migration
 
 **URLs**
 
-| Service       | URL                                      |
-| ------------- | ---------------------------------------- |
-| Next.js app   | http://localhost:3000                    |
-| Express API   | http://localhost:8080                    |
-| Prisma Studio | http://localhost:5555 (`pnpm db:studio`) |
+| Service       | URL                                                        |
+| ------------- | ---------------------------------------------------------- |
+| Next.js app   | http://localhost:3000                                      |
+| Express API   | http://localhost:8080                                      |
+| Prisma Studio | http://localhost:5555 (`pnpm db:studio`)                   |
+| pgAdmin 4     | Desktop app — see [pgAdmin 4](#browse-data-with-pgadmin-4) |
 
 **Verify**
 
@@ -109,16 +171,17 @@ See `.env.docker.example` for Docker-specific overrides.
 
 All commands run from the **repo root**.
 
-| Command                  | When to use                                     |
-| ------------------------ | ----------------------------------------------- |
-| `pnpm db:generate`       | After every `schema.prisma` change              |
-| `pnpm db:migrate`        | Local dev — create + apply migration            |
-| `pnpm db:migrate:deploy` | CI / production — apply pending migrations      |
-| `pnpm db:push`           | Quick local sync (no migration files)           |
-| `pnpm db:pull`           | Introspect existing DB → update `schema.prisma` |
-| `pnpm db:studio`         | Open Prisma Studio GUI                          |
-| `pnpm typecheck`         | `db:generate` + backend typecheck               |
-| `pnpm typecheck:backend` | Typecheck Express API only                      |
+| Command                  | When to use                                                      |
+| ------------------------ | ---------------------------------------------------------------- |
+| `pnpm db:generate`       | After every `schema.prisma` change                               |
+| `pnpm db:migrate`        | Local dev — create + apply migration                             |
+| `pnpm db:migrate:deploy` | CI / production — apply pending migrations                       |
+| `pnpm db:push`           | Quick local sync (no migration files)                            |
+| `pnpm db:pull`           | Introspect existing DB → update `schema.prisma`                  |
+| `pnpm db:studio`         | Open Prisma Studio GUI                                           |
+| pgAdmin 4                | Browse PostgreSQL — see [pgAdmin 4](#browse-data-with-pgadmin-4) |
+| `pnpm typecheck`         | `db:generate` + backend typecheck                                |
+| `pnpm typecheck:backend` | Typecheck Express API only                                       |
 
 **Production Docker (Next UI + Express API):**
 
@@ -395,6 +458,64 @@ pnpm db:pull        # introspect DB → updates schema.prisma
 pnpm db:generate
 ```
 
+### Browse data with pgAdmin 4
+
+[pgAdmin 4](https://www.pgadmin.org/) is a desktop GUI for PostgreSQL. Use it to inspect tables, run SQL, and browse rows alongside (or instead of) Prisma Studio.
+
+#### Start pgAdmin 4 (macOS)
+
+1. Open **Applications** → **pgAdmin 4**, or press **⌘ Space** and type `pgAdmin 4`.
+2. On first launch, pgAdmin may ask you to set a **master password** for saved server passwords — this is pgAdmin-only, not your Postgres password.
+3. Ensure PostgreSQL is running before connecting:
+
+```bash
+pg_isready -h localhost -p 5432
+# expected: localhost:5432 - accepting connections
+```
+
+#### Connect to the project database
+
+This repo uses the database name **`multi-tenant`** on `localhost:5432`. Credentials come from root **`.env`** → `DATABASE_URL`:
+
+```env
+DATABASE_URL=postgresql://USER:PASSWORD@localhost:5432/multi-tenant
+```
+
+Use **`USER`** and **`PASSWORD`** from that URL — not necessarily the default `postgres` superuser.
+
+> **Homebrew PostgreSQL on macOS:** the DB user is often your macOS username (e.g. `macbookpro`), while pgAdmin’s default server entry tries `postgres`. If pgAdmin prompts for the `postgres` password and you do not know it, register a **new** server with the same user/password as `DATABASE_URL`.
+
+**Register a server in pgAdmin:**
+
+1. Right-click **Servers** → **Register** → **Server…**
+2. **General** tab — **Name:** `Local PostgreSQL` (any label)
+3. **Connection** tab:
+    - **Host:** `localhost`
+    - **Port:** `5432`
+    - **Maintenance database:** `multi-tenant`
+    - **Username:** from `DATABASE_URL` (the `USER` segment)
+    - **Password:** from `DATABASE_URL` (the `PASSWORD` segment)
+4. Enable **Save password** → **Save**
+
+Expand **Servers → Local PostgreSQL → Databases → multi-tenant → Schemas → public → Tables** to browse project tables.
+
+#### Verify the app can reach the same database
+
+```bash
+curl http://localhost:8080/api/health/db
+# expected: {"ok":true,"userCount":...}
+```
+
+If the backend connects but pgAdmin does not, the username or password in pgAdmin does not match root `.env`.
+
+#### Alternative: Prisma Studio (no pgAdmin setup)
+
+```bash
+pnpm db:studio
+```
+
+Opens http://localhost:5555 with tables filtered to the Prisma schema.
+
 ### 4. Prisma commands reference
 
 > **Full step-by-step workflows:** see [Database migration workflow](#database-migration-workflow) in the quick reference above.
@@ -506,19 +627,20 @@ See `.env.docker.example` for overrides.
 
 ### 7. Troubleshooting
 
-| Problem                                                    | Fix                                                                                                                        |
-| ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `Cannot find module '@repo/database'`                      | Run `pnpm install` from repo root. Start backend with `cd backend && pnpm start` (uses local `ts-node`, not global).       |
-| `Environment variable not found: DATABASE_URL`             | Create root `.env` with `DATABASE_URL=...`. Prisma CLI does not read `backend/.env` alone.                                 |
-| `Prisma Client could not locate the Query Engine` (Next)   | Next should not import `@repo/database`. Data goes through the backend API.                                                |
-| `P3014` / shadow database permission error on `db:migrate` | Postgres user needs `CREATEDB`, or use `pnpm db:push` for local dev, or ask for a shadow DB URL.                           |
-| `permission denied for table test_users`                   | Grant access: `GRANT ALL ON TABLE test_users TO your_user;` (run as table owner in psql).                                  |
-| `EADDRINUSE :::8080`                                       | Another process is on port 8080. Stop it or change `PORT` in `backend/.env`.                                               |
-| Users empty / error on homepage                            | Ensure backend is running on 8080 and `BACKEND_URL` in root `.env` is correct.                                             |
-| Docker dev fails on `pnpm install`                         | Ensure Docker has enough disk/RAM; try `pnpm docker:dev:down -v` and rebuild.                                              |
-| Docker cannot reach database                               | Ensure host Postgres is running. Docker uses `host.docker.internal:5432` by default.                                       |
-| `P1000` auth failed on `multi dev up` (bundled mode)       | Reset volume: `docker volume rm multi-tenant-ecommerce-next_postgres_data` and retry with `DOCKER_USE_BUNDLED_POSTGRES=1`. |
-| Schema out of sync                                         | `pnpm db:generate` then `pnpm db:migrate` or `pnpm db:push` depending on your workflow.                                    |
+| Problem                                                     | Fix                                                                                                                                                             |
+| ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Cannot find module '@repo/database'`                       | Run `pnpm install` from repo root. Start backend with `cd backend && pnpm start` (uses local `ts-node`, not global).                                            |
+| `Environment variable not found: DATABASE_URL`              | Create root `.env` with `DATABASE_URL=...`. Prisma CLI does not read `backend/.env` alone.                                                                      |
+| `Prisma Client could not locate the Query Engine` (Next)    | Run `pnpm db:generate`. Group tRPC uses Prisma via `@repo/database` in the Next server layer.                                                                   |
+| `P3014` / shadow database permission error on `db:migrate`  | Postgres user needs `CREATEDB`, or use `pnpm db:push` for local dev, or ask for a shadow DB URL.                                                                |
+| `permission denied for table test_users`                    | Grant access: `GRANT ALL ON TABLE test_users TO your_user;` (run as table owner in psql).                                                                       |
+| `EADDRINUSE :::8080`                                        | Another process is on port 8080. Stop it or change `PORT` in `backend/.env`.                                                                                    |
+| Users empty / error on homepage                             | Ensure backend is running on 8080 and `BACKEND_URL` in root `.env` is correct.                                                                                  |
+| Docker dev fails on `pnpm install`                          | Ensure Docker has enough disk/RAM; try `pnpm docker:dev:down -v` and rebuild.                                                                                   |
+| Docker cannot reach database                                | Ensure host Postgres is running. Docker uses `host.docker.internal:5432` by default.                                                                            |
+| pgAdmin asks for `postgres` password / no `multi-tenant` DB | Register a new server using `USER` + `PASSWORD` from root `.env` `DATABASE_URL`, not the default `postgres` user. See [pgAdmin 4](#browse-data-with-pgadmin-4). |
+| `P1000` auth failed on `multi dev up` (bundled mode)        | Reset volume: `docker volume rm multi-tenant-ecommerce-next_postgres_data` and retry with `DOCKER_USE_BUNDLED_POSTGRES=1`.                                      |
+| Schema out of sync                                          | `pnpm db:generate` then `pnpm db:migrate` or `pnpm db:push` depending on your workflow.                                                                         |
 
 ### 8. Quick checklist for new teammates
 
@@ -594,11 +716,11 @@ The sections below document how individual features were added over time (lintin
   "editor.tabSize": 4
   },
 
-                                                                              "editor.defaultFormatter": "esbenp.prettier-vscode",
-                                                                              "editor.formatOnSave": true
+                                                                                    "editor.defaultFormatter": "esbenp.prettier-vscode",
+                                                                                    "editor.formatOnSave": true
 
-                                                                      }
-                                                                      </pre>
+                                                                            }
+                                                                            </pre>
 
 - Eslint config
   <pre>
@@ -681,8 +803,8 @@ export default lintConfig;
     <pre>
     sh .husky/validate-branch-name.sh
     
-                                                pnpm exec lint-staged
-                                              </pre>
+                                                      pnpm exec lint-staged
+                                                    </pre>
 
 - commit-msg
     <pre>
@@ -691,85 +813,85 @@ export default lintConfig;
 
 - pre-
 
-                                              <pre>
-                                                #!/usr/bin/env sh
+                                                    <pre>
+                                                      #!/usr/bin/env sh
 
-                                                . "$(dirname -- "$0")/\_/husky.sh"
+                                                      . "$(dirname -- "$0")/\_/husky.sh"
 
-                                                    RED='\033[0;31m'
-                                                    GREEN='\033[0;32m'
-                                                    YELLOW='\033[1;33m'
-                                                    NC='\033[0m'
+                                                          RED='\033[0;31m'
+                                                          GREEN='\033[0;32m'
+                                                          YELLOW='\033[1;33m'
+                                                          NC='\033[0m'
 
-                                                    # Get current branch
+                                                          # Get current branch
 
-                                                    CURRENT_BRANCH=$(git symbolic-ref --short HEAD 2>/dev/null)
+                                                          CURRENT_BRANCH=$(git symbolic-ref --short HEAD 2>/dev/null)
 
-                                                    # Exit if detached HEAD
+                                                          # Exit if detached HEAD
 
-                                                    [ -z "$CURRENT_BRANCH" ] && exit 0
+                                                          [ -z "$CURRENT_BRANCH" ] && exit 0
 
-                                                    # Allowed branch patterns
+                                                          # Allowed branch patterns
 
-                                                    ALLOWED_PATTERN="^(feature|bugfix|hotfix|docs)/(frontend|backend|common)-[a-z0-9-]+$"
+                                                          ALLOWED_PATTERN="^(feature|bugfix|hotfix|docs)/(frontend|backend|common)-[a-z0-9-]+$"
 
-                                                    # Check branch name
+                                                          # Check branch name
 
-                                                    if ! echo "$CURRENT_BRANCH" | grep -Eq "$ALLOWED_PATTERN"; then
-                                                    echo ""
+                                                          if ! echo "$CURRENT_BRANCH" | grep -Eq "$ALLOWED_PATTERN"; then
+                                                          echo ""
 
-                                                    printf "${RED}❌ Invalid branch name:${NC} %s\n" "$CURRENT_BRANCH"
+                                                          printf "${RED}❌ Invalid branch name:${NC} %s\n" "$CURRENT_BRANCH"
 
-                                                    echo ""
-                                                    printf "${GREEN}✅ Valid format:${NC} <type>/<scope>-<description>\n"
+                                                          echo ""
+                                                          printf "${GREEN}✅ Valid format:${NC} <type>/<scope>-<description>\n"
 
-                                                    echo ""
-                                                    printf "${YELLOW}Allowed types:${NC} feature | bugfix | hotfix | docs\n"
-                                                    printf "${YELLOW}Allowed scopes:${NC} frontend | backend | common\n"
-                                                    printf "${YELLOW}Description:${NC} lowercase-with-hyphens\n"
+                                                          echo ""
+                                                          printf "${YELLOW}Allowed types:${NC} feature | bugfix | hotfix | docs\n"
+                                                          printf "${YELLOW}Allowed scopes:${NC} frontend | backend | common\n"
+                                                          printf "${YELLOW}Description:${NC} lowercase-with-hyphens\n"
 
-                                                    echo ""
-                                                    printf "${GREEN}👉 Example:${NC} feature/frontend-add-login-form\n"
-                                                    echo ""
+                                                          echo ""
+                                                          printf "${GREEN}👉 Example:${NC} feature/frontend-add-login-form\n"
+                                                          echo ""
 
-                                                    exit 1
-                                                    fi
+                                                          exit 1
+                                                          fi
 
-                                                    exit 0
+                                                          exit 0
 
-                                                </pre>
+                                                      </pre>
 
 - custom-commit-msg.sh
       <pre>
       #!/usr/bin/env sh
       
-                                                    MSG_FILE=$1
-                                                    OUTPUT=$(pnpm exec commitlint --edit "$MSG_FILE" 2>&1)
-                                                    STATUS=$?
+                                                          MSG_FILE=$1
+                                                          OUTPUT=$(pnpm exec commitlint --edit "$MSG_FILE" 2>&1)
+                                                          STATUS=$?
       
-                                                    echo "$OUTPUT"
+                                                          echo "$OUTPUT"
       
-                                                    RED='\033[0;31m'
-                                                    GREEN='\033[0;32m'
-                                                    NC='\033[0m'
+                                                          RED='\033[0;31m'
+                                                          GREEN='\033[0;32m'
+                                                          NC='\033[0m'
       
-                                                    if [ "$STATUS" -ne 0 ]; then
-                                                    echo ""
+                                                          if [ "$STATUS" -ne 0 ]; then
+                                                          echo ""
       
-                                                    printf "${RED}❌ Invalid commit message!${NC}\n"
+                                                          printf "${RED}❌ Invalid commit message!${NC}\n"
       
-                                                    echo ""
-                                                    echo "✅ Format: <type>(<scope>): <description>"
-                                                    echo "   - type: feat | fix | docs | style | refactor | test | chore | revert"
-                                                    echo "   - scope: frontend | backend | common"
-                                                    echo "   - description: imperative sentence"
-                                                    echo ""
-                                                    echo "👉 Example: feat(frontend): add login form"
-                                                    echo ""
+                                                          echo ""
+                                                          echo "✅ Format: <type>(<scope>): <description>"
+                                                          echo "   - type: feat | fix | docs | style | refactor | test | chore | revert"
+                                                          echo "   - scope: frontend | backend | common"
+                                                          echo "   - description: imperative sentence"
+                                                          echo ""
+                                                          echo "👉 Example: feat(frontend): add login form"
+                                                          echo ""
       
-                                                    exit 1
-                                                    fi
-                                                </pre>
+                                                          exit 1
+                                                          fi
+                                                      </pre>
 
 - validate-branch-name.sh
 

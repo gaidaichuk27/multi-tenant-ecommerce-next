@@ -1,11 +1,15 @@
 'use client';
 
 import { memo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { LockIcon, EyeIcon, EyeOffIcon } from 'lucide-react';
 
 import { PasswordChangeFormData } from '../../model/types/types';
+import { changePassword } from '@lib/auth/password-client-api';
+import { PASSWORD_AUTH_ENABLED } from '@shared/config/auth';
+import { useFormApiError } from '@shared/hooks/useFormApiError';
 import { Button } from '@shared/ui/Form/Button';
 import { cn } from '@lib/utils';
 import { Field, FieldGroup, FieldLabel } from '@shared/ui/Form/Field';
@@ -18,29 +22,24 @@ import {
 
 interface PasswordChangeFormProps {
     className?: string;
-    onSubmit?: (data: PasswordChangeFormData) => void;
 }
 
 export const PasswordChangeForm = memo(
-    ({ className, onSubmit }: PasswordChangeFormProps) => {
+    ({ className }: PasswordChangeFormProps) => {
         const { t } = useTranslation(['common']);
+        const getSubmitError = useFormApiError();
+        const router = useRouter();
         const [showOldPassword, setShowOldPassword] = useState(false);
         const [showNewPassword, setShowNewPassword] = useState(false);
         const [showRepeatNewPassword, setShowRepeatNewPassword] =
             useState(false);
-
-        const submitFormHandler = async (data: PasswordChangeFormData) => {
-            try {
-                console.log('password change data', data);
-                onSubmit?.(data);
-            } catch (error) {
-                console.log('error from password change form', error);
-            }
-        };
+        const [submitError, setSubmitError] = useState<string | null>(null);
+        const [isSubmitting, setIsSubmitting] = useState(false);
 
         const {
             register,
             handleSubmit,
+            watch,
             formState: { errors, isValid },
         } = useForm<PasswordChangeFormData>({
             mode: 'onChange',
@@ -51,12 +50,41 @@ export const PasswordChangeForm = memo(
             },
         });
 
+        const newPassword = watch('newPassword');
+
+        const submitFormHandler = async ({
+            oldPassword,
+            newPassword: password,
+        }: PasswordChangeFormData) => {
+            try {
+                setSubmitError(null);
+                setIsSubmitting(true);
+
+                await changePassword({
+                    oldPassword,
+                    newPassword: password,
+                });
+
+                router.refresh();
+            } catch (error) {
+                setSubmitError(getSubmitError(error));
+            } finally {
+                setIsSubmitting(false);
+            }
+        };
+
         return (
             <form
                 onSubmit={handleSubmit(submitFormHandler)}
                 noValidate
             >
                 <FieldGroup className={cn('auth-form__wrapper', className)}>
+                    {!PASSWORD_AUTH_ENABLED && (
+                        <p className="text-muted-foreground text-sm">
+                            {t('common:auth.password.not_implemented')}
+                        </p>
+                    )}
+
                     <Field aria-invalid={Boolean(errors.oldPassword?.message)}>
                         <FieldLabel htmlFor="oldPassword">
                             {t('common:form.placeholder.password.old')}{' '}
@@ -167,10 +195,14 @@ export const PasswordChangeForm = memo(
                                 aria-invalid={Boolean(
                                     errors.repeatNewPassword?.message,
                                 )}
-                                {...register(
-                                    'repeatNewPassword',
-                                    REPEAT_PASSWORD_VALIDATION(t),
-                                )}
+                                {...register('repeatNewPassword', {
+                                    ...REPEAT_PASSWORD_VALIDATION(t),
+                                    validate: (value) =>
+                                        value === newPassword ||
+                                        t(
+                                            'common:form.validation.passwords.should.match',
+                                        ),
+                                })}
                                 placeholder={t(
                                     'common:form.placeholder.password.repeat',
                                 )}
@@ -200,13 +232,19 @@ export const PasswordChangeForm = memo(
                         )}
                     </Field>
 
+                    {submitError && <ErrorMessage error={submitError} />}
+
                     <Button
                         type="submit"
                         className="auth-form__button"
                         aria-label={t('common:form.button.create')}
-                        disabled={!isValid}
+                        disabled={
+                            !PASSWORD_AUTH_ENABLED || !isValid || isSubmitting
+                        }
                     >
-                        {t('common:form.button.create')}
+                        {isSubmitting
+                            ? t('common:loading')
+                            : t('common:form.button.create')}
                     </Button>
                 </FieldGroup>
             </form>

@@ -2,6 +2,9 @@ import getTranslations from '@/i18n';
 import { LoginView } from '@views/auth/LoginView';
 import { WithMainLayout } from '@hocs/WithMainLayout';
 import { Metadata } from 'next';
+import { isValidLocale } from '@shared/config/locales/locale';
+import { Language } from '@shared/config/locales/types';
+import i18nConfig from '@/i18nConfig';
 
 type LoginPageProps = {
     params: Promise<{ locale: string }>;
@@ -21,7 +24,11 @@ export async function generateMetadata({
     };
 }
 
-export default function LoginPage() {
+export default async function LoginPage({ params }: LoginPageProps) {
+    const { locale: localeParam } = await params;
+    const locale: Language = isValidLocale(localeParam)
+        ? localeParam
+        : i18nConfig.defaultLocale;
     const Layouted = WithMainLayout(LoginView);
-    return <Layouted />;
+    return <Layouted locale={locale} />;
 }

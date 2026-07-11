@@ -18,4 +18,10 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 export { PrismaClient };
-export type { TestUser } from './generated/client';
+export type {
+    Group,
+    GroupMembership,
+    GroupSettings,
+    TestUser,
+    User,
+} from './generated/client';

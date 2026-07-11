@@ -1,0 +1,40 @@
+---
+description: API contracts — @repo/api schemas, Express backend, Next proxies
+globs: packages/api/**/*.ts,backend/**/*.ts,app/api/**/*.ts,src/lib/**/client-api.ts
+alwaysApply: false
+---
+
+# API contracts
+
+## Package `@repo/api`
+
+- Zod input schemas (`registerInputSchema`, `createGroupInputSchema`, …)
+- Response schemas (`apiResponseSchema`, `authUserApiResponseSchema`, …)
+- `tMessage` keys (`AUTH_T_MESSAGES`, `GROUP_T_MESSAGES`)
+- DTO serializers (`serializeUser`, `serializeGroup`)
+- `ApiError`, `isApiError`, `parseApiErrorPayload`, `createApiSuccessResponse`
+
+Shared contracts only — no Express/Prisma logic here.
+
+## Express backend (`backend/`)
+
+- Parse input with `@repo/api` schemas
+- Respond via `sendApiSuccess` / `sendApiError` from `backend/lib/api-response.ts`
+- Auth logic and DB access live in routers, not in `@repo/api`
+- Protected routes use `requireAuth`; optional-user routes use `optionalAuth`
+
+## Next.js API routes (`app/api/`)
+
+- Proxy to Express via `backendFetch` + `unwrapApiResponseData`
+- Set httpOnly JWT cookie on login/register; body returns `{ user }` only (no token in JSON)
+- Use `resolveRouteApiError` for catch blocks
+
+## Client API (`src/lib/**/client-api.ts`)
+
+- Thin fetch/tRPC wrappers used by forms
+- Throw `ApiError` on failure so forms can use `isApiError`
+- `parseApiErrorPayload` must not treat `success: true` responses as errors
+
+## parseApiErrorPayload rule
+
+If `payload.success === true`, return `null`. Success responses also have a `message` field — do not treat that as an error.

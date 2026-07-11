@@ -16,6 +16,7 @@
         ],
         "paths": {
             "@/*": ["./*"],
+            "@entities/*": ["./src/entities/*"],
             "@features/*": ["./src/features/*"],
             "@helpers/*": ["./src/helpers/*"],
             "@hooks/*": ["./src/hooks/*"],
@@ -26,6 +27,7 @@
             "@lib/*": ["./src/lib/*"],
             "@locales/*": ["./src/locales/*"],
             "@providers/*": ["./src/providers/*"],
+            "@repo/api": ["./packages/api/src/index.ts"],
             "@shared/*": ["./src/shared/*"],
             "@services/*": ["./src/services/*"],
             "@styles/*": ["./src/styles/*"],

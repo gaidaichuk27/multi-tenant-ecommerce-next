@@ -1,4 +1,7 @@
 import getTranslations from '@/i18n';
+import { isValidLocale } from '@shared/config/locales/locale';
+import { Language } from '@shared/config/locales/types';
+import i18nConfig from '@/i18nConfig';
 import { Metadata } from 'next';
 import { WithMainLayout } from '@hocs/WithMainLayout';
 import { PasswordRestoreView } from '@views/auth/PasswordRestoreView';
@@ -21,7 +24,13 @@ export async function generateMetadata({
     };
 }
 
-export default function PasswordRestorePage() {
+export default async function PasswordRestorePage({
+    params,
+}: PasswordRestorePageProps) {
+    const { locale: localeParam } = await params;
+    const locale: Language = isValidLocale(localeParam)
+        ? localeParam
+        : i18nConfig.defaultLocale;
     const Layouted = WithMainLayout(PasswordRestoreView);
-    return <Layouted />;
+    return <Layouted locale={locale} />;
 }

@@ -9,6 +9,104 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
+enum PlatformRole {
+    user
+    super_admin
+}
+
+enum GroupVisibility {
+    public
+    private
+    hidden
+}
+
+enum GroupMembershipRole {
+    owner
+    admin
+    moderator
+    member
+}
+
+enum GroupMembershipStatus {
+    active
+    pending
+    banned
+}
+
+model User {
+    id                      String         @id @default(cuid())
+    email                   String         @unique @db.VarChar(255)
+    username                String         @unique @db.VarChar(100)
+    name                    String?        @db.VarChar(255)
+    avatarUrl               String?        @map("avatar_url") @db.VarChar(500)
+    passwordHash            String         @map("password_hash") @db.VarChar(255)
+    roles                   PlatformRole[] @default([user])
+    // Phase 0 follow-up: password reset routes + login lockout logic
+    resetPasswordToken      String?        @map("reset_password_token") @db.VarChar(255)
+    resetPasswordExpiration DateTime?      @map("reset_password_expiration") @db.Timestamp(6)
+    loginAttempts           Int            @default(0) @map("login_attempts")
+    lockUntil               DateTime?      @map("lock_until") @db.Timestamp(6)
+    createdAt               DateTime       @default(now()) @map("created_at") @db.Timestamp(6)
+    updatedAt               DateTime       @updatedAt @map("updated_at") @db.Timestamp(6)
+
+    ownedGroups       Group[]            @relation("GroupOwner")
+    groupMemberships  GroupMembership[]
+
+    @@map("users")
+}
+
+model Group {
+    id          String          @id @default(cuid())
+    slug        String          @unique @db.VarChar(100)
+    name        String          @db.VarChar(255)
+    description String?         @db.Text
+    logoUrl     String?         @map("logo_url") @db.VarChar(500)
+    coverUrl    String?         @map("cover_url") @db.VarChar(500)
+    ownerId     String          @map("owner_id")
+    visibility  GroupVisibility @default(public)
+    createdAt   DateTime        @default(now()) @map("created_at") @db.Timestamp(6)
+    updatedAt   DateTime        @updatedAt @map("updated_at") @db.Timestamp(6)
+
+    owner       User              @relation("GroupOwner", fields: [ownerId], references: [id])
+    settings    GroupSettings?
+    memberships GroupMembership[]
+
+    @@map("groups")
+}
+
+model GroupSettings {
+    groupId        String   @id @map("group_id")
+    welcomeMessage String?  @map("welcome_message") @db.Text
+    rules          String?  @db.Text
+    tabsConfigJson Json?    @map("tabs_config_json")
+    pluginsJson    Json?    @map("plugins_json")
+    createdAt      DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+    updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamp(6)
+
+    group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+    @@map("group_settings")
+}
+
+model GroupMembership {
+    id        String                @id @default(cuid())
+    groupId   String                @map("group_id")
+    userId    String                @map("user_id")
+    role      GroupMembershipRole   @default(member)
+    status    GroupMembershipStatus @default(active)
+    points    Int                   @default(0)
+    level     Int                   @default(1)
+    joinedAt  DateTime              @default(now()) @map("joined_at") @db.Timestamp(6)
+    createdAt DateTime              @default(now()) @map("created_at") @db.Timestamp(6)
+    updatedAt DateTime              @updatedAt @map("updated_at") @db.Timestamp(6)
+
+    group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+    user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@unique([groupId, userId])
+    @@map("group_memberships")
+}
+
 // Synced with pgAdmin table: public.test_users
 model TestUser {
     id        Int       @id @default(autoincrement())

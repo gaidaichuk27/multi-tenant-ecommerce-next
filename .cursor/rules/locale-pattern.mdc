@@ -1,0 +1,41 @@
+---
+description: Locale — pass from page params, not pathname parsing
+globs: app/**/page.tsx,src/views/**/*.tsx,src/features/**/ui/**/*.tsx
+alwaysApply: false
+---
+
+# Locale pattern
+
+Single source of truth: the `[locale]` route segment from Next.js `params`.
+
+## Flow
+
+```
+page (params.locale) → view → client form/component
+```
+
+## Pages (server)
+
+```typescript
+const { locale: localeParam } = await params;
+const locale: Language = isValidLocale(localeParam)
+    ? localeParam
+    : i18nConfig.defaultLocale;
+return <ViewComponent locale={locale} />;
+```
+
+## Views (server)
+
+- Accept `locale: Language` as a prop from the page
+- Do not call `getCurrentLangFromPathname()` when the page already passes `locale`
+- Pass `locale` down to client forms that need redirects or links
+
+## Client components
+
+- Receive `locale: Language` as a prop
+- Use `buildLocalizedPathname('/app', locale)` for redirects
+- Do **not** use `usePathname()` + `pathname.split('/')[1]`
+
+## Suspense
+
+Wrap components that use `useSearchParams()` in `<Suspense>` in the view (e.g. `SignInForm`, `PasswordRestoreForm`).

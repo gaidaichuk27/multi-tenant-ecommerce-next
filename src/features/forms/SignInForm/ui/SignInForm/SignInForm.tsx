@@ -2,14 +2,17 @@
 
 import { memo, useState } from 'react';
 import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-
-import { SignInFormData } from '@features/forms/SignInForm';
-import { Button } from '@shared/ui/Form/Button';
-// import { useNotification } from '@shared/ui/Notification';
+import { buildLocalizedPathname } from '@shared/config/locales/locale';
+import type { Language } from '@shared/config/locales/types';
+import { useFormApiError } from '@shared/hooks/useFormApiError';
 import { LogInIcon, LockIcon, EyeIcon, EyeOffIcon } from 'lucide-react';
 
+import { SignInFormData } from '@features/forms/SignInForm';
+import { loginWithCredentials } from '@lib/auth/client-api';
+import { Button } from '@shared/ui/Form/Button';
 import { cn } from '@lib/utils';
 import { Field, FieldGroup, FieldLabel } from '@shared/ui/Form/Field';
 import { ErrorMessage } from '@shared/ui/Form/ErrorMessage';
@@ -20,58 +23,23 @@ import {
 } from '@/src/shared/ui/Form';
 import { GoogleButton } from '@features/auth/buttons';
 import {
-    EMAIL_PATTERN,
-    PASSWORD_PATTERN,
-} from '@/src/shared/config/forms/validationPatterns';
-import {
     EMAIL_VALIDATION,
     PASSWORD_VALIDATION,
-} from '@/src/shared/config/forms/fieldValidation';
+} from '@shared/config/forms/fieldValidation';
 
 interface SignInFormProps {
     className?: string;
-    onSubmit?: (data: SignInFormData) => void;
+    locale: Language;
 }
 
-export const SignInForm = memo(({ className, onSubmit }: SignInFormProps) => {
+export const SignInForm = memo(({ className, locale }: SignInFormProps) => {
     const { t } = useTranslation(['common']);
+    const getSubmitError = useFormApiError();
     const [showPassword, setShowPassword] = useState(false);
-    // const { notify } = useNotification({
-    //     type: 'error',
-    //     title: `${notifyMessage}`,
-    // });
-
-    // useEffect(() => {
-    //     if (notifyMessage) {
-    //         notify();
-    //     }
-
-    //     return () => {
-    //         setNotifyMessage('');
-    //     };
-    // }, [notify, notifyMessage]);
-
-    const submitFormHandler = async ({ email, password }: SignInFormData) => {
-        try {
-            console.log('email', email);
-            console.log('password', password);
-            onSubmit?.({ email, password });
-            // const response = await signIn('credentials', {
-            //     email,
-            //     password,
-            //     redirect: false,
-            //     callbackUrl: `/${locale}`,
-            // });
-            // onSubmit?.({ email, password });
-            // if (response?.error) {
-            //     setNotifyMessage(response.error);
-            //     return;
-            // }
-            // router.push('/');
-        } catch (error) {
-            console.log('error from signIn form', error);
-        }
-    };
+    const [submitError, setSubmitError] = useState<string | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const router = useRouter();
+    const searchParams = useSearchParams();
 
     const {
         register,
@@ -84,6 +52,25 @@ export const SignInForm = memo(({ className, onSubmit }: SignInFormProps) => {
             password: '',
         },
     });
+
+    const submitFormHandler = async ({ email, password }: SignInFormData) => {
+        try {
+            setSubmitError(null);
+            setIsSubmitting(true);
+            await loginWithCredentials({ email, password });
+
+            const redirect =
+                searchParams.get('redirect') ??
+                buildLocalizedPathname('/app', locale);
+            router.push(redirect);
+            router.refresh();
+        } catch (error) {
+            setSubmitError(getSubmitError(error));
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     return (
         <form
             onSubmit={handleSubmit(submitFormHandler)}
@@ -150,19 +137,28 @@ export const SignInForm = memo(({ className, onSubmit }: SignInFormProps) => {
                         <span>{t('common:form.label.password.forgot')}</span>
                     </p>
                     <p className="auth-form__link">
-                        <Link href="/password-forgot">
+                        <Link
+                            href={buildLocalizedPathname(
+                                '/password-forgot',
+                                locale,
+                            )}
+                        >
                             {t('common:form.link.password.restore')}
                         </Link>
                     </p>
                 </div>
                 <div className="flex flex-col gap-4">
+                    {submitError && <ErrorMessage error={submitError} />}
+
                     <Button
                         type="submit"
                         className="auth-form__button"
                         aria-label={t('common:form.button.signin')}
-                        disabled={!isValid}
+                        disabled={!isValid || isSubmitting}
                     >
-                        {t('common:form.button.signin')}
+                        {isSubmitting
+                            ? t('common:loading')
+                            : t('common:form.button.signin')}
                     </Button>
 
                     <GoogleButton />
