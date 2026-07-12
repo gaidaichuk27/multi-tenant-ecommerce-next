@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
+import { GROUP_T_MESSAGES } from '@repo/api';
 import { useFormApiError } from '@shared/hooks/useFormApiError';
 import { buildLocalizedPathname } from '@shared/config/locales/locale';
 import type { Language } from '@shared/config/locales/types';
@@ -12,7 +14,7 @@ import { createGroup } from '@lib/groups/client-api';
 import { Button } from '@shared/ui/Form/Button';
 import { ErrorMessage } from '@shared/ui/Form/ErrorMessage';
 import { Field, FieldGroup, FieldLabel } from '@shared/ui/Form/Field';
-import { InputGroup, InputGroupInput } from '@/src/shared/ui/Form';
+import { InputGroup, InputGroupInput } from '@shared/ui/Form';
 import { cn } from '@lib/utils';
 
 import type { CreateGroupFormData } from '../model/types';
@@ -46,6 +48,8 @@ export function CreateGroupForm({ className, locale }: CreateGroupFormProps) {
     const {
         register,
         handleSubmit,
+        reset,
+        clearErrors,
         setValue,
         formState: { errors, isValid },
     } = useForm<CreateGroupFormData>({
@@ -62,7 +66,6 @@ export function CreateGroupForm({ className, locale }: CreateGroupFormProps) {
 
     const submitFormHandler = async (data: CreateGroupFormData) => {
         try {
-            setSubmitError(null);
             setIsSubmitting(true);
 
             const group = await createGroup({
@@ -71,10 +74,16 @@ export function CreateGroupForm({ className, locale }: CreateGroupFormProps) {
                 description: data.description.trim() || undefined,
             });
 
+            setSubmitError(null);
+            clearErrors();
+            toast.success(t(`common:${GROUP_T_MESSAGES.CREATE_SUCCESS}`));
             router.push(buildLocalizedPathname(`/${group.slug}/about`, locale));
             router.refresh();
         } catch (error) {
-            setSubmitError(getSubmitError(error));
+            reset(data);
+            const message = getSubmitError(error);
+            setSubmitError(message);
+            toast.error(message);
         } finally {
             setIsSubmitting(false);
         }

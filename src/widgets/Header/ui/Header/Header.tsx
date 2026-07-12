@@ -1,16 +1,17 @@
-import { memo } from 'react';
-import { LangSelector } from '@features/langSelector';
-import { ThemeSelector, ThemeToggle } from '@features/theme';
+import { headers } from 'next/headers';
+import { getAuthSession } from '@lib/auth/session';
 import { Logo } from '@shared/ui/Logo';
+import { HeaderActions } from './HeaderActions';
 import { HeaderClient } from './HeaderClient';
-import { SettingsDrawer } from '@widgets/Navigation';
 
 interface HeaderProps {
     className?: string;
     isSticky?: boolean;
 }
 
-export const Header = memo(({ isSticky = true }: HeaderProps) => {
+export async function Header({ isSticky = true }: HeaderProps) {
+    const session = await getAuthSession(await headers());
+
     return (
         <HeaderClient isSticky={isSticky}>
             <div className="header__inner">
@@ -18,19 +19,11 @@ export const Header = memo(({ isSticky = true }: HeaderProps) => {
                     <Logo />
 
                     <div className="ml-auto flex items-center gap-1.5">
-                        <LangSelector
-                            slim
-                            className="hidden lg:block"
-                        />
-                        <ThemeToggle className="hidden lg:block" />
-                        <ThemeSelector className="hidden lg:block" />
-                        <SettingsDrawer />
+                        <HeaderActions user={session?.user ?? null} />
                     </div>
                 </div>
             </div>
             <div className="header__backdrop"></div>
         </HeaderClient>
     );
-});
-
-Header.displayName = 'Header';
+}

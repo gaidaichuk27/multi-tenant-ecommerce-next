@@ -61,6 +61,8 @@
 
     "form.button.register": "Register",
     "form.button.signin": "Sign in",
+    "avatar.edit": "Update avatar",
+    "avatar.open_menu": "Open account menu",
     "form.button.send": "Send",
     "form.button.restore": "Restore",
     "form.button.create": "Create",
@@ -100,6 +102,7 @@
     "auth.register.email_taken": "Email already registered",
     "auth.register.username_taken": "Username already taken",
     "auth.logout.success": "Logout successful",
+    "auth.logout.button": "Sign out",
     "auth.me.success": "Session loaded",
     "auth.me.unauthorized": "Unauthorized",
     "auth.me.user_not_found": "User not found",
@@ -142,6 +145,8 @@
     "group.about.visibility": "Visibility",
 
     "settings.title": "Site Settings",
+    "settings.open": "Open menu",
+    "settings.close": "Close menu",
     "settings.description": "Choose your preferred options",
     "settings.language": "Language",
     "settings.theme": "Theme",

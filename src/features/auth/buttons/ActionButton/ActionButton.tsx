@@ -41,6 +41,7 @@ export const ActionButton = memo(
             <Button
                 type="button"
                 variant={variant.variant}
+                size={variant.size}
                 className={className}
                 aria-label={t(title)}
                 onClick={clickButtonHandler}

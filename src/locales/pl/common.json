@@ -61,6 +61,8 @@
 
     "form.button.register": "Zarejestruj się",
     "form.button.signin": "Zaloguj się",
+    "avatar.edit": "Zaktualizuj awatar",
+    "avatar.open_menu": "Otwórz menu konta",
     "form.button.send": "Wyślij",
     "form.button.restore": "Przywróć",
     "form.button.create": "Utwórz",
@@ -99,6 +101,7 @@
     "auth.register.email_taken": "Email jest już zarejestrowany",
     "auth.register.username_taken": "Nazwa użytkownika jest już zajęta",
     "auth.logout.success": "Wylogowano pomyślnie",
+    "auth.logout.button": "Wyloguj się",
     "auth.me.success": "Sesja załadowana",
     "auth.me.unauthorized": "Brak autoryzacji",
     "auth.me.user_not_found": "Nie znaleziono użytkownika",
@@ -141,6 +144,8 @@
     "group.about.visibility": "Widoczność",
 
     "settings.title": "Ustawienia strony",
+    "settings.open": "Otwórz menu",
+    "settings.close": "Zamknij menu",
     "settings.description": "Wybierz swoje ulubione opcje",
     "settings.language": "Język",
     "settings.theme": "Motyw",

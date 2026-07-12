@@ -37,6 +37,7 @@ authRouter.post('/register', async (req, res, next) => {
             where: { username: input.username },
         });
 
+        // TODO: split unique handle (username) from reusable display name (name) on register
         if (existingUserByUsername) {
             sendApiError(
                 res,

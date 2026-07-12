@@ -7,6 +7,7 @@ import i18nConfig from '@/i18nConfig';
 import '@styles/globals.css';
 import TranslationProvider from '@providers/TranslationProvider';
 import { TRPCReactProvider } from '@providers/TRPCProvider';
+import { Toaster } from '@shared/ui/Toaster/Toaster';
 
 const fontSans = Orbitron({
     subsets: ['latin'],
@@ -59,6 +60,7 @@ export default async function RootLayout({
                             <div className="js-page page h-full">
                                 <TRPCReactProvider>
                                     {children}
+                                    <Toaster position="top-right" />
                                 </TRPCReactProvider>
                             </div>
                         </TranslationProvider>

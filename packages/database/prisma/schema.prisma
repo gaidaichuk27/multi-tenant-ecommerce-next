@@ -36,7 +36,7 @@ enum GroupMembershipStatus {
 model User {
     id                      String         @id @default(cuid())
     email                   String         @unique @db.VarChar(255)
-    username                String         @unique @db.VarChar(100)
+    username                String         @unique @db.VarChar(100) // TODO: keep unique as handle; allow duplicate display names via `name`
     name                    String?        @db.VarChar(255)
     avatarUrl               String?        @map("avatar_url") @db.VarChar(500)
     passwordHash            String         @map("password_hash") @db.VarChar(255)
