@@ -1,0 +1,77 @@
+@layer components {
+    .avatar {
+        @apply relative inline-flex shrink-0 items-center justify-center overflow-visible;
+    }
+
+    .avatar--small {
+        --avatar-size: var(--avatar-size-small);
+    }
+
+    .avatar--large {
+        --avatar-size: var(--avatar-size-large);
+    }
+
+    .avatar:not(:has(.avatar__info)) {
+        width: var(--avatar-size);
+        height: var(--avatar-size);
+    }
+
+    .avatar--editable:not(:has(.avatar__info)) {
+        width: calc(var(--avatar-size) + 0.25rem);
+        height: calc(var(--avatar-size) + 0.25rem);
+    }
+
+    .avatar__wrapper {
+        @apply flex items-center gap-6;
+    }
+
+    .avatar__media {
+        @apply relative shrink-0;
+        width: var(--avatar-size);
+        height: var(--avatar-size);
+    }
+
+    button.avatar__media {
+        @apply cursor-pointer border-0 bg-transparent p-0;
+    }
+
+    .avatar--clickable .avatar__media {
+        @apply transition-opacity hover:opacity-90;
+    }
+
+    .avatar__image-wrapper {
+        @apply border-border size-full overflow-hidden rounded-full border;
+    }
+
+    .avatar__image {
+        @apply object-cover;
+    }
+
+    .avatar__info {
+        @apply flex flex-col items-start justify-center gap-0.5;
+    }
+
+    .avatar__name {
+        @apply text-foreground;
+    }
+
+    .avatar__email {
+        @apply text-muted-foreground;
+    }
+
+    .avatar__edit {
+        @apply border-background bg-primary text-primary-foreground focus-visible:ring-ring hover:bg-primary/90 absolute -right-0.5 -bottom-0.5 z-10 flex size-4 cursor-pointer items-center justify-center rounded-full border p-0 shadow-sm transition-colors outline-none focus-visible:ring-2;
+    }
+
+    .avatar--large .avatar__edit {
+        @apply size-5;
+    }
+
+    .avatar__edit-icon {
+        @apply size-2.5 stroke-[3];
+    }
+
+    .avatar--large .avatar__edit-icon {
+        @apply size-3;
+    }
+}

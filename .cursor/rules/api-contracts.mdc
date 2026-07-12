@@ -32,7 +32,7 @@ Shared contracts only — no Express/Prisma logic here.
 ## Client API (`src/lib/**/client-api.ts`)
 
 - Thin fetch/tRPC wrappers used by forms
-- Throw `ApiError` on failure so forms can use `isApiError`
+- Throw `ApiError` on failure; forms resolve messages via `useFormApiError` / `getSubmitError`
 - `parseApiErrorPayload` must not treat `success: true` responses as errors
 
 ## parseApiErrorPayload rule

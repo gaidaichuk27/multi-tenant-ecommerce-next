@@ -61,6 +61,8 @@
 
     "form.button.register": "Зареєструватися",
     "form.button.signin": "Увійти",
+    "avatar.edit": "Оновити аватар",
+    "avatar.open_menu": "Відкрити меню облікового запису",
     "form.button.send": "Надіслати",
     "form.button.restore": "Відновити",
     "form.button.create": "Створити",
@@ -100,6 +102,7 @@
     "auth.register.email_taken": "Email вже зареєстровано",
     "auth.register.username_taken": "Ім'я користувача вже зайняте",
     "auth.logout.success": "Вихід виконано успішно",
+    "auth.logout.button": "Вийти",
     "auth.me.success": "Сесію завантажено",
     "auth.me.unauthorized": "Не авторизовано",
     "auth.me.user_not_found": "Користувача не знайдено",
@@ -142,6 +145,8 @@
     "group.about.visibility": "Видимість",
 
     "settings.title": "Налаштування сайту",
+    "settings.open": "Відкрити меню",
+    "settings.close": "Закрити меню",
     "settings.description": "Виберіть бажані параметри",
     "settings.language": "Мова",
     "settings.theme": "Тема",

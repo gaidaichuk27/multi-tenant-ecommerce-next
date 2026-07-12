@@ -62,6 +62,8 @@
 
     "form.button.register": "Registrieren",
     "form.button.signin": "Anmelden",
+    "avatar.edit": "Avatar aktualisieren",
+    "avatar.open_menu": "Kontomenü öffnen",
     "form.button.send": "Senden",
     "form.button.restore": "Wiederherstellen",
     "form.button.create": "Erstellen",
@@ -101,6 +103,7 @@
     "auth.register.email_taken": "E-Mail ist bereits registriert",
     "auth.register.username_taken": "Benutzername ist bereits vergeben",
     "auth.logout.success": "Abmeldung erfolgreich",
+    "auth.logout.button": "Abmelden",
     "auth.me.success": "Sitzung geladen",
     "auth.me.unauthorized": "Nicht autorisiert",
     "auth.me.user_not_found": "Benutzer nicht gefunden",
@@ -143,6 +146,8 @@
     "group.about.visibility": "Sichtbarkeit",
 
     "settings.title": "Site Einstellungen",
+    "settings.open": "Menü öffnen",
+    "settings.close": "Menü schließen",
     "settings.description": "Wählen Sie Ihre bevorzugten Optionen",
     "settings.language": "Sprache",
     "settings.theme": "Thema",

@@ -5,9 +5,11 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 import { buildLocalizedPathname } from '@shared/config/locales/locale';
 import type { Language } from '@shared/config/locales/types';
 import { useFormApiError } from '@shared/hooks/useFormApiError';
+import { AUTH_T_MESSAGES } from '@repo/api';
 import { LogInIcon, LockIcon, EyeIcon, EyeOffIcon } from 'lucide-react';
 
 import { SignInFormData } from '@features/forms/SignInForm';
@@ -44,6 +46,8 @@ export const SignInForm = memo(({ className, locale }: SignInFormProps) => {
     const {
         register,
         handleSubmit,
+        reset,
+        clearErrors,
         formState: { errors, isValid },
     } = useForm<SignInFormData>({
         mode: 'onChange',
@@ -53,11 +57,16 @@ export const SignInForm = memo(({ className, locale }: SignInFormProps) => {
         },
     });
 
-    const submitFormHandler = async ({ email, password }: SignInFormData) => {
+    const submitFormHandler = async (data: SignInFormData) => {
         try {
-            setSubmitError(null);
             setIsSubmitting(true);
-            await loginWithCredentials({ email, password });
+            await loginWithCredentials({
+                email: data.email,
+                password: data.password,
+            });
+            setSubmitError(null);
+            clearErrors();
+            toast.success(t(`common:${AUTH_T_MESSAGES.LOGIN_SUCCESS}`));
 
             const redirect =
                 searchParams.get('redirect') ??
@@ -65,7 +74,10 @@ export const SignInForm = memo(({ className, locale }: SignInFormProps) => {
             router.push(redirect);
             router.refresh();
         } catch (error) {
-            setSubmitError(getSubmitError(error));
+            reset(data);
+            const message = getSubmitError(error);
+            setSubmitError(message);
+            toast.error(message);
         } finally {
             setIsSubmitting(false);
         }

@@ -1,5 +1,5 @@
 ---
-description: Form submit pattern — useForm, client-api, isApiError, fieldValidation
+description: Form submit pattern — useForm, client-api, useFormApiError, toasts, fieldValidation
 globs: src/features/**/ui/**/*Form*.tsx,src/features/forms/**/*.tsx
 alwaysApply: false
 ---
@@ -13,8 +13,9 @@ All forms follow the same self-contained pattern (see `RegisterForm`).
 - `useForm` with `mode: 'onChange'`
 - `onSubmit={handleSubmit(submitFormHandler)}`
 - Internal `isSubmitting` and `submitError` state
-- Validation via `@/src/shared/config/forms/fieldValidation` — pass `VALIDATION(t)` to `register()`
+- Validation via `@shared/config/forms/fieldValidation` — pass `VALIDATION(t)` to `register()`
 - Redirects use `buildLocalizedPathname(path, locale)` when `locale` is needed
+- Receive `locale: Language` as a prop — do not parse `usePathname()` for locale
 
 ## API calls
 
@@ -22,23 +23,53 @@ All forms follow the same self-contained pattern (see `RegisterForm`).
 - Use a `client-api` module:
   - Auth: `@lib/auth/client-api`, `@lib/auth/password-client-api`
   - Groups: `@lib/groups/client-api`
+- Client API throws `ApiError` on failure; forms read messages via `useFormApiError`, not `isApiError`
 
 ## Error handling
+
+Use `useFormApiError` — it wraps `resolveSubmitError` and translates backend `tMessage` / `message` from `ApiError`. Do **not** call `isApiError` or branch on `AUTH_T_MESSAGES` in forms unless mapping errors to a specific field is required.
 
 ```typescript
 const getSubmitError = useFormApiError();
 
-} catch (error) {
-    setSubmitError(getSubmitError(error));
-} finally {
-    setIsSubmitting(false);
-}
+const submitFormHandler = async (data: FormData) => {
+    try {
+        setIsSubmitting(true);
+        await submitAction(data);
+        setSubmitError(null);
+        clearErrors();
+        toast.success(t(`common:${AUTH_T_MESSAGES.ACTION_SUCCESS}`));
+        router.push(buildLocalizedPathname('/app', locale));
+        router.refresh();
+    } catch (error) {
+        reset(data);
+        const message = getSubmitError(error);
+        setSubmitError(message);
+        toast.error(message);
+    } finally {
+        setIsSubmitting(false);
+    }
+};
 ```
 
-`useFormApiError` wraps `resolveSubmitError` — use it instead of inlining `isApiError` checks.
+### Error / success rules
+
+- **On failure:** `reset(data)` to keep field values, then `setSubmitError` + `toast.error` with `getSubmitError(error)`
+- **On success:** clear `submitError` and field errors, then `toast.success` (use `AUTH_T_MESSAGES` / `GROUP_T_MESSAGES` keys), then redirect
+- Do **not** call `setSubmitError(null)`, `clearErrors()`, or `reset()` at the start of submit — only after success
+- Field validation errors stay in `errors.*` via `register()` rules; API errors use `submitError` + toast
+- Do not add extra error-wrapper helpers — backend `tMessage` is resolved by `getSubmitError`
+
+## Toasts
+
+- Use `sonner` (`import { toast } from 'sonner'`)
+- `Toaster` is mounted in `app/[locale]/layout.tsx`
+- Success and error feedback both use toasts; keep inline `submitError` + `<ErrorMessage>` for form-level API errors
 
 ## Avoid
 
 - `FormContainer` / `use*Submit` hook wrappers (logic lives in the form)
-- `pathname.split('/')[1]` for locale inside forms — receive `locale: Language` as a prop
+- `pathname.split('/')[1]` for locale inside forms
 - Inline validation rules — add shared rules to `fieldValidation.ts` + `validationPatterns.ts`
+- `isApiError` checks in forms — use `getSubmitError(error)` instead
+- Clearing the form on API failure — always `reset(data)` in `catch`

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 import { buildLocalizedPathname } from '@shared/config/locales/locale';
 import type { Language } from '@shared/config/locales/types';
 import { useFormApiError } from '@shared/hooks/useFormApiError';
@@ -17,6 +18,7 @@ import {
 } from 'lucide-react';
 
 import { RegisterFormData } from '../../model/types/types';
+import { AUTH_T_MESSAGES } from '@repo/api';
 import { registerAccount } from '@lib/auth/client-api';
 import { Button } from '@shared/ui/Form/Button';
 import { cn } from '@lib/utils';
@@ -48,6 +50,8 @@ export const RegisterForm = memo(({ className, locale }: RegisterFormProps) => {
     const {
         register,
         handleSubmit,
+        reset,
+        clearErrors,
         formState: { errors, isValid },
     } = useForm<RegisterFormData>({
         mode: 'onChange',
@@ -61,17 +65,22 @@ export const RegisterForm = memo(({ className, locale }: RegisterFormProps) => {
 
     const submitFormHandler = async (data: RegisterFormData) => {
         try {
-            setSubmitError(null);
             setIsSubmitting(true);
             await registerAccount({
                 username: data.username,
                 email: data.email,
                 password: data.password,
             });
+            setSubmitError(null);
+            clearErrors();
+            toast.success(t(`common:${AUTH_T_MESSAGES.REGISTER_SUCCESS}`));
             router.push(buildLocalizedPathname('/app', locale));
             router.refresh();
         } catch (error) {
-            setSubmitError(getSubmitError(error));
+            reset(data);
+            const message = getSubmitError(error);
+            setSubmitError(message);
+            toast.error(message);
         } finally {
             setIsSubmitting(false);
         }
@@ -117,6 +126,7 @@ export const RegisterForm = memo(({ className, locale }: RegisterFormProps) => {
                         <InputGroupInput
                             id="email"
                             type="email"
+                            aria-invalid={Boolean(errors.email?.message)}
                             {...register('email', EMAIL_VALIDATION(t))}
                             placeholder={t('common:form.placeholder.email')}
                         />

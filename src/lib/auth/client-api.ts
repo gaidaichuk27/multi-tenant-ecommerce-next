@@ -1,6 +1,7 @@
 import {
     ApiError,
     AUTH_T_MESSAGES,
+    authLogoutApiResponseSchema,
     authUserApiResponseSchema,
     type LoginInput,
     type RegisterInput,
@@ -31,4 +32,11 @@ export function loginWithCredentials(input: LoginInput) {
 
 export function registerAccount(input: RegisterInput) {
     return requestAuth('/api/auth/register', input);
+}
+
+export function logoutAccount() {
+    return requestApi('/api/auth/logout', {
+        method: 'POST',
+        schema: authLogoutApiResponseSchema,
+    });
 }
