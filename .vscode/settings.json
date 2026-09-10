@@ -30,5 +30,12 @@
     },
 
     "typescript.tsdk": "node_modules/typescript/lib",
-    "typescript.enablePromptUseWorkspaceTsdk": true
+    "typescript.enablePromptUseWorkspaceTsdk": true,
+
+    "css.lint.unknownAtRules": "ignore",
+    "scss.lint.unknownAtRules": "ignore",
+    "tailwindCSS.experimental.configFile": "src/styles/globals.css",
+    "tailwindCSS.includeLanguages": {
+        "css": "css"
+    }
 }

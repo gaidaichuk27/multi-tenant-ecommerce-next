@@ -1,0 +1,54 @@
+---
+description: Express controller pattern — routers map HTTP, controllers own request handling
+globs: backend/**/*.ts
+alwaysApply: false
+---
+
+# Express controllers
+
+## Router (`backend/routers/`)
+
+- Map HTTP method + path to a controller function
+- Attach middleware chains only (`requireAuth`, `requireVerifiedEmail`, `optionalAuth`)
+- No business logic, Prisma calls, or inline `async (req, res)` handlers
+
+```typescript
+authRouter.post('/password-change', requireAuth, changePasswordController);
+```
+
+## Controller (`backend/controllers/{domain}/`)
+
+- One exported `*Controller` per route action in `{action}.controller.ts`
+- Aggregate in `{domain}Controllers.ts` and export a `controllers` object (mealstogo-style barrel)
+- Re-export from `controllers/{domain}/index.ts`
+
+```typescript
+// backend/controllers/auth/authControllers.ts
+export const controllers = {
+  postRegister: registerController,
+  postLogin: loginController,
+  getMe: meController,
+};
+
+// backend/routers/authRouter.ts
+import { controllers } from '../controllers/auth/authControllers';
+
+authRouter.post('/register', controllers.postRegister);
+```
+
+## Handler rules
+
+1. Parse input with `@repo/api` Zod schemas
+2. Respond via `sendApiSuccess` / `sendApiError` or `throw new ApiError(...)`
+3. Always `next(error)` in `catch` — never inline `res.status(500).json(...)`
+4. Auth via middleware on the router; do not accept session tokens in request body
+5. Side effects (mailer, bcrypt, Prisma) live in controllers or `backend/services/` — never in `@repo/api`
+
+## Services (`backend/services/`)
+
+Extract shared logic only when reused by 2+ controllers (e.g. mailer helpers in `backend/lib/mailer/`).
+
+## Related rules
+
+- API contracts: `.cursor/rules/api-contracts.mdc`
+- Auth middleware: `.cursor/rules/auth-middleware.mdc`

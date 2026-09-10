@@ -1,52 +1,37 @@
 import {
     ApiError,
-    AUTH_T_MESSAGES,
-    authLogoutApiResponseSchema,
+    authEmptyApiResponseSchema,
+    authUserApiResponseSchema,
 } from '@repo/api';
 import { requestApi } from '@lib/api-client';
-import { PASSWORD_AUTH_ENABLED } from '@shared/config/auth';
 
 export type PasswordForgotInput = {
     email: string;
+    locale?: string;
 };
 
 export type PasswordRestoreInput = {
     password: string;
-    token?: string;
+    token: string;
 };
 
 export type PasswordChangeInput = {
     oldPassword: string;
     newPassword: string;
+    locale?: string;
 };
 
-/**
- * Phase 0 follow-up: implement Express password routes and Next proxies at
- * `/api/auth/password-forgot`, `password-restore`, `password-change`.
- */
 async function requestPasswordAction(
     path: string,
     input: unknown,
 ): Promise<void> {
-    if (!PASSWORD_AUTH_ENABLED) {
-        throw new ApiError(
-            501,
-            AUTH_T_MESSAGES.PASSWORD_NOT_IMPLEMENTED,
-            'Password reset is not available yet',
-        );
-    }
-
     const parsed = await requestApi(path, {
         body: input,
-        schema: authLogoutApiResponseSchema,
+        schema: authEmptyApiResponseSchema,
     });
 
     if (!parsed.success) {
-        throw new ApiError(
-            500,
-            AUTH_T_MESSAGES.INTERNAL_ERROR,
-            'Invalid response',
-        );
+        throw new ApiError(parsed.status, parsed.tMessage, parsed.message);
     }
 }
 
@@ -58,6 +43,19 @@ export function restorePassword(input: PasswordRestoreInput) {
     return requestPasswordAction('/api/auth/password-restore', input);
 }
 
-export function changePassword(input: PasswordChangeInput) {
-    return requestPasswordAction('/api/auth/password-change', input);
+export async function changePassword(input: PasswordChangeInput) {
+    const parsed = await requestApi('/api/auth/password-change', {
+        body: input,
+        schema: authUserApiResponseSchema,
+    });
+
+    if (!parsed.success) {
+        throw new ApiError(parsed.status, parsed.tMessage, parsed.message);
+    }
+}
+
+export function resendVerificationEmail(locale?: string) {
+    return requestPasswordAction('/api/auth/resend-verification', {
+        locale,
+    });
 }

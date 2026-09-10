@@ -14,6 +14,7 @@ import { LogInIcon, LockIcon, EyeIcon, EyeOffIcon } from 'lucide-react';
 
 import { SignInFormData } from '@features/forms/SignInForm';
 import { loginWithCredentials } from '@lib/auth/client-api';
+import { safeRedirect } from '@lib/auth/safe-redirect';
 import { Button } from '@shared/ui/Form/Button';
 import { cn } from '@lib/utils';
 import { Field, FieldGroup, FieldLabel } from '@shared/ui/Form/Field';
@@ -26,7 +27,7 @@ import {
 import { GoogleButton } from '@features/auth/buttons';
 import {
     EMAIL_VALIDATION,
-    PASSWORD_VALIDATION,
+    LOGIN_PASSWORD_VALIDATION,
 } from '@shared/config/forms/fieldValidation';
 
 interface SignInFormProps {
@@ -68,9 +69,11 @@ export const SignInForm = memo(({ className, locale }: SignInFormProps) => {
             clearErrors();
             toast.success(t(`common:${AUTH_T_MESSAGES.LOGIN_SUCCESS}`));
 
-            const redirect =
-                searchParams.get('redirect') ??
-                buildLocalizedPathname('/app', locale);
+            const fallback = buildLocalizedPathname('/app', locale);
+            const redirect = safeRedirect(
+                searchParams.get('redirect'),
+                fallback,
+            );
             router.push(redirect);
             router.refresh();
         } catch (error) {
@@ -121,7 +124,10 @@ export const SignInForm = memo(({ className, locale }: SignInFormProps) => {
                         <InputGroupInput
                             id="password"
                             type={showPassword ? 'text' : 'password'}
-                            {...register('password', PASSWORD_VALIDATION(t))}
+                            {...register(
+                                'password',
+                                LOGIN_PASSWORD_VALIDATION(t),
+                            )}
                             placeholder={t('common:form.placeholder.password')}
                         />
                         <InputGroupAddon align="inline-end">

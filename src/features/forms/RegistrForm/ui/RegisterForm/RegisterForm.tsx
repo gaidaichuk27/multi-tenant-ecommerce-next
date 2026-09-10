@@ -52,6 +52,7 @@ export const RegisterForm = memo(({ className, locale }: RegisterFormProps) => {
         handleSubmit,
         reset,
         clearErrors,
+        watch,
         formState: { errors, isValid },
     } = useForm<RegisterFormData>({
         mode: 'onChange',
@@ -63,6 +64,8 @@ export const RegisterForm = memo(({ className, locale }: RegisterFormProps) => {
         },
     });
 
+    const password = watch('password');
+
     const submitFormHandler = async (data: RegisterFormData) => {
         try {
             setIsSubmitting(true);
@@ -70,10 +73,11 @@ export const RegisterForm = memo(({ className, locale }: RegisterFormProps) => {
                 username: data.username,
                 email: data.email,
                 password: data.password,
+                locale,
             });
             setSubmitError(null);
             clearErrors();
-            toast.success(t(`common:${AUTH_T_MESSAGES.REGISTER_SUCCESS}`));
+            toast.success(t(`common:${AUTH_T_MESSAGES.REGISTER_CHECK_EMAIL}`));
             router.push(buildLocalizedPathname('/app', locale));
             router.refresh();
         } catch (error) {
@@ -186,10 +190,14 @@ export const RegisterForm = memo(({ className, locale }: RegisterFormProps) => {
                             aria-invalid={Boolean(
                                 errors.repeatPassword?.message,
                             )}
-                            {...register(
-                                'repeatPassword',
-                                REPEAT_PASSWORD_VALIDATION(t),
-                            )}
+                            {...register('repeatPassword', {
+                                ...REPEAT_PASSWORD_VALIDATION(t),
+                                validate: (value) =>
+                                    value === password ||
+                                    t(
+                                        'common:form.validation.passwords.should.match',
+                                    ),
+                            })}
                             placeholder={t(
                                 'common:form.placeholder.password.repeat',
                             )}

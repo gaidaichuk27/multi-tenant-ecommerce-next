@@ -1,20 +1,37 @@
 ---
-description: Express auth middleware — requireAuth vs optionalAuth
+description: Express auth middleware — requireAuth vs optionalAuth vs requireVerifiedEmail
 globs: backend/middleware/**/*.ts,backend/routers/**/*.ts
 alwaysApply: false
 ---
 
 # Auth middleware
 
-Defined in `backend/middleware/requireAuth.ts`. Token is extracted from `Authorization: Bearer <jwt>`.
+Defined in `backend/middleware/requireAuth.ts` and `backend/middleware/requireVerifiedEmail.ts`. Token is extracted from `Authorization: Bearer <jwt>`.
 
 ## requireAuth — session required
 
-Use on protected routes (e.g. `GET /api/auth/me`, mutations that need a user).
+Use on protected routes (e.g. `GET /api/auth/me`, `POST /api/auth/password-change`).
 
 - No token → `401` + `sendApiError`, stop
-- Invalid/expired token → `401`, stop
+- Invalid/expired token, or `tokenVersion` mismatch → `401`, stop
 - Valid token → set `req.userId`, `next()`
+
+Access JWTs include `tv` (`tokenVersion`). Password change/restore increments `User.tokenVersion`, which invalidates older sessions.
+
+## requireVerifiedEmail — confirmed email required
+
+Use **after** `requireAuth` on sensitive mutations (group creation, checkout, tenant mutations).
+
+- No `req.userId` → should not happen if chained after `requireAuth`
+- User not found → `401`
+- `isEmailConfirmed === false` → `403` + `AUTH_T_MESSAGES.EMAIL_NOT_CONFIRMED`
+- Verified user → `next()`
+
+```typescript
+router.post('/groups', requireAuth, requireVerifiedEmail, createGroupController);
+```
+
+Mount this on Express routers when those routes exist. Today email gating for groups is via tRPC `verifiedEmailProcedure`.
 
 ## optionalAuth — session optional
 
@@ -22,16 +39,33 @@ Use on routes that work for guests and logged-in users (public feed, group about
 
 - No token → `next()` immediately (guest, `req.userId` unset)
 - Invalid token → ignore, continue as guest
-- Valid token → set `req.userId`, `next()`
+- Valid token → set `req.userId`
 
 Never return `401` from `optionalAuth`.
 
-## Choosing middleware
+## Rate limits
 
-| Need | Middleware |
-|------|------------|
+`authRouter` applies `authRouteLimiter` (broad) plus `authSensitiveLimiter` on login/register/forgot/restore/resend.
+
+## Express middleware table
+
+| Need | Middleware chain |
+|------|------------------|
 | Must be logged in | `requireAuth` |
+| Logged in + verified email | `requireAuth`, `requireVerifiedEmail` |
 | Works with or without login | `optionalAuth` |
 | Public, no user context | neither |
 
 In route handlers, read `req.userId` only after the appropriate middleware is applied.
+
+## tRPC procedures (`src/TRPC/init.ts`)
+
+| Need | Procedure |
+|------|-----------|
+| Must be logged in | `protectedProcedure` |
+| Logged in + verified email | `verifiedEmailProcedure` |
+| Public | `publicProcedure` / `baseProcedure` |
+
+`verifiedEmailProcedure` throws `FORBIDDEN` with message `auth.email.not_confirmed` when `ctx.user.isEmailConfirmed` is false.
+
+Apply `verifiedEmailProcedure` to sensitive mutations such as `group.create`.

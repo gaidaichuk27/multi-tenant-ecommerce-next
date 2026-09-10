@@ -26,6 +26,14 @@
         @apply flex items-center justify-between;
     }
 
+    /* Neo-brutal themes set margin on buttons for hard shadows
+       (`.theme-* [data-slot=button]:not(...)`). Beat that specificity so
+       header controls share the same box as ThemeToggle / LangSelector. */
+    .header [data-slot='button'] {
+        margin-bottom: 0 !important;
+        margin-right: 0 !important;
+    }
+
     .header__backdrop {
         @apply absolute inset-x-0 -inset-y-4 top-0 -z-1 h-full w-full bg-[rgba(225,225,225,0.05)] mask-[linear-gradient(rgb(0,0,0)_50%,rgba(0,0,0,0.8)_70%,rgba(0,0,0,0)_100%)] backdrop-blur-[30px] [-webkit-mask-image:linear-gradient(rgb(0,0,0)_50%,rgba(0,0,0,0.8)_70%,rgba(0,0,0,0)_100%)];
     }

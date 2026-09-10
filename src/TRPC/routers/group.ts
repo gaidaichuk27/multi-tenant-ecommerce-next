@@ -6,10 +6,15 @@ import {
     getGroupBySlugInputSchema,
     serializeGroup,
 } from '@repo/api';
-import { createTRPCRouter, protectedProcedure, publicProcedure } from '../init';
+import {
+    createTRPCRouter,
+    protectedProcedure,
+    publicProcedure,
+    verifiedEmailProcedure,
+} from '../init';
 
 export const groupRouter = createTRPCRouter({
-    create: protectedProcedure
+    create: verifiedEmailProcedure
         .input(createGroupInputSchema)
         .mutation(async ({ ctx, input }) => {
             const existingGroup = await db.group.findUnique({

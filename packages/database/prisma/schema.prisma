@@ -40,8 +40,11 @@ model User {
     name                    String?        @db.VarChar(255)
     avatarUrl               String?        @map("avatar_url") @db.VarChar(500)
     passwordHash            String         @map("password_hash") @db.VarChar(255)
+    isEmailConfirmed        Boolean        @default(false) @map("is_email_confirmed")
+    /** Bumped on password change/restore to invalidate existing access JWTs. */
+    tokenVersion            Int            @default(0) @map("token_version")
     roles                   PlatformRole[] @default([user])
-    // Phase 0 follow-up: password reset routes + login lockout logic
+    /** SHA-256 of the active password-reset JWT (single-use). */
     resetPasswordToken      String?        @map("reset_password_token") @db.VarChar(255)
     resetPasswordExpiration DateTime?      @map("reset_password_expiration") @db.Timestamp(6)
     loginAttempts           Int            @default(0) @map("login_attempts")

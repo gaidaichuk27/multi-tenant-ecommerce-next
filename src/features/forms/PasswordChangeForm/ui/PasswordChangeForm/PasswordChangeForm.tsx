@@ -4,11 +4,12 @@ import { memo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 import { LockIcon, EyeIcon, EyeOffIcon } from 'lucide-react';
 
 import { PasswordChangeFormData } from '../../model/types/types';
 import { changePassword } from '@lib/auth/password-client-api';
-import { PASSWORD_AUTH_ENABLED } from '@shared/config/auth';
+import { AUTH_T_MESSAGES } from '@repo/api';
 import { useFormApiError } from '@shared/hooks/useFormApiError';
 import { Button } from '@shared/ui/Form/Button';
 import { cn } from '@lib/utils';
@@ -16,16 +17,20 @@ import { Field, FieldGroup, FieldLabel } from '@shared/ui/Form/Field';
 import { ErrorMessage } from '@shared/ui/Form/ErrorMessage';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@shared/ui/Form';
 import {
+    LOGIN_PASSWORD_VALIDATION,
     PASSWORD_VALIDATION,
     REPEAT_PASSWORD_VALIDATION,
 } from '@shared/config/forms/fieldValidation';
+import { buildLocalizedPathname } from '@shared/config/locales/locale';
+import type { Language } from '@shared/config/locales/types';
 
 interface PasswordChangeFormProps {
     className?: string;
+    locale: Language;
 }
 
 export const PasswordChangeForm = memo(
-    ({ className }: PasswordChangeFormProps) => {
+    ({ className, locale }: PasswordChangeFormProps) => {
         const { t } = useTranslation(['common']);
         const getSubmitError = useFormApiError();
         const router = useRouter();
@@ -40,6 +45,8 @@ export const PasswordChangeForm = memo(
             register,
             handleSubmit,
             watch,
+            reset,
+            clearErrors,
             formState: { errors, isValid },
         } = useForm<PasswordChangeFormData>({
             mode: 'onChange',
@@ -52,22 +59,33 @@ export const PasswordChangeForm = memo(
 
         const newPassword = watch('newPassword');
 
-        const submitFormHandler = async ({
-            oldPassword,
-            newPassword: password,
-        }: PasswordChangeFormData) => {
+        const submitFormHandler = async (data: PasswordChangeFormData) => {
             try {
-                setSubmitError(null);
                 setIsSubmitting(true);
 
                 await changePassword({
-                    oldPassword,
-                    newPassword: password,
+                    oldPassword: data.oldPassword,
+                    newPassword: data.newPassword,
+                    locale,
                 });
 
+                setSubmitError(null);
+                clearErrors();
+                reset({
+                    oldPassword: '',
+                    newPassword: '',
+                    repeatNewPassword: '',
+                });
+                toast.success(
+                    t(`common:${AUTH_T_MESSAGES.PASSWORD_CHANGE_SUCCESS}`),
+                );
+                router.push(buildLocalizedPathname('/app', locale));
                 router.refresh();
             } catch (error) {
-                setSubmitError(getSubmitError(error));
+                reset(data);
+                const message = getSubmitError(error);
+                setSubmitError(message);
+                toast.error(message);
             } finally {
                 setIsSubmitting(false);
             }
@@ -79,12 +97,6 @@ export const PasswordChangeForm = memo(
                 noValidate
             >
                 <FieldGroup className={cn('auth-form__wrapper', className)}>
-                    {!PASSWORD_AUTH_ENABLED && (
-                        <p className="text-muted-foreground text-sm">
-                            {t('common:auth.password.not_implemented')}
-                        </p>
-                    )}
-
                     <Field aria-invalid={Boolean(errors.oldPassword?.message)}>
                         <FieldLabel htmlFor="oldPassword">
                             {t('common:form.placeholder.password.old')}{' '}
@@ -102,7 +114,7 @@ export const PasswordChangeForm = memo(
                                 )}
                                 {...register(
                                     'oldPassword',
-                                    PASSWORD_VALIDATION(t),
+                                    LOGIN_PASSWORD_VALIDATION(t),
                                 )}
                                 placeholder={t(
                                     'common:form.placeholder.password.old',
@@ -238,9 +250,7 @@ export const PasswordChangeForm = memo(
                         type="submit"
                         className="auth-form__button"
                         aria-label={t('common:form.button.create')}
-                        disabled={
-                            !PASSWORD_AUTH_ENABLED || !isValid || isSubmitting
-                        }
+                        disabled={!isValid || isSubmitting}
                     >
                         {isSubmitting
                             ? t('common:loading')

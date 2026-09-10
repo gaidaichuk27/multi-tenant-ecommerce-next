@@ -21,14 +21,20 @@ export const HeaderAuthButtons = memo(
             <ActionButton
                 title="common:form.button.signin"
                 route="/login"
-                variant={{ variant: 'outline', size: 'sm' }}
-                className={cn(direction === 'col' && 'w-full')}
+                variant={{ variant: 'outline', size: 'default' }}
+                className={cn(
+                    '!mr-0 !mb-0 h-10 min-w-0 px-3',
+                    direction === 'col' && 'w-full',
+                )}
             />
             <ActionButton
                 title="common:form.button.register"
                 route="/register"
-                variant={{ variant: 'default', size: 'sm' }}
-                className={cn(direction === 'col' && 'w-full')}
+                variant={{ variant: 'default', size: 'default' }}
+                className={cn(
+                    '!mr-0 !mb-0 h-10 min-w-0 px-3',
+                    direction === 'col' && 'w-full',
+                )}
             />
         </div>
     ),

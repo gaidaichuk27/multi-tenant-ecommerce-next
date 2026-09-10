@@ -4,13 +4,14 @@ import { memo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 import { buildLocalizedPathname } from '@shared/config/locales/locale';
 import type { Language } from '@shared/config/locales/types';
 import { LockIcon, EyeIcon, EyeOffIcon } from 'lucide-react';
 
 import { PasswordRestoreFormData } from '../../model/types/types';
 import { restorePassword } from '@lib/auth/password-client-api';
-import { PASSWORD_AUTH_ENABLED } from '@shared/config/auth';
+import { AUTH_T_MESSAGES } from '@repo/api';
 import { useFormApiError } from '@shared/hooks/useFormApiError';
 import { Button } from '@shared/ui/Form/Button';
 import { cn } from '@lib/utils';
@@ -42,6 +43,8 @@ export const PasswordRestoreForm = memo(
             register,
             handleSubmit,
             watch,
+            reset,
+            clearErrors,
             formState: { errors, isValid },
         } = useForm<PasswordRestoreFormData>({
             mode: 'onChange',
@@ -53,22 +56,36 @@ export const PasswordRestoreForm = memo(
 
         const password = watch('password');
 
-        const submitFormHandler = async ({
-            password: newPassword,
-        }: PasswordRestoreFormData) => {
+        const submitFormHandler = async (data: PasswordRestoreFormData) => {
+            const token = searchParams.get('token');
+
+            if (!token) {
+                const message = t('common:auth.password.restore.token_missing');
+                setSubmitError(message);
+                toast.error(message);
+                return;
+            }
+
             try {
-                setSubmitError(null);
                 setIsSubmitting(true);
 
                 await restorePassword({
-                    password: newPassword,
-                    token: searchParams.get('token') ?? undefined,
+                    password: data.password,
+                    token,
                 });
 
+                setSubmitError(null);
+                clearErrors();
+                toast.success(
+                    t(`common:${AUTH_T_MESSAGES.PASSWORD_RESTORE_SUCCESS}`),
+                );
                 router.push(buildLocalizedPathname('/login', locale));
                 router.refresh();
             } catch (error) {
-                setSubmitError(getSubmitError(error));
+                reset(data);
+                const message = getSubmitError(error);
+                setSubmitError(message);
+                toast.error(message);
             } finally {
                 setIsSubmitting(false);
             }
@@ -80,12 +97,6 @@ export const PasswordRestoreForm = memo(
                 noValidate
             >
                 <FieldGroup className={cn('auth-form__wrapper', className)}>
-                    {!PASSWORD_AUTH_ENABLED && (
-                        <p className="text-muted-foreground text-sm">
-                            {t('common:auth.password.not_implemented')}
-                        </p>
-                    )}
-
                     <Field aria-invalid={Boolean(errors.password?.message)}>
                         <FieldLabel htmlFor="password">
                             {t('common:form.placeholder.password.new')}{' '}
@@ -189,9 +200,7 @@ export const PasswordRestoreForm = memo(
                         type="submit"
                         className="auth-form__button"
                         aria-label={t('common:form.button.restore')}
-                        disabled={
-                            !PASSWORD_AUTH_ENABLED || !isValid || isSubmitting
-                        }
+                        disabled={!isValid || isSubmitting}
                     >
                         {isSubmitting
                             ? t('common:loading')

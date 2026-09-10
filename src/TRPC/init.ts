@@ -8,6 +8,12 @@ export type TRPCContext = {
     headers: Headers;
 };
 
+export type AuthenticatedTRPCContext = {
+    userId: string;
+    user: User;
+    headers: Headers;
+};
+
 export async function createTRPCContext(opts: {
     headers: Headers;
 }): Promise<TRPCContext> {
@@ -23,15 +29,17 @@ export async function createTRPCContext(opts: {
 const t = initTRPC.context<TRPCContext>().create();
 
 const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
-    if (!ctx.userId || !ctx.user) {
+    const { userId, user } = ctx;
+
+    if (!userId || !user) {
         throw new TRPCError({ code: 'UNAUTHORIZED' });
     }
 
     return next({
         ctx: {
-            ...ctx,
-            userId: ctx.userId,
-            user: ctx.user,
+            headers: ctx.headers,
+            userId,
+            user,
         },
     });
 });
@@ -41,3 +49,16 @@ export const createCallerFactory = t.createCallerFactory;
 export const publicProcedure = t.procedure;
 export const baseProcedure = publicProcedure;
 export const protectedProcedure = publicProcedure.use(enforceUserIsAuthed);
+
+export const verifiedEmailProcedure = protectedProcedure.use(
+    ({ ctx, next }) => {
+        if (!ctx.user.isEmailConfirmed) {
+            throw new TRPCError({
+                code: 'FORBIDDEN',
+                message: 'auth.email.not_confirmed',
+            });
+        }
+
+        return next({ ctx });
+    },
+);

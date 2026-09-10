@@ -595,6 +595,38 @@ Mapped from `demo_project/` Payload collections → Prisma models.
 
 **Exit criteria:** User can sign up, create a group, view public about page.
 
+#### Deferred — auth production hardening (separate pass · do not skip before multi-instance)
+
+Phase 0 ships auth with **in-process** `express-rate-limit`. That is fine for local /
+single-process, but **not** for load-balanced production. Track here and execute with
+Phase 7 Redis (or earlier if you scale out before then). Status also mirrored in
+[`README.md`](../README.md) → _Auth follow-up_.
+
+| Status | Item                                                                                                                            | Why                                                                                                                     |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| [ ]    | **Shared rate-limit store (Redis)** — wire `rate-limit-redis` (or equivalent) for Express auth limiters                         | In-memory counters reset per process and do not share across instances. **Deploy blocker** before multi-instance / ALB. |
+| [ ]    | **Confirm `TRUST_PROXY` + reverse-proxy IPs** in prod (`TRUST_PROXY=1` / `NODE_ENV=production`)                                 | Rate-limit keys must use real client IPs behind the proxy.                                                              |
+| [ ]    | Stateful single-use email-verify tokens (hashed at rest, like password reset)                                                   | Medium — optional hardening.                                                                                            |
+| [ ]    | Consolidate Next `/api/auth` route factories                                                                                    | Low — cleanup after ship.                                                                                               |
+| [ ]    | **Dev email-template preview** — Express (or Next) controller + URL to render each mailer HTML without sending (see note below) | Speeds template QA; must be **dev-only** / gated.                                                                       |
+
+##### Mailer follow-up — email template preview + password-changed mail
+
+**Shipped / in progress**
+
+- [x] `changePasswordEmail` template (`backend/lib/mailer/emailTemplates/changePasswordEmail/`)
+- [x] Send security notification on successful password change (`sendPasswordChangedEmail` → best-effort from `changePasswordController`)
+
+**Still to build (dev tooling)**
+
+- [ ] **Email template preview controller** (local / non-prod only):
+    - Suggested route: `GET /api/dev/email-previews/:template?locale=en`
+    - Templates to cover: `accountVerification`, `forgotPassword`, `emailConfirmation`, `changePassword`
+    - Return branded HTML (`Content-Type: text/html`) using the same `*EmailTemplate` helpers + sample `url` / `to` / coupon fixtures — **do not call `sendMail`**
+    - Gate with `NODE_ENV !== 'production'` (and/or `ENABLE_EMAIL_PREVIEWS=1`); never mount in production builds
+    - Optional: index page listing available template names for quick browser checks
+    - Optional later: Storybook or a Next `/dev/emails` page that proxies the same HTML
+
 ---
 
 ### Phase 1 — Community core (Weeks 4–8)
@@ -695,17 +727,18 @@ Mapped from `demo_project/` Payload collections → Prisma models.
 
 ### Phase 7 — AWS production & scale (Weeks 29–36)
 
-| Area              | Action                                                        |
-| ----------------- | ------------------------------------------------------------- |
-| **Compute**       | ECS Fargate: Next.js, tRPC API (can merge initially), Workers |
-| **DB**            | RDS PostgreSQL Multi-AZ, connection pooling (PgBouncer)       |
-| **Cache**         | ElastiCache Redis                                             |
-| **CDN**           | CloudFront + S3 for media                                     |
-| **Search**        | OpenSearch for `search.group`                                 |
-| **Queue**         | SQS → worker (emails, analytics, webhooks)                    |
-| **Email**         | SES                                                           |
-| **CI/CD**         | GitHub Actions → ECR → ECS                                    |
-| **Observability** | CloudWatch, structured logs, tRPC error tracking              |
+| Area                 | Action                                                                                                                                                                                                                      |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Compute**          | ECS Fargate: Next.js, tRPC API (can merge initially), Workers                                                                                                                                                               |
+| **DB**               | RDS PostgreSQL Multi-AZ, connection pooling (PgBouncer)                                                                                                                                                                     |
+| **Cache**            | ElastiCache Redis                                                                                                                                                                                                           |
+| **Auth rate limits** | **Must-do with Redis:** migrate Express `express-rate-limit` from in-memory to a **shared Redis store**; verify `TRUST_PROXY` / ALB client IPs. See Phase 0 deferred checklist. **Deploy blocker** before >1 auth instance. |
+| **CDN**              | CloudFront + S3 for media                                                                                                                                                                                                   |
+| **Search**           | OpenSearch for `search.group`                                                                                                                                                                                               |
+| **Queue**            | SQS → worker (emails, analytics, webhooks)                                                                                                                                                                                  |
+| **Email**            | SES                                                                                                                                                                                                                         |
+| **CI/CD**            | GitHub Actions → ECR → ECS                                                                                                                                                                                                  |
+| **Observability**    | CloudWatch, structured logs, tRPC error tracking                                                                                                                                                                            |
 
 **Performance patterns:**
 
@@ -737,6 +770,7 @@ Mapped from `demo_project/` Payload collections → Prisma models.
 ### MVP (≈12 weeks) — ship this first
 
 - [ ] Auth: login, signup, settings profile
+- [ ] **Before multi-instance deploy:** Redis-backed auth rate limits + `TRUST_PROXY` verified (Phase 0 deferred / Phase 7)
 - [ ] Create group + about page
 - [ ] Community feed (posts, comments, likes, categories)
 - [ ] Join + pending approvals + membership questions

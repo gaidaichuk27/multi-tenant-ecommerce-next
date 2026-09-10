@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from 'express';
 import { AUTH_T_MESSAGES } from '@repo/api';
+import { db, type User } from '@repo/database';
 import { verifyAccessToken } from '../lib/jwt';
 import { sendApiError } from '../lib/api-response';
 
@@ -19,48 +20,77 @@ function extractBearerToken(
     return token;
 }
 
-export function requireAuth(req: Request, res: Response, next: NextFunction) {
-    const token = extractBearerToken(req.headers.authorization);
+async function resolveSessionUser(
+    authorizationHeader: string | undefined,
+): Promise<User | null> {
+    const token = extractBearerToken(authorizationHeader);
 
     if (!token) {
-        sendApiError(res, 401, AUTH_T_MESSAGES.ME_UNAUTHORIZED, 'Unauthorized');
-        return;
+        return null;
     }
 
     const session = verifyAccessToken(token);
 
     if (!session) {
-        sendApiError(
-            res,
-            401,
-            AUTH_T_MESSAGES.ME_UNAUTHORIZED,
-            'Invalid or expired token',
-        );
-        return;
+        return null;
     }
 
-    req.userId = session.userId;
-    next();
+    const user = await db.user.findUnique({
+        where: { id: session.userId },
+    });
+
+    if (!user || user.tokenVersion !== session.tokenVersion) {
+        return null;
+    }
+
+    return user;
+}
+
+export async function requireAuth(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) {
+    try {
+        const user = await resolveSessionUser(req.headers.authorization);
+
+        if (!user) {
+            sendApiError(
+                res,
+                401,
+                AUTH_T_MESSAGES.ME_UNAUTHORIZED,
+                'Unauthorized',
+            );
+            return;
+        }
+
+        req.userId = user.id;
+        req.user = user;
+        next();
+    } catch (error) {
+        next(error);
+    }
 }
 
 /**
- * Sets `req.userId` when a valid Bearer token is present; continues as guest otherwise.
- * Use on routes that behave differently for signed-in users but do not require auth.
- * (Not wired yet — first consumer expected in Phase 1 public group pages.)
+ * Sets `req.userId` / `req.user` when a valid Bearer token is present;
+ * continues as guest otherwise.
  */
-export function optionalAuth(req: Request, _res: Response, next: NextFunction) {
-    const token = extractBearerToken(req.headers.authorization);
+export async function optionalAuth(
+    req: Request,
+    _res: Response,
+    next: NextFunction,
+) {
+    try {
+        const user = await resolveSessionUser(req.headers.authorization);
 
-    if (!token) {
+        if (user) {
+            req.userId = user.id;
+            req.user = user;
+        }
+
         next();
-        return;
+    } catch (error) {
+        next(error);
     }
-
-    const session = verifyAccessToken(token);
-
-    if (session) {
-        req.userId = session.userId;
-    }
-
-    next();
 }

@@ -25,9 +25,12 @@ Shared contracts only — no Express/Prisma logic here.
 
 ## Next.js API routes (`app/api/`)
 
-- Proxy to Express via `backendFetch` + `unwrapApiResponseData`
-- Set httpOnly JWT cookie on login/register; body returns `{ user }` only (no token in JSON)
-- Use `resolveRouteApiError` for catch blocks
+- Proxy to Express via `backendFetch` from `src/lib/backend-client.ts`
+- Shared auth route helpers in `src/lib/auth/backend-auth-route.ts`:
+  - `proxyBackendAuthRoute` — GET/POST proxy with optional `forwardAuth` (uses `extractBearerToken` from `session.ts`)
+  - `createAuthProxyRoute` — pass-through proxy factory (password, verify-email, resend)
+  - `createAuthSessionRoute` — login/register proxy + httpOnly JWT cookie; body returns `{ user }` only
+- Use `createNextResponseFromApiError` / `resolveRouteApiError` for catch blocks
 
 ## Client API (`src/lib/**/client-api.ts`)
 

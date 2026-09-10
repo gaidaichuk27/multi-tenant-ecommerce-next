@@ -10,7 +10,8 @@ export const POST = createAuthSessionRoute({
     inputSchema: registerInputSchema,
     backendResponseSchema: authRegisterApiResponseSchema,
     successStatus: 201,
-    tMessage: AUTH_T_MESSAGES.REGISTER_SUCCESS,
-    successMessage: 'Registration successful',
+    tMessage: AUTH_T_MESSAGES.REGISTER_CHECK_EMAIL,
+    successMessage:
+        'Registration successful. Check your email to verify your account.',
     fallbackErrorMessage: 'Registration failed',
 });

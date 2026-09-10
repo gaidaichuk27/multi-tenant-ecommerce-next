@@ -1,7 +1,8 @@
-export const EMAIL_PATTERN = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
+export { PASSWORD_PATTERN } from '@repo/api';
 
-export const PASSWORD_PATTERN =
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+/** Allow plus-addressing and multi-part TLDs (aligned with Zod `.email()` on the API). */
+export const EMAIL_PATTERN =
+    /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
 
 export const NAME_PATTERN =
     /^([a-zA-Z]{2,}(?:\s[a-zA-Z]{1,}(?:['-][a-zA-Z]{2,})?\s?([a-zA-Z]{1,})?)?)$/;

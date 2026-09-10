@@ -6,8 +6,11 @@ import {
     type AuthTokenData,
 } from '@repo/api';
 import { mapUserFromDto } from '@entities/User/model/mappers';
-import { resolveRouteApiError } from '@lib/api-error';
 import { backendFetch, unwrapApiResponseData } from '@lib/backend-client';
+import {
+    createNextResponseFromApiError,
+    parseAuthRouteBody,
+} from '@lib/auth/backend-auth-route';
 import {
     getAuthCookieOptions,
     JWT_TOKEN_COOKIE_KEY,
@@ -26,7 +29,7 @@ type CreateAuthSessionRouteOptions = {
 export function createAuthSessionRoute(options: CreateAuthSessionRouteOptions) {
     return async function POST(request: Request) {
         try {
-            const body = options.inputSchema.parse(await request.json());
+            const body = await parseAuthRouteBody(request, options.inputSchema);
             const backendResponse = await backendFetch(options.backendPath, {
                 method: 'POST',
                 body,
@@ -56,12 +59,10 @@ export function createAuthSessionRoute(options: CreateAuthSessionRouteOptions) {
 
             return response;
         } catch (error) {
-            const body = resolveRouteApiError(
+            return createNextResponseFromApiError(
                 error,
                 options.fallbackErrorMessage,
             );
-
-            return NextResponse.json(body, { status: body.status });
         }
     };
 }

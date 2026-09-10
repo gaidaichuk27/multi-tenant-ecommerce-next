@@ -56,6 +56,20 @@ export const PASSWORD_VALIDATION = (t: TFunction) => ({
     },
 });
 
+/** Login accepts legacy passwords — strength is enforced on register/change/restore. */
+export const LOGIN_PASSWORD_VALIDATION = (t: TFunction) => ({
+    required: t('common:form.validation.required', {
+        field: t('common:form.placeholder.password'),
+    }),
+    minLength: {
+        value: 8,
+        message: t('common:form.validation.min.length', {
+            field: t('common:form.placeholder.password'),
+            length: 8,
+        }),
+    },
+});
+
 export const REPEAT_PASSWORD_VALIDATION = (t: TFunction) => ({
     required: t('common:form.validation.required', {
         field: t('common:form.placeholder.password.repeat'),
