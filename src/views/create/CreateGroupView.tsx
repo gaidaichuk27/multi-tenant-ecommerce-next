@@ -1,4 +1,6 @@
 import getTranslations from '@/i18n';
+import { requireAuthSession } from '@lib/auth/require-auth-session';
+import { buildLocalizedPathname } from '@shared/config/locales/locale';
 import { WithMainLayout } from '@hocs/WithMainLayout';
 import { CreateGroupForm } from '@features/create-group';
 import { ShadowBox } from '@shared/ui/ShadowBox/ShadowBox';
@@ -17,6 +19,8 @@ export async function CreateGroupView({
     className,
     locale,
 }: CreateGroupViewProps) {
+    await requireAuthSession(locale, buildLocalizedPathname('/create', locale));
+
     const { t } = await getTranslations(locale, i18nNamespaces);
 
     const Layouted = WithMainLayout(() => (

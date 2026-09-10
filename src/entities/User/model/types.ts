@@ -6,6 +6,7 @@ export type User = {
     name: string | null;
     avatarUrl: string | null;
     roles: UserRole[];
+    isEmailConfirmed: boolean;
     createdAt: string;
     updatedAt: string;
 };

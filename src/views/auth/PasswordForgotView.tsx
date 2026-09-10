@@ -1,24 +1,25 @@
 import getTranslations from '@/i18n';
-import { getCurrentLangFromPathname } from '@helpers/getCurrentLangFromPathname';
 import { ActionButton } from '@features/auth/buttons';
 import { PasswordForgotForm } from '@features/forms/PasswordForgotForm';
 import { ShadowBox } from '@shared/ui/ShadowBox/ShadowBox';
 import { SectionHeader } from '@shared/ui/Typography';
 import { Legend } from '@shared/ui/Legend';
-
+import type { Language } from '@shared/config/locales/types';
 import { cn } from '@lib/utils';
 
 interface PasswordForgotViewProps {
     className?: string;
+    locale: Language;
 }
 
 const i18nNamespaces = ['common'];
 
 export const PasswordForgotView = async ({
     className,
+    locale,
 }: PasswordForgotViewProps) => {
-    const pathName = await getCurrentLangFromPathname();
-    const { t } = await getTranslations(pathName, i18nNamespaces);
+    const { t } = await getTranslations(locale, i18nNamespaces);
+
     return (
         <div
             className={cn(
@@ -32,7 +33,7 @@ export const PasswordForgotView = async ({
                     subTitle={t('common:form.password.forgot.subtitle')}
                     className="mb-4"
                 />
-                <PasswordForgotForm />
+                <PasswordForgotForm locale={locale} />
 
                 <Legend label={t('common:form.label.have.account')} />
 

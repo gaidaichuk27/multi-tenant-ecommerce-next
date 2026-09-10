@@ -1,24 +1,29 @@
 import getTranslations from '@/i18n';
-import { getCurrentLangFromPathname } from '@helpers/getCurrentLangFromPathname';
-import { ActionButton } from '@features/auth/buttons';
+import { requireAuthSession } from '@lib/auth/require-auth-session';
+import { buildLocalizedPathname } from '@shared/config/locales/locale';
+import type { Language } from '@shared/config/locales/types';
 import { PasswordChangeForm } from '@features/forms/PasswordChangeForm';
 import { ShadowBox } from '@shared/ui/ShadowBox/ShadowBox';
 import { SectionHeader } from '@shared/ui/Typography';
-import { Legend } from '@shared/ui/Legend';
-
 import { cn } from '@lib/utils';
 
 interface PasswordChangeViewProps {
     className?: string;
+    locale: Language;
 }
 
 const i18nNamespaces = ['common'];
 
-export const PasswordChangeView = async ({
+export async function PasswordChangeView({
     className,
-}: PasswordChangeViewProps) => {
-    const pathName = await getCurrentLangFromPathname();
-    const { t } = await getTranslations(pathName, i18nNamespaces);
+    locale,
+}: PasswordChangeViewProps) {
+    await requireAuthSession(
+        locale,
+        buildLocalizedPathname('/password-change', locale),
+    );
+
+    const { t } = await getTranslations(locale, i18nNamespaces);
 
     return (
         <div
@@ -33,8 +38,8 @@ export const PasswordChangeView = async ({
                     subTitle={t('common:form.password.change.subtitle')}
                     className="mb-4"
                 />
-                <PasswordChangeForm />
+                <PasswordChangeForm locale={locale} />
             </ShadowBox>
         </div>
     );
-};
+}

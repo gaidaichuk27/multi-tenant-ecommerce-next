@@ -5,6 +5,9 @@ import { isValidLocale } from '@shared/config/locales/locale';
 import type { Language } from '@shared/config/locales/types';
 import i18nConfig from '@/i18nConfig';
 
+/** Cookie session gate — never serve a static Full Route Cache shell. */
+export const dynamic = 'force-dynamic';
+
 type AppPageProps = {
     params: Promise<{ locale: string }>;
 };

@@ -25,6 +25,10 @@ let isShuttingDown = false;
 
 app.use(cors(getCorsOptions()));
 app.use(helmet());
+// Needed so express-rate-limit keys on the real client IP behind a reverse proxy.
+if (process.env.TRUST_PROXY === '1' || process.env.NODE_ENV === 'production') {
+    app.set('trust proxy', 1);
+}
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 

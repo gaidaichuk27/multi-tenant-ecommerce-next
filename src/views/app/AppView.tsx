@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation';
 import getTranslations from '@/i18n';
+import { requireAuthSession } from '@lib/auth/require-auth-session';
 import { buildLocalizedPathname } from '@shared/config/locales/locale';
 import type { Language } from '@shared/config/locales/types';
 import { WithMainLayout } from '@hocs/WithMainLayout';
@@ -15,13 +15,7 @@ const i18nNamespaces = ['common'];
 
 export async function AppView({ className, locale }: AppViewProps) {
     const { t } = await getTranslations(locale, i18nNamespaces);
-    const user = await caller.auth.me();
-
-    if (!user) {
-        redirect(
-            `${buildLocalizedPathname('/login', locale)}?redirect=${encodeURIComponent(buildLocalizedPathname('/app', locale))}`,
-        );
-    }
+    await requireAuthSession(locale, buildLocalizedPathname('/app', locale));
 
     const groups = await caller.group.listMine();
 

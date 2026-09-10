@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { Footer } from '@widgets/Footer';
 import { Content } from '@widgets/Content';
 import { Header } from '@widgets/Header';
+import { EmailVerificationBannerServer } from '@widgets/EmailVerificationBanner/EmailVerificationBannerServer';
 import { Container } from '@shared/ui/Container';
 import { cn } from '@lib/utils';
 
@@ -19,6 +20,7 @@ export const MainLayout = ({
     return (
         <div className={cn('flex h-full flex-col', className)}>
             <Header />
+            <EmailVerificationBannerServer />
             <Content className="grow">
                 <Container variant={withContainer}>{children}</Container>
             </Content>

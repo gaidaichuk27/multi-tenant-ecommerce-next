@@ -1,7 +1,13 @@
+import type { Metadata } from 'next';
 import getTranslations from '@/i18n';
 import { PasswordChangeView } from '@views/auth/PasswordChangeView';
 import { WithMainLayout } from '@hocs/WithMainLayout';
-import { Metadata } from 'next';
+import { isValidLocale } from '@shared/config/locales/locale';
+import type { Language } from '@shared/config/locales/types';
+import i18nConfig from '@/i18nConfig';
+
+/** Cookie session gate — never serve a static Full Route Cache shell. */
+export const dynamic = 'force-dynamic';
 
 type PasswordChangePageProps = {
     params: Promise<{ locale: string }>;
@@ -21,7 +27,17 @@ export async function generateMetadata({
     };
 }
 
-export default function PasswordChangePage() {
-    const Layouted = WithMainLayout(PasswordChangeView);
+export default async function PasswordChangePage({
+    params,
+}: PasswordChangePageProps) {
+    const { locale: localeParam } = await params;
+    const locale: Language = isValidLocale(localeParam)
+        ? localeParam
+        : i18nConfig.defaultLocale;
+
+    const Layouted = WithMainLayout(() => (
+        <PasswordChangeView locale={locale} />
+    ));
+
     return <Layouted />;
 }

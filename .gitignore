@@ -13,6 +13,9 @@ node_modules/
 
 # testing
 /coverage
+/test-results/
+/playwright-report/
+/blob-report/
 
 # next.js
 /.next/
@@ -49,4 +52,4 @@ storybook-static
 # prisma generated client (run pnpm db:generate)
 packages/database/src/generated
 
-/demo_project
+demo_project/

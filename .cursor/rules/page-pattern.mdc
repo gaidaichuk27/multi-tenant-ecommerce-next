@@ -1,0 +1,93 @@
+---
+description: App Router page.tsx — thin server entry, locale, metadata, WithMainLayout
+globs: app/**/page.tsx
+alwaysApply: false
+---
+
+# Page pattern (`app/**/page.tsx`)
+
+Pages are **thin server entry points**. No UI markup, no forms, no `ShadowBox` / `SectionHeader` — that belongs in `src/views/`.
+
+## Responsibilities (page only)
+
+1. `generateMetadata` — i18n title/description from `params.locale`
+2. Resolve `locale` from `params` with `isValidLocale` + `i18nConfig.defaultLocale`
+3. Compose layout + view and pass `locale` down
+
+## Standard shape
+
+```typescript
+import type { Metadata } from 'next';
+import getTranslations from '@/i18n';
+import { LoginView } from '@views/auth/LoginView';
+import { WithMainLayout } from '@hocs/WithMainLayout';
+import { isValidLocale } from '@shared/config/locales/locale';
+import type { Language } from '@shared/config/locales/types';
+import i18nConfig from '@/i18nConfig';
+
+type LoginPageProps = {
+    params: Promise<{ locale: string }>;
+};
+
+const i18nNamespaces = ['common'];
+
+export async function generateMetadata({
+    params,
+}: LoginPageProps): Promise<Metadata> {
+    const { locale } = await params;
+    const { t } = await getTranslations(locale, i18nNamespaces);
+
+    return {
+        title: t('common:page.login.title'),
+        description: t('common:page.login.description'),
+    };
+}
+
+export default async function LoginPage({ params }: LoginPageProps) {
+    const { locale: localeParam } = await params;
+    const locale: Language = isValidLocale(localeParam)
+        ? localeParam
+        : i18nConfig.defaultLocale;
+    const Layouted = WithMainLayout(LoginView);
+
+    return <Layouted locale={locale} />;
+}
+```
+
+Reference: [`app/[locale]/(Auth)/login/page.tsx`](app/[locale]/(Auth)/login/page.tsx), [`app/[locale]/(Auth)/verify-email/page.tsx`](app/[locale]/(Auth)/verify-email/page.tsx).
+
+## View owns UI
+
+- `ShadowBox`, `SectionHeader`, `Legend`, action buttons
+- `<Suspense>` around client children that use `useSearchParams()`
+- Client forms and verification flows
+
+Reference: [`src/views/auth/LoginView.tsx`](src/views/auth/LoginView.tsx), [`src/views/auth/VerifyEmailView.tsx`](src/views/auth/VerifyEmailView.tsx).
+
+## Layout placement
+
+| Pattern | Where | When |
+|---------|-------|------|
+| `WithMainLayout(View)` in **page** | `const Layouted = WithMainLayout(MyView); return <Layouted locale={locale} />` | Auth and most marketing pages |
+| `WithMainLayout` inside **view** | View calls `WithMainLayout` and returns `<Layouted />` | Feature views that bundle layout + content (e.g. create group) |
+
+Prefer **layout in page** for new routes unless the view already wraps itself.
+
+## Do not put in `page.tsx`
+
+- `ShadowBox`, `SectionHeader`, form components
+- `getTranslations` for view copy (only for `generateMetadata` unless the page has no view)
+- `getCurrentLangFromPathname()` — use `params.locale` (see `.cursor/rules/locale-pattern.mdc`)
+- Business logic, fetch, or API calls — use the view, tRPC caller, or server modules
+
+## Protected / no-index pages
+
+Add `robots: { index: false, follow: false }` in `generateMetadata` when needed (e.g. `/app`, `/create`).
+
+## Checklist for a new page
+
+- [ ] `PageProps` with `params: Promise<{ locale: string }>`
+- [ ] `i18nNamespaces` constant
+- [ ] `generateMetadata` uses `getTranslations(locale, i18nNamespaces)`
+- [ ] Default export resolves `locale` and renders `<Layouted locale={locale} />` or `<MyView locale={locale} />`
+- [ ] No inline UI — delegate to `src/views/...`

@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import type { User } from '@entities/User';
 import { LangSelector } from '@features/langSelector';
 import { HeaderAuthButtons, LogOutButton } from '@features/auth/buttons';
@@ -16,6 +18,11 @@ import {
 import { X, Menu } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Label } from '@shared/ui/Form/Label';
+import {
+    buildLocalizedPathname,
+    isValidLocale,
+} from '@shared/config/locales/locale';
+import i18nConfig from '@/i18nConfig';
 
 interface SettingsDrawerProps {
     open: boolean;
@@ -31,6 +38,9 @@ export const SettingsDrawer = ({
     user = null,
 }: SettingsDrawerProps) => {
     const { t } = useTranslation(['common']);
+    const pathname = usePathname();
+    const segment = pathname.split('/')[1];
+    const locale = isValidLocale(segment) ? segment : i18nConfig.defaultLocale;
 
     return (
         <Drawer
@@ -74,7 +84,6 @@ export const SettingsDrawer = ({
                                     user={user}
                                     size="large"
                                     showInfo
-                                    editable
                                 />
                             </div>
                         )}
@@ -126,7 +135,23 @@ export const SettingsDrawer = ({
                     </div>
 
                     {user && (
-                        <div className="border-border mt-auto border-t p-4">
+                        <div className="border-border mt-auto space-y-2 border-t p-4">
+                            {/* TEMP: remove once account settings page exists */}
+                            <Button
+                                asChild
+                                variant="outline"
+                                className="w-full"
+                            >
+                                <Link
+                                    href={buildLocalizedPathname(
+                                        '/password-change',
+                                        locale,
+                                    )}
+                                    onClick={() => onOpenChange(false)}
+                                >
+                                    {t('form.password.change.title')}
+                                </Link>
+                            </Button>
                             <LogOutButton />
                         </div>
                     )}
