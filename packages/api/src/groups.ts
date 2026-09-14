@@ -1,13 +1,28 @@
 import { z } from 'zod';
 
-export const groupVisibilitySchema = z.enum(['public', 'private', 'hidden']);
+/** Single source of truth for group visibility values (Prisma + API). */
+export const GROUP_VISIBILITIES = ['public', 'private', 'hidden'] as const;
 
-export const groupMembershipRoleSchema = z.enum([
+/** Single source of truth for group membership roles (Prisma + API). */
+export const GROUP_MEMBERSHIP_ROLES = [
     'owner',
     'admin',
     'moderator',
     'member',
-]);
+] as const;
+
+/** Single source of truth for group membership statuses (Prisma + API). */
+export const GROUP_MEMBERSHIP_STATUSES = [
+    'active',
+    'pending',
+    'banned',
+] as const;
+
+export const groupVisibilitySchema = z.enum(GROUP_VISIBILITIES);
+
+export const groupMembershipRoleSchema = z.enum(GROUP_MEMBERSHIP_ROLES);
+
+export const groupMembershipStatusSchema = z.enum(GROUP_MEMBERSHIP_STATUSES);
 
 export const groupSlugSchema = z
     .string()
@@ -46,8 +61,10 @@ export const getGroupBySlugInputSchema = z.object({
 export type GroupDto = z.infer<typeof groupSchema>;
 export type GroupWithRoleDto = z.infer<typeof groupWithRoleSchema>;
 export type CreateGroupInput = z.infer<typeof createGroupInputSchema>;
-export type GroupVisibilityDto = z.infer<typeof groupVisibilitySchema>;
-export type GroupMembershipRoleDto = z.infer<typeof groupMembershipRoleSchema>;
+export type GroupVisibilityDto = (typeof GROUP_VISIBILITIES)[number];
+export type GroupMembershipRoleDto = (typeof GROUP_MEMBERSHIP_ROLES)[number];
+export type GroupMembershipStatusDto =
+    (typeof GROUP_MEMBERSHIP_STATUSES)[number];
 
 export function serializeGroup(group: {
     id: string;
@@ -57,7 +74,7 @@ export function serializeGroup(group: {
     logoUrl: string | null;
     coverUrl: string | null;
     ownerId: string;
-    visibility: 'public' | 'private' | 'hidden';
+    visibility: GroupVisibilityDto;
     createdAt: Date;
     updatedAt: Date;
 }): GroupDto {

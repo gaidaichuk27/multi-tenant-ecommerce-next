@@ -4,7 +4,9 @@ import {
     GROUP_T_MESSAGES,
     createGroupInputSchema,
     getGroupBySlugInputSchema,
+    groupSlugInputSchema,
     serializeGroup,
+    serializeMembership,
 } from '@repo/api';
 import {
     createTRPCRouter,
@@ -80,6 +82,56 @@ export const groupRouter = createTRPCRouter({
             }
 
             return serializeGroup(group);
+        }),
+
+    /**
+     * Smoke / helper: viewer's membership for a group, or null.
+     * Resolves group by slug (never by client groupId).
+     */
+    getMineMembership: protectedProcedure
+        .input(groupSlugInputSchema)
+        .query(async ({ ctx, input }) => {
+            const group = await db.group.findUnique({
+                where: { slug: input.slug },
+            });
+
+            if (!group) {
+                throw new TRPCError({
+                    code: 'NOT_FOUND',
+                    message: GROUP_T_MESSAGES.NOT_FOUND,
+                });
+            }
+
+            if (group.visibility === 'hidden') {
+                const membership = await db.groupMembership.findUnique({
+                    where: {
+                        groupId_userId: {
+                            groupId: group.id,
+                            userId: ctx.userId,
+                        },
+                    },
+                });
+
+                if (!membership || membership.status !== 'active') {
+                    throw new TRPCError({
+                        code: 'NOT_FOUND',
+                        message: GROUP_T_MESSAGES.NOT_FOUND,
+                    });
+                }
+
+                return serializeMembership(membership);
+            }
+
+            const membership = await db.groupMembership.findUnique({
+                where: {
+                    groupId_userId: {
+                        groupId: group.id,
+                        userId: ctx.userId,
+                    },
+                },
+            });
+
+            return membership ? serializeMembership(membership) : null;
         }),
 
     listMine: protectedProcedure.query(async ({ ctx }) => {
