@@ -64,6 +64,7 @@ export {
     getGroupBySlugInputSchema,
     groupMembershipRoleSchema,
     groupMembershipStatusSchema,
+    groupPublicSchema,
     groupSchema,
     groupSlugSchema,
     groupVisibilitySchema,
@@ -73,6 +74,7 @@ export {
     type GroupDto,
     type GroupMembershipRoleDto,
     type GroupMembershipStatusDto,
+    type GroupPublicDto,
     type GroupVisibilityDto,
     type GroupWithRoleDto,
 } from './groups';

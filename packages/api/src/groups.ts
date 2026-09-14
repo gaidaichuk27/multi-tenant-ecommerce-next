@@ -58,8 +58,26 @@ export const getGroupBySlugInputSchema = z.object({
     slug: z.string().min(1),
 });
 
+export const groupPublicSchema = z.object({
+    group: groupSchema,
+    memberCount: z.number().int().nonnegative(),
+    viewerMembership: z
+        .object({
+            id: z.string(),
+            groupId: z.string(),
+            userId: z.string(),
+            role: groupMembershipRoleSchema,
+            status: groupMembershipStatusSchema,
+            points: z.number().int(),
+            level: z.number().int(),
+            joinedAt: z.string(),
+        })
+        .nullable(),
+});
+
 export type GroupDto = z.infer<typeof groupSchema>;
 export type GroupWithRoleDto = z.infer<typeof groupWithRoleSchema>;
+export type GroupPublicDto = z.infer<typeof groupPublicSchema>;
 export type CreateGroupInput = z.infer<typeof createGroupInputSchema>;
 export type GroupVisibilityDto = (typeof GROUP_VISIBILITIES)[number];
 export type GroupMembershipRoleDto = (typeof GROUP_MEMBERSHIP_ROLES)[number];
