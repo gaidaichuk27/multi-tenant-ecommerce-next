@@ -141,6 +141,8 @@
     "page.backpack.description": "Your saved items",
     "page.group.about.title": "{{name}} — Community",
     "page.group.about.description": "Join {{name}} on our platform",
+    "page.group.feed.title": "{{name}} — Community feed",
+    "page.group.feed.description": "Community feed for {{name}}",
 
     "app.welcome": "Welcome back",
     "app.my_groups": "My communities",
@@ -165,6 +167,13 @@
 
     "group.about.join_cta": "Join community",
     "group.about.visibility": "Visibility",
+
+    "group.nav.community": "Community",
+    "group.nav.about": "About",
+    "group.nav.members": "Members",
+    "group.nav.pending": "Pending",
+    "group.feed.placeholder.title": "Community feed",
+    "group.feed.placeholder.description": "Posts and discussions arrive in Phase 1. This is the member shell placeholder.",
 
     "settings.title": "Site Settings",
     "settings.open": "Open menu",

@@ -37,9 +37,9 @@ Merge each PR into `develop` before starting the next (or rebase the next onto t
 
 ## Phase 3 checklist
 
-- [ ] `app/[locale]/[group]/layout.tsx` + feed placeholder page
-- [ ] `GroupNav` widget; about stays public
-- [ ] Member routes use `requireAuthSession`
+- [x] `app/[locale]/[group]/layout.tsx` + feed placeholder page
+- [x] `GroupNav` widget; about stays public
+- [x] Member routes use `requireAuthSession`
 
 **Exit:** Active member sees shell at `/{group}`; guests redirect to about.
 

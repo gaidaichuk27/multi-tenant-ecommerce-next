@@ -142,6 +142,8 @@
     "page.backpack.description": "Ihre gespeicherten Elemente",
     "page.group.about.title": "{{name}} — Community",
     "page.group.about.description": "Treten Sie {{name}} auf unserer Plattform bei",
+    "page.group.feed.title": "{{name}} — Community-Feed",
+    "page.group.feed.description": "Community-Feed für {{name}}",
 
     "app.welcome": "Willkommen zurück",
     "app.my_groups": "Meine Communities",
@@ -166,6 +168,13 @@
 
     "group.about.join_cta": "Community beitreten",
     "group.about.visibility": "Sichtbarkeit",
+
+    "group.nav.community": "Community",
+    "group.nav.about": "Über uns",
+    "group.nav.members": "Mitglieder",
+    "group.nav.pending": "Ausstehend",
+    "group.feed.placeholder.title": "Community-Feed",
+    "group.feed.placeholder.description": "Beiträge und Diskussionen kommen in Phase 1. Dies ist der Platzhalter der Mitglieder-Shell.",
 
     "settings.title": "Site Einstellungen",
     "settings.open": "Menü öffnen",
