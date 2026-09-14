@@ -29,9 +29,9 @@ Merge each PR into `develop` before starting the next (or rebase the next onto t
 
 ## Phase 2 checklist
 
-- [ ] `membership` router: `requestJoin`, `leave`, `listMembers`, `listPending`, `approve`, `decline`, `updateRole`, `ban`
-- [ ] `group.getPublic` → `{ group, memberCount, viewerMembership }`
-- [ ] Server query helpers under `src/lib/groups` / `src/lib/membership`
+- [x] `membership` router: `requestJoin`, `leave`, `listMembers`, `listPending`, `approve`, `decline`, `updateRole`, `ban`
+- [x] `group.getPublic` → `{ group, memberCount, viewerMembership }`
+- [x] Server query helpers under `src/lib/groups` / `src/lib/membership`
 
 **Exit:** Second verified user can join a public group via API; private → pending; admin approve/decline works.
 
