@@ -45,8 +45,22 @@ Merge each PR into `develop` before starting the next (or rebase the next onto t
 
 ## Phase 4 checklist
 
-- [ ] `src/features/join-group/` + about CTAs
-- [ ] `/{group}/-/members` and `/{group}/-/pending`
-- [ ] About uses `group.getPublic`
+- [x] `src/features/join-group/` + about CTAs
+- [x] `/{group}/-/members` and `/{group}/-/pending`
+- [x] About uses `group.getPublic`
 
 **Exit:** End-to-end join from about → feed; pending queue for private groups.
+
+---
+
+## Follow-ups (not in this stacked PR)
+
+Membership **email notifications** (reuse auth mailer patterns; best-effort send):
+
+- [ ] **Owner/admins** — email when someone `requestJoin`s (especially private → pending), with link to `/{group}/-/pending`
+- [ ] **Joiner** — email when request is **approved** (link to `/{group}`)
+- [ ] **Joiner** — email when request is **declined**
+- [ ] **Decline reason (optional)** — short note from admin on decline; persist (or pass through) and include in the joiner email so they can correct behavior and re-request
+- [ ] Wire into `membership.requestJoin` / `approve` / `decline`; add templates under `backend/lib/mailer/`; respect future notification prefs when those exist
+
+Also deferred from the original out-of-scope list: membership questions, categories, posts/comments.

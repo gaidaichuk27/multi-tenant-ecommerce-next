@@ -54,7 +54,7 @@ export function AppDashboard({
                             >
                                 <Link
                                     href={buildLocalizedPathname(
-                                        `/${group.slug}/about`,
+                                        `/${group.slug}`,
                                         locale,
                                     )}
                                     className="font-medium hover:underline"

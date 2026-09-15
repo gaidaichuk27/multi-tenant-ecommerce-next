@@ -633,17 +633,18 @@ Phase 7 Redis (or earlier if you scale out before then). Status also mirrored in
 
 **Goal:** Full community loop.
 
-| Feature               | Pages                     | tRPC                                     |
-| --------------------- | ------------------------- | ---------------------------------------- |
-| Community feed        | `/{group}`, `/{group}?c=` | `post.list`, `post.create`               |
-| Single post           | `/{group}/[postId]`       | `post.get`, `comment.*`                  |
-| Categories            | Settings tab              | `category.*`                             |
-| Likes + points        | Feed                      | `post.like`, `gamification.addPoints`    |
-| Roles                 | Settings → Admins         | `membership.updateRole`                  |
-| Join flow + questions | About join modal          | `membership.requestJoin`                 |
-| Pending approvals     | `/-/pending`              | `membership.approve/decline`             |
-| Rules                 | `/-/rules`                | `group.getRules`                         |
-| Pin / delete / report | Modals                    | `post.pin`, `post.delete`, `post.report` |
+| Feature               | Pages                     | tRPC                                                                              |
+| --------------------- | ------------------------- | --------------------------------------------------------------------------------- |
+| Community feed        | `/{group}`, `/{group}?c=` | `post.list`, `post.create`                                                        |
+| Single post           | `/{group}/[postId]`       | `post.get`, `comment.*`                                                           |
+| Categories            | Settings tab              | `category.*`                                                                      |
+| Likes + points        | Feed                      | `post.like`, `gamification.addPoints`                                             |
+| Roles                 | Settings → Admins         | `membership.updateRole`                                                           |
+| Join flow + questions | About join modal          | `membership.requestJoin`                                                          |
+| Pending approvals     | `/-/pending`              | `membership.approve/decline`                                                      |
+| Membership emails     | Mailer                    | Notify owner on join request; joiner on approve/decline (optional decline reason) |
+| Rules                 | `/-/rules`                | `group.getRules`                                                                  |
+| Pin / delete / report | Modals                    | `post.pin`, `post.delete`, `post.report`                                          |
 
 **Exit criteria:** Member joins, posts, comments, earns points, levels up.
 
@@ -771,9 +772,10 @@ Phase 7 Redis (or earlier if you scale out before then). Status also mirrored in
 
 - [ ] Auth: login, signup, settings profile
 - [ ] **Before multi-instance deploy:** Redis-backed auth rate limits + `TRUST_PROXY` verified (Phase 0 deferred / Phase 7)
-- [ ] Create group + about page
+- [x] Create group + about page
 - [ ] Community feed (posts, comments, likes, categories)
-- [ ] Join + pending approvals + membership questions
+- [x] Join + pending approvals (membership questions deferred)
+- [ ] Membership emails: owner on join request; joiner on approve/decline (+ optional decline reason)
 - [ ] Classroom (1+ courses, lessons, progress)
 - [ ] Leaderboards + points
 - [ ] Calendar (basic events)

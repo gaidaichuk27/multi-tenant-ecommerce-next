@@ -1,8 +1,10 @@
+import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import getTranslations from '@/i18n';
-import type { Group } from '@entities/Group';
+import type { GroupPublic } from '@entities/Group';
 import { isTrpcErrorCode } from '@lib/trpc/errors';
-import { getGroupBySlug } from '@lib/groups/queries';
+import { getAuthSession } from '@lib/auth/session';
+import { getGroupPublic } from '@lib/groups/queries';
 import { WithMainLayout } from '@hocs/WithMainLayout';
 import type { Language } from '@shared/config/locales/types';
 import { GroupAboutView } from '@views/group/GroupAboutView';
@@ -19,11 +21,12 @@ export async function GroupAboutPageView({
     groupSlug,
 }: GroupAboutPageViewProps) {
     const { t } = await getTranslations(locale, i18nNamespaces);
+    const session = await getAuthSession(await headers());
 
-    let group: Group;
+    let publicGroup: GroupPublic;
 
     try {
-        group = await getGroupBySlug(groupSlug);
+        publicGroup = await getGroupPublic(groupSlug);
     } catch (error) {
         if (isTrpcErrorCode(error, 'NOT_FOUND')) {
             notFound();
@@ -32,17 +35,34 @@ export async function GroupAboutPageView({
         throw error;
     }
 
-    const Layouted = WithMainLayout(() => (
+    const about = (
         <GroupAboutView
             locale={locale}
-            group={group}
+            group={publicGroup.group}
+            memberCount={publicGroup.memberCount}
+            viewerMembership={publicGroup.viewerMembership}
+            isAuthenticated={Boolean(session?.user)}
             labels={{
-                joinCta: t('common:group.about.join_cta'),
+                join: t('common:group.about.join_cta'),
+                requestJoin: t('common:group.about.request_join'),
+                pending: t('common:group.about.pending'),
+                openCommunity: t('common:group.about.open_community'),
+                leave: t('common:group.about.leave'),
+                loginToJoin: t('common:group.about.login_to_join'),
+                banned: t('common:group.about.banned'),
                 visibility: t('common:group.about.visibility'),
+                members: t('common:group.about.members_count'),
                 backToApp: t('common:app.back_to_app'),
             }}
         />
-    ));
+    );
+
+    // Active members already sit inside GroupShellView → MainLayout.
+    if (publicGroup.viewerMembership?.status === 'active') {
+        return about;
+    }
+
+    const Layouted = WithMainLayout(() => about);
 
     return <Layouted />;
 }

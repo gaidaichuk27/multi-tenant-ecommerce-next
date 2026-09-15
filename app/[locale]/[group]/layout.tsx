@@ -1,9 +1,10 @@
 import { headers } from 'next/headers';
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import getTranslations from '@/i18n';
 import { isTrpcErrorCode } from '@lib/trpc/errors';
 import { requireAuthSession } from '@lib/auth/require-auth-session';
 import { getGroupPublic } from '@lib/groups/queries';
+import { HardRedirect } from '@lib/navigation/HardRedirect';
 import {
     buildLocalizedPathname,
     isValidLocale,
@@ -34,17 +35,7 @@ export default async function GroupLayout({
         : i18nConfig.defaultLocale;
 
     const pathname = (await headers()).get('x-current-path') ?? '';
-
-    if (isGroupAboutPath(pathname, groupSlug)) {
-        return children;
-    }
-
-    const { t } = await getTranslations(locale, i18nNamespaces);
-
-    await requireAuthSession(
-        locale,
-        buildLocalizedPathname(`/${groupSlug}`, locale),
-    );
+    const isAbout = isGroupAboutPath(pathname, groupSlug);
 
     let publicGroup;
 
@@ -59,10 +50,34 @@ export default async function GroupLayout({
     }
 
     const { group, viewerMembership } = publicGroup;
+    const isActiveMember = viewerMembership?.status === 'active';
 
-    if (!viewerMembership || viewerMembership.status !== 'active') {
-        redirect(buildLocalizedPathname(`/${groupSlug}/about`, locale));
+    // About stays reachable without auth. Active members still use the shell so
+    // soft-nav to /-/members keeps GroupNav (layout tree must not switch shape).
+    if (isAbout && !isActiveMember) {
+        return children;
     }
+
+    if (!isAbout) {
+        await requireAuthSession(
+            locale,
+            buildLocalizedPathname(`/${groupSlug}`, locale),
+        );
+
+        if (!isActiveMember || !viewerMembership) {
+            return (
+                <HardRedirect
+                    href={buildLocalizedPathname(`/${groupSlug}/about`, locale)}
+                />
+            );
+        }
+    }
+
+    if (!viewerMembership || !isActiveMember) {
+        return children;
+    }
+
+    const { t } = await getTranslations(locale, i18nNamespaces);
 
     return (
         <GroupShellView
