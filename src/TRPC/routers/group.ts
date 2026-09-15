@@ -4,7 +4,9 @@ import {
     GROUP_T_MESSAGES,
     createGroupInputSchema,
     getGroupBySlugInputSchema,
+    groupSlugInputSchema,
     serializeGroup,
+    serializeMembership,
 } from '@repo/api';
 import {
     createTRPCRouter,
@@ -80,6 +82,127 @@ export const groupRouter = createTRPCRouter({
             }
 
             return serializeGroup(group);
+        }),
+
+    /**
+     * Public about-page payload: group metadata, active member count,
+     * and the viewer's membership when a session is present.
+     */
+    getPublic: publicProcedure
+        .input(groupSlugInputSchema)
+        .query(async ({ ctx, input }) => {
+            const group = await db.group.findUnique({
+                where: { slug: input.slug },
+            });
+
+            if (!group) {
+                throw new TRPCError({
+                    code: 'NOT_FOUND',
+                    message: GROUP_T_MESSAGES.NOT_FOUND,
+                });
+            }
+
+            if (group.visibility === 'hidden') {
+                if (!ctx.userId) {
+                    throw new TRPCError({
+                        code: 'NOT_FOUND',
+                        message: GROUP_T_MESSAGES.NOT_FOUND,
+                    });
+                }
+
+                const viewer = await db.groupMembership.findUnique({
+                    where: {
+                        groupId_userId: {
+                            groupId: group.id,
+                            userId: ctx.userId,
+                        },
+                    },
+                });
+
+                if (!viewer || viewer.status !== 'active') {
+                    throw new TRPCError({
+                        code: 'NOT_FOUND',
+                        message: GROUP_T_MESSAGES.NOT_FOUND,
+                    });
+                }
+            }
+
+            const [memberCount, viewerMembership] = await Promise.all([
+                db.groupMembership.count({
+                    where: {
+                        groupId: group.id,
+                        status: 'active',
+                    },
+                }),
+                ctx.userId
+                    ? db.groupMembership.findUnique({
+                          where: {
+                              groupId_userId: {
+                                  groupId: group.id,
+                                  userId: ctx.userId,
+                              },
+                          },
+                      })
+                    : Promise.resolve(null),
+            ]);
+
+            return {
+                group: serializeGroup(group),
+                memberCount,
+                viewerMembership: viewerMembership
+                    ? serializeMembership(viewerMembership)
+                    : null,
+            };
+        }),
+
+    /**
+     * Smoke / helper: viewer's membership for a group, or null.
+     * Resolves group by slug (never by client groupId).
+     */
+    getMineMembership: protectedProcedure
+        .input(groupSlugInputSchema)
+        .query(async ({ ctx, input }) => {
+            const group = await db.group.findUnique({
+                where: { slug: input.slug },
+            });
+
+            if (!group) {
+                throw new TRPCError({
+                    code: 'NOT_FOUND',
+                    message: GROUP_T_MESSAGES.NOT_FOUND,
+                });
+            }
+
+            if (group.visibility === 'hidden') {
+                const membership = await db.groupMembership.findUnique({
+                    where: {
+                        groupId_userId: {
+                            groupId: group.id,
+                            userId: ctx.userId,
+                        },
+                    },
+                });
+
+                if (!membership || membership.status !== 'active') {
+                    throw new TRPCError({
+                        code: 'NOT_FOUND',
+                        message: GROUP_T_MESSAGES.NOT_FOUND,
+                    });
+                }
+
+                return serializeMembership(membership);
+            }
+
+            const membership = await db.groupMembership.findUnique({
+                where: {
+                    groupId_userId: {
+                        groupId: group.id,
+                        userId: ctx.userId,
+                    },
+                },
+            });
+
+            return membership ? serializeMembership(membership) : null;
         }),
 
     listMine: protectedProcedure.query(async ({ ctx }) => {

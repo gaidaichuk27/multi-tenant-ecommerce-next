@@ -2,7 +2,7 @@
 
 import { memo, useState } from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -41,7 +41,6 @@ export const SignInForm = memo(({ className, locale }: SignInFormProps) => {
     const [showPassword, setShowPassword] = useState(false);
     const [submitError, setSubmitError] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const router = useRouter();
     const searchParams = useSearchParams();
 
     const {
@@ -74,8 +73,10 @@ export const SignInForm = memo(({ className, locale }: SignInFormProps) => {
                 searchParams.get('redirect'),
                 fallback,
             );
-            router.push(redirect);
-            router.refresh();
+            // Hard navigation so post-login group layout redirects (e.g. non-member
+            // → about) are real HTTP 307s. Soft router.push + redirect() in RSC
+            // can leave a blank page until manual reload.
+            window.location.assign(redirect);
         } catch (error) {
             reset(data);
             const message = getSubmitError(error);

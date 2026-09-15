@@ -4,6 +4,7 @@ import type { AppRouter } from '@TRPC/routers/_app';
 
 const TRPC_ERROR_STATUS_BY_CODE = {
     UNAUTHORIZED: 401,
+    FORBIDDEN: 403,
     CONFLICT: 409,
     NOT_FOUND: 404,
     BAD_REQUEST: 400,

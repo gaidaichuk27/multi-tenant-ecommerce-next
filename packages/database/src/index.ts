@@ -21,7 +21,10 @@ export { Prisma, PrismaClient };
 export type {
     Group,
     GroupMembership,
+    GroupMembershipRole,
+    GroupMembershipStatus,
     GroupSettings,
+    GroupVisibility,
     TestUser,
     User,
 } from './generated/client';

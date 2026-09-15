@@ -1,0 +1,30 @@
+---
+description: Group-scoped tRPC procedures — resolve from slug, never trust client groupId
+globs: src/TRPC/**/*.ts
+alwaysApply: false
+---
+
+# Group-scoped tRPC procedures
+
+## Slug, not groupId
+
+- Group procedures take `{ slug: string }` (plus other fields) in the input.
+- Resolve `group` from the slug in middleware / procedure helpers.
+- **Never** accept a bare `groupId` from the client body as the tenancy key.
+- Use `ctx.group.id` after resolution for DB writes.
+
+## Procedure stack (`src/TRPC/init.ts`)
+
+| Procedure | Requirements |
+|---|---|
+| `groupProcedure` | Authed + group exists (hidden → only active members) |
+| `groupMemberProcedure` | Active membership |
+| `groupModeratorProcedure` | Role `moderator` \| `admin` \| `owner` |
+| `groupAdminProcedure` | Role `admin` \| `owner` |
+| `groupOwnerProcedure` | Role `owner` |
+
+`ctx.group` and `ctx.membership` are injected after the guard runs.
+
+## Contracts
+
+Shared Zod + serializers live in `@repo/api` (`membership.ts`, `MEMBERSHIP_T_MESSAGES`).

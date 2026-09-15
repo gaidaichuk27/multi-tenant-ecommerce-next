@@ -1,1 +1,1 @@
-export type { Group, GroupWithRole } from './model/types';
+export type { Group, GroupPublic, GroupWithRole } from './model/types';
