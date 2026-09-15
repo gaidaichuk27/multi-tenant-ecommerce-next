@@ -140,6 +140,8 @@
     "page.backpack.description": "Twoje zapisane elementy",
     "page.group.about.title": "{{name}} — Społeczność",
     "page.group.about.description": "Dołącz do {{name}} na naszej platformie",
+    "page.group.feed.title": "{{name}} — Tablica społeczności",
+    "page.group.feed.description": "Tablica społeczności {{name}}",
 
     "app.welcome": "Witaj ponownie",
     "app.my_groups": "Moje społeczności",
@@ -164,6 +166,13 @@
 
     "group.about.join_cta": "Dołącz do społeczności",
     "group.about.visibility": "Widoczność",
+
+    "group.nav.community": "Społeczność",
+    "group.nav.about": "O społeczności",
+    "group.nav.members": "Członkowie",
+    "group.nav.pending": "Oczekujące",
+    "group.feed.placeholder.title": "Tablica społeczności",
+    "group.feed.placeholder.description": "Posty i dyskusje pojawią się w Phase 1. To placeholder powłoki członka.",
 
     "settings.title": "Ustawienia strony",
     "settings.open": "Otwórz menu",

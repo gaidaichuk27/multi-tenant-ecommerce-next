@@ -141,6 +141,8 @@
     "page.backpack.description": "Ваші збережені елементи",
     "page.group.about.title": "{{name}} — Спільнота",
     "page.group.about.description": "Приєднуйтесь до {{name}} на нашій платформі",
+    "page.group.feed.title": "{{name}} — Стрічка спільноти",
+    "page.group.feed.description": "Стрічка спільноти {{name}}",
 
     "app.welcome": "З поверненням",
     "app.my_groups": "Мої спільноти",
@@ -165,6 +167,13 @@
 
     "group.about.join_cta": "Приєднатися до спільноти",
     "group.about.visibility": "Видимість",
+
+    "group.nav.community": "Спільнота",
+    "group.nav.about": "Про спільноту",
+    "group.nav.members": "Учасники",
+    "group.nav.pending": "Очікують",
+    "group.feed.placeholder.title": "Стрічка спільноти",
+    "group.feed.placeholder.description": "Пости та обговорення з’являться у Phase 1. Це заглушка оболонки учасника.",
 
     "settings.title": "Налаштування сайту",
     "settings.open": "Відкрити меню",
