@@ -19,12 +19,15 @@ if (process.env.NODE_ENV !== 'production') {
 
 export { Prisma, PrismaClient };
 export type {
+    Comment,
     Group,
     GroupMembership,
     GroupMembershipRole,
     GroupMembershipStatus,
     GroupSettings,
     GroupVisibility,
+    Post,
+    PostType,
     TestUser,
     User,
 } from './generated/client';

@@ -33,6 +33,10 @@ enum GroupMembershipStatus {
     banned
 }
 
+enum PostType {
+    text
+}
+
 model User {
     id                      String         @id @default(cuid())
     email                   String         @unique @db.VarChar(255)
@@ -54,6 +58,8 @@ model User {
 
     ownedGroups       Group[]            @relation("GroupOwner")
     groupMemberships  GroupMembership[]
+    posts             Post[]
+    comments          Comment[]
 
     @@map("users")
 }
@@ -73,6 +79,7 @@ model Group {
     owner       User              @relation("GroupOwner", fields: [ownerId], references: [id])
     settings    GroupSettings?
     memberships GroupMembership[]
+    posts       Post[]
 
     @@map("groups")
 }
@@ -108,6 +115,46 @@ model GroupMembership {
 
     @@unique([groupId, userId])
     @@map("group_memberships")
+}
+
+model Post {
+    id             String   @id @default(cuid())
+    groupId        String   @map("group_id")
+    authorId       String   @map("author_id")
+    body           String   @db.Text
+    type           PostType @default(text)
+    pinned         Boolean  @default(false)
+    broadcastEmail Boolean  @default(false) @map("broadcast_email")
+    createdAt      DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+    updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamp(6)
+
+    group    Group     @relation(fields: [groupId], references: [id], onDelete: Cascade)
+    author   User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+    comments Comment[]
+
+    @@index([groupId, createdAt(sort: Desc)])
+    @@index([authorId])
+    @@map("posts")
+}
+
+model Comment {
+    id        String   @id @default(cuid())
+    postId    String   @map("post_id")
+    parentId  String?  @map("parent_id")
+    authorId  String   @map("author_id")
+    body      String   @db.Text
+    createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+    updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamp(6)
+
+    post    Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+    parent  Comment?  @relation("CommentThread", fields: [parentId], references: [id], onDelete: Cascade)
+    replies Comment[] @relation("CommentThread")
+    author  User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+    @@index([postId, createdAt])
+    @@index([parentId])
+    @@index([authorId])
+    @@map("comments")
 }
 
 // Synced with pgAdmin table: public.test_users
