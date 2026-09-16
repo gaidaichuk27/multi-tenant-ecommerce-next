@@ -1,28 +1,35 @@
 import { notFound, redirect } from 'next/navigation';
 import getTranslations from '@/i18n';
 import { isTrpcErrorCode } from '@lib/trpc/errors';
-import { listGroupPosts } from '@lib/posts/queries';
+import { listPostComments } from '@lib/comments/queries';
+import { getGroupPost } from '@lib/posts/queries';
 import { buildLocalizedPathname } from '@shared/config/locales/locale';
 import type { Language } from '@shared/config/locales/types';
-import { GroupFeedView } from '@views/group/GroupFeedView';
+import { GroupPostView } from '@views/group/GroupPostView';
 
-interface GroupFeedPageViewProps {
+interface GroupPostPageViewProps {
     locale: Language;
     groupSlug: string;
+    postId: string;
 }
 
 const i18nNamespaces = ['common'];
 
-export async function GroupFeedPageView({
+export async function GroupPostPageView({
     locale,
     groupSlug,
-}: GroupFeedPageViewProps) {
+    postId,
+}: GroupPostPageViewProps) {
     const { t } = await getTranslations(locale, i18nNamespaces);
 
-    let page;
+    let post;
+    let commentsPage;
 
     try {
-        page = await listGroupPosts(groupSlug);
+        [post, commentsPage] = await Promise.all([
+            getGroupPost(groupSlug, postId),
+            listPostComments(groupSlug, postId),
+        ]);
     } catch (error) {
         if (isTrpcErrorCode(error, 'NOT_FOUND')) {
             notFound();
@@ -39,14 +46,17 @@ export async function GroupFeedPageView({
     }
 
     return (
-        <GroupFeedView
+        <GroupPostView
             locale={locale}
             groupSlug={groupSlug}
-            posts={page.items}
+            post={post}
+            comments={commentsPage.items}
             labels={{
-                empty: t('common:group.feed.empty'),
-                commentsCount: (count) =>
-                    t('common:group.feed.comments_count', { count }),
+                backToFeed: t('common:group.post.back_to_feed'),
+                commentsHeading: t('common:group.post.comments_heading'),
+                commentsEmpty: t('common:group.post.comments_empty'),
+                reply: t('common:group.post.comment.reply'),
+                cancelReply: t('common:group.post.comment.cancel_reply'),
                 pinned: t('common:group.feed.pinned'),
             }}
         />
