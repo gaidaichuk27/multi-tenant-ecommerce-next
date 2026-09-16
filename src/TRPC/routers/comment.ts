@@ -70,7 +70,7 @@ export const commentRouter = createTRPCRouter({
             const rows = await db.comment.findMany({
                 where: { postId: input.postId },
                 include: { author: { select: AUTHOR_SELECT } },
-                orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+                orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
                 take: limit + 1,
                 ...(input.cursor
                     ? {

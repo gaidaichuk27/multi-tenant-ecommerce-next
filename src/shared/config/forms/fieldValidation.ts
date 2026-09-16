@@ -169,3 +169,19 @@ export const POST_BODY_VALIDATION = (
         }),
     ...maxLengthValidation(t, t('common:group.feed.composer.body'), maxLength),
 });
+
+/** Comment body shares post length rules with comment field labels. */
+export const COMMENT_BODY_VALIDATION = (
+    t: TFunction,
+    maxLength: number = DEFAULT_CHARACTER_LIMIT,
+) => ({
+    required: t('common:form.validation.required', {
+        field: t('common:group.post.comment.body'),
+    }),
+    validate: (value: string) =>
+        value.trim().length > 0 ||
+        t('common:form.validation.required', {
+            field: t('common:group.post.comment.body'),
+        }),
+    ...maxLengthValidation(t, t('common:group.post.comment.body'), maxLength),
+});
