@@ -3,6 +3,7 @@ import {
     GROUP_SLUG_PATTERN,
     PASSWORD_PATTERN,
 } from './validationPatterns';
+import { DEFAULT_CHARACTER_LIMIT } from './characterLimit';
 import { USERNAME_PATTERN } from '@repo/api';
 import { TFunction } from 'i18next';
 
@@ -136,4 +137,35 @@ export const GROUP_DESCRIPTION_VALIDATION = (t: TFunction) => ({
             length: 5000,
         }),
     },
+});
+
+/** Shared maxLength rule — override `maxLength` per field (default 2000). */
+export const maxLengthValidation = (
+    t: TFunction,
+    fieldLabel: string,
+    maxLength: number = DEFAULT_CHARACTER_LIMIT,
+) => ({
+    maxLength: {
+        value: maxLength,
+        message: t('common:form.validation.max.length', {
+            field: fieldLabel,
+            length: maxLength,
+        }),
+    },
+});
+
+/** Post body: required + trim + max length (default {@link DEFAULT_CHARACTER_LIMIT}). */
+export const POST_BODY_VALIDATION = (
+    t: TFunction,
+    maxLength: number = DEFAULT_CHARACTER_LIMIT,
+) => ({
+    required: t('common:form.validation.required', {
+        field: t('common:group.feed.composer.body'),
+    }),
+    validate: (value: string) =>
+        value.trim().length > 0 ||
+        t('common:form.validation.required', {
+            field: t('common:group.feed.composer.body'),
+        }),
+    ...maxLengthValidation(t, t('common:group.feed.composer.body'), maxLength),
 });

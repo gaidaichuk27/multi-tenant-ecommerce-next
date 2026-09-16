@@ -43,3 +43,4 @@ export {
     SelectValue,
 } from './Select';
 export { Textarea } from './Textarea';
+export { CharacterCount } from './CharacterCount';
