@@ -3,9 +3,8 @@ import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { Container } from './Container';
 
 type ContainerStoryArgs = {
-    variant: 'primary' | 'secondary' | 'tertiary';
+    variant: 'primary' | 'secondary' | 'tertiary' | 'fullwidth';
     bgcolor: 'section-primary-background' | 'section-secondary-background';
-    isFullWidth: boolean;
     rounded: boolean;
     lightness: number;
 };
@@ -23,7 +22,6 @@ const placeholder = (
 function ContainerStory({
     variant,
     bgcolor,
-    isFullWidth,
     rounded,
     lightness,
 }: ContainerStoryArgs) {
@@ -31,7 +29,6 @@ function ContainerStory({
         <Container
             variant={variant}
             bgcolor={bgcolor}
-            fullwidth={isFullWidth}
             rounded={rounded}
             lightness={lightness}
         >
@@ -50,9 +47,9 @@ const meta = {
     argTypes: {
         variant: {
             control: 'select',
-            options: ['primary', 'secondary', 'tertiary'],
+            options: ['primary', 'secondary', 'tertiary', 'fullwidth'],
             description:
-                'Adds `.primary`, `.secondary`, or `.tertiary` on `.container`.',
+                'Adds `.primary`, `.secondary`, `.tertiary`, or `.fullwidth` on `.container`.',
         },
         bgcolor: {
             control: 'select',
@@ -62,15 +59,10 @@ const meta = {
             ],
             description: 'Sets the `--bg-color` CSS variable.',
         },
-        isFullWidth: {
-            name: 'Full width',
-            control: 'boolean',
-            description:
-                'Adds `.fullwidth` on `.container` (edge-to-edge layout).',
-        },
         rounded: {
             control: 'boolean',
-            description: 'Applies `rounded-[25px]` when true.',
+            description:
+                'Applies `rounded-[25px]` when true (ignored for fullwidth).',
         },
         lightness: {
             control: { type: 'range', min: 0, max: 100, step: 5 },
@@ -80,7 +72,6 @@ const meta = {
     args: {
         variant: 'primary',
         bgcolor: 'section-primary-background',
-        isFullWidth: false,
         rounded: true,
         lightness: 100,
     },
@@ -108,7 +99,7 @@ export const Tertiary: Story = {
 export const EdgeToEdge: Story = {
     name: 'Full width',
     args: {
-        isFullWidth: true,
+        variant: 'fullwidth',
         rounded: false,
     },
 };
@@ -144,6 +135,10 @@ export const Comparison: Story = {
                         variant: 'tertiary' as const,
                         label: 'Tertiary',
                     },
+                    {
+                        variant: 'fullwidth' as const,
+                        label: 'Full width',
+                    },
                 ] as const
             ).map(({ variant, label }) => (
                 <Container
@@ -155,21 +150,15 @@ export const Comparison: Story = {
                     </div>
                 </Container>
             ))}
-            <Container fullwidth>
-                <div className="p-6">
-                    <p className="text-sm font-medium">Full width</p>
-                </div>
-            </Container>
         </div>
     ),
 };
 
 export const WithContent: Story = {
-    render: ({ variant, bgcolor, isFullWidth, rounded, lightness }) => (
+    render: ({ variant, bgcolor, rounded, lightness }) => (
         <Container
             variant={variant}
             bgcolor={bgcolor}
-            fullwidth={isFullWidth}
             rounded={rounded}
             lightness={lightness}
             className="py-10"

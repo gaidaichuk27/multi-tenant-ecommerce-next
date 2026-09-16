@@ -34,6 +34,8 @@
         "db:studio": "pnpm --filter @repo/database db:studio",
         "db:push": "pnpm --filter @repo/database db:push",
         "db:pull": "pnpm --filter @repo/database db:pull",
+        "smoke:feed:phase-1": "pnpm --filter backend exec tsx --env-file=../.env ../scripts/smoke-community-feed-phase-1.ts",
+        "smoke:feed:phase-2": "pnpm --filter backend exec tsx --tsconfig ../tsconfig.json --env-file=../.env ../scripts/smoke-community-feed-phase-2.ts",
         "typecheck:backend": "pnpm --filter backend build",
         "typecheck": "pnpm db:generate && pnpm typecheck:backend",
         "docker:dev": "sh bin/multi dev up",

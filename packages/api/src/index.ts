@@ -100,6 +100,43 @@ export {
     type MembershipUpdateRoleInput,
     type MembershipUserSummaryDto,
 } from './membership';
+export { POST_T_MESSAGES, type PostTMessage } from './post-messages';
+export {
+    POST_TYPES,
+    postBodySchema,
+    postCreateInputSchema,
+    postGetInputSchema,
+    postListInputSchema,
+    postListPageSchema,
+    postSchema,
+    postTypeSchema,
+    postUpdateInputSchema,
+    serializePost,
+    type PostCreateInput,
+    type PostDto,
+    type PostGetInput,
+    type PostListInput,
+    type PostListPageDto,
+    type PostTypeDto,
+    type PostUpdateInput,
+} from './posts';
+export { COMMENT_T_MESSAGES, type CommentTMessage } from './comment-messages';
+export {
+    commentBodySchema,
+    commentCreateInputSchema,
+    commentGetInputSchema,
+    commentListInputSchema,
+    commentListPageSchema,
+    commentSchema,
+    commentUpdateInputSchema,
+    serializeComment,
+    type CommentCreateInput,
+    type CommentDto,
+    type CommentGetInput,
+    type CommentListInput,
+    type CommentListPageDto,
+    type CommentUpdateInput,
+} from './comments';
 export {
     PASSWORD_PATTERN,
     PASSWORD_VALIDATION_MESSAGE_KEY,
