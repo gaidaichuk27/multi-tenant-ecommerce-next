@@ -3,10 +3,10 @@
 import { useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { GROUP_T_MESSAGES } from '@repo/api';
+import { GROUP_T_MESSAGES, GROUP_VISIBILITIES } from '@repo/api';
 import { useFormApiError } from '@shared/hooks/useFormApiError';
 import { buildLocalizedPathname } from '@shared/config/locales/locale';
 import type { Language } from '@shared/config/locales/types';
@@ -15,6 +15,8 @@ import { Button } from '@shared/ui/Form/Button';
 import { ErrorMessage } from '@shared/ui/Form/ErrorMessage';
 import { Field, FieldGroup, FieldLabel } from '@shared/ui/Form/Field';
 import { InputGroup, InputGroupInput } from '@shared/ui/Form';
+import { Label } from '@shared/ui/Form/Label';
+import { RadioGroup, RadioGroupItem } from '@shared/ui/Form/RadioGroup';
 import { cn } from '@lib/utils';
 
 import type { CreateGroupFormData } from '../model/types';
@@ -51,6 +53,7 @@ export function CreateGroupForm({ className, locale }: CreateGroupFormProps) {
         reset,
         clearErrors,
         setValue,
+        control,
         formState: { errors, isValid },
     } = useForm<CreateGroupFormData>({
         mode: 'onChange',
@@ -58,6 +61,7 @@ export function CreateGroupForm({ className, locale }: CreateGroupFormProps) {
             name: '',
             slug: '',
             description: '',
+            visibility: 'public',
         },
     });
 
@@ -72,6 +76,7 @@ export function CreateGroupForm({ className, locale }: CreateGroupFormProps) {
                 name: data.name.trim(),
                 slug: data.slug.trim(),
                 description: data.description.trim() || undefined,
+                visibility: data.visibility,
             });
 
             setSubmitError(null);
@@ -173,6 +178,65 @@ export function CreateGroupForm({ className, locale }: CreateGroupFormProps) {
                     </InputGroup>
                     {errors.description?.message && (
                         <ErrorMessage error={errors.description.message} />
+                    )}
+                </Field>
+
+                <Field aria-invalid={Boolean(errors.visibility?.message)}>
+                    <FieldLabel id="group-visibility-label">
+                        {t('common:group.form.visibility')}{' '}
+                        <span className="text-destructive">*</span>
+                    </FieldLabel>
+                    <Controller
+                        name="visibility"
+                        control={control}
+                        rules={{
+                            required: t('common:form.validation.required', {
+                                field: t('common:group.form.visibility'),
+                            }),
+                        }}
+                        render={({ field }) => (
+                            <RadioGroup
+                                value={field.value}
+                                onValueChange={field.onChange}
+                                aria-labelledby="group-visibility-label"
+                                className="gap-3"
+                            >
+                                {GROUP_VISIBILITIES.map((value) => {
+                                    const id = `group-visibility-${value}`;
+
+                                    return (
+                                        <div
+                                            key={value}
+                                            className="flex items-start gap-3"
+                                        >
+                                            <RadioGroupItem
+                                                value={value}
+                                                id={id}
+                                                className="mt-0.5"
+                                            />
+                                            <div className="grid gap-1">
+                                                <Label
+                                                    htmlFor={id}
+                                                    className="font-normal"
+                                                >
+                                                    {t(
+                                                        `common:group.form.visibility.${value}`,
+                                                    )}
+                                                </Label>
+                                                <p className="text-muted-foreground text-sm">
+                                                    {t(
+                                                        `common:group.form.visibility.${value}.hint`,
+                                                    )}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </RadioGroup>
+                        )}
+                    />
+                    {errors.visibility?.message && (
+                        <ErrorMessage error={errors.visibility.message} />
                     )}
                 </Field>
 

@@ -21,6 +21,10 @@ const eslintConfig = [...compat.extends("next/core-web-vitals", "next/typescript
     "next-env.d.ts",
     "backend/**",
     "packages/**",
+    // Local scratch / reference trees (also gitignored)
+    "demo_project/**",
+    "mealstogo-api/**",
+    "reviews/**",
   ],
 }, ...storybook.configs["flat/recommended"]];
 

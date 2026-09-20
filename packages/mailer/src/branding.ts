@@ -3,6 +3,7 @@ import {
     getDefaultLocale,
     getStorefrontUrl,
 } from './config';
+import { escapeHtml } from './html';
 
 export const APP_NAME = 'Multi-Tenant Ecommerce';
 
@@ -37,14 +38,14 @@ function stripTrailingSlash(url: string): string {
  */
 export function applyEmailBranding(html: string, locale?: string): string {
     const resolvedLocale = locale ?? getDefaultLocale();
-    const homeUrl = stripTrailingSlash(
-        buildStorefrontPath(resolvedLocale, '/'),
+    const homeUrl = escapeHtml(
+        stripTrailingSlash(buildStorefrontPath(resolvedLocale, '/')),
     );
-    const categoriesUrl = stripTrailingSlash(
-        buildStorefrontPath(resolvedLocale, '/categories'),
+    const categoriesUrl = escapeHtml(
+        stripTrailingSlash(buildStorefrontPath(resolvedLocale, '/categories')),
     );
-    const storefrontHostname = getStorefrontHostname();
-    const supportEmail = getSupportEmail();
+    const storefrontHostname = escapeHtml(getStorefrontHostname());
+    const supportEmail = escapeHtml(getSupportEmail());
 
     return html
         .replaceAll(

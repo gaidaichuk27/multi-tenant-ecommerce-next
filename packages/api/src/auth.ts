@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { apiResponseSchema } from './response';
 import { passwordFieldSchema, usernameFieldSchema } from './validation';
+import { storefrontLocaleSchema } from './locales';
 
 export const userRoleSchema = z.enum(['user', 'super-admin']);
 
@@ -59,12 +60,12 @@ export const registerInputSchema = z.object({
     password: passwordFieldSchema,
     username: usernameFieldSchema,
     name: z.string().min(1).max(255).optional(),
-    locale: z.string().min(2).max(5).optional(),
+    locale: storefrontLocaleSchema.optional(),
 });
 
 export const passwordForgotInputSchema = z.object({
     email: z.string().email(),
-    locale: z.string().min(2).max(5).optional(),
+    locale: storefrontLocaleSchema.optional(),
 });
 
 export const passwordRestoreInputSchema = z.object({
@@ -75,16 +76,16 @@ export const passwordRestoreInputSchema = z.object({
 export const passwordChangeInputSchema = z.object({
     oldPassword: z.string().min(8),
     newPassword: passwordFieldSchema,
-    locale: z.string().min(2).max(5).optional(),
+    locale: storefrontLocaleSchema.optional(),
 });
 
 export const resendVerificationInputSchema = z.object({
-    locale: z.string().min(2).max(5).optional(),
+    locale: storefrontLocaleSchema.optional(),
 });
 
 export const verifyEmailQuerySchema = z.object({
     token: z.string().min(1),
-    locale: z.string().min(2).max(5).optional(),
+    locale: storefrontLocaleSchema.optional(),
 });
 
 export type UserDto = z.infer<typeof userSchema>;

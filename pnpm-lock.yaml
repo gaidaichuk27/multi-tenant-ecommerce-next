@@ -17,6 +17,9 @@ importers:
       '@repo/database':
         specifier: workspace:*
         version: link:packages/database
+      '@repo/mailer':
+        specifier: workspace:*
+        version: link:packages/mailer
       '@tanstack/react-query':
         specifier: ^5.101.0
         version: 5.101.0(react@19.1.0)
@@ -192,6 +195,9 @@ importers:
       '@repo/database':
         specifier: workspace:*
         version: link:../packages/database
+      '@repo/mailer':
+        specifier: workspace:*
+        version: link:../packages/mailer
       bcryptjs:
         specifier: ^3.0.3
         version: 3.0.3
@@ -213,9 +219,6 @@ importers:
       jsonwebtoken:
         specifier: ^9.0.3
         version: 9.0.3
-      nodemailer:
-        specifier: ^7.0.5
-        version: 7.0.13
       ts-node:
         specifier: ^10.9.2
         version: 10.9.2(@types/node@20.19.41)(typescript@5.9.3)
@@ -238,9 +241,6 @@ importers:
       '@types/node':
         specifier: ^20
         version: 20.19.41
-      '@types/nodemailer':
-        specifier: ^6.4.17
-        version: 6.4.24
       nodemon:
         specifier: ^3.1.14
         version: 3.1.14
@@ -273,6 +273,25 @@ importers:
       prisma:
         specifier: ^6.8.2
         version: 6.19.3(typescript@5.9.3)
+
+  packages/mailer:
+    dependencies:
+      '@repo/api':
+        specifier: workspace:*
+        version: link:../api
+      nodemailer:
+        specifier: ^7.0.5
+        version: 7.0.13
+    devDependencies:
+      '@types/node':
+        specifier: ^20
+        version: 20.19.41
+      '@types/nodemailer':
+        specifier: ^6.4.17
+        version: 6.4.24
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
 
 packages:
 

@@ -14,8 +14,7 @@ function parseOrigins(value: string | undefined): string[] {
 export function getCorsOptions(): CorsOptions {
     const origins = [
         ...parseOrigins(process.env.CORS_ORIGINS),
-        process.env.STOREFRONT_URL,
-        'http://localhost:3000',
+        process.env.NEXT_PUBLIC_API_URL,
     ].filter((origin): origin is string => Boolean(origin));
 
     const uniqueOrigins = [...new Set(origins)];

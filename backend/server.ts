@@ -11,9 +11,14 @@ import { usersRouter } from './routers/usersRouter';
 import { getCorsOptions } from './middleware/cors';
 import { errorHandler } from './middleware/errorHandler';
 
-// Root .env (DATABASE_URL) + backend/.env (PORT, JWT, etc.)
+// Root .env: shared monorepo values (DATABASE_URL, NEXT_PUBLIC_API_URL for CORS).
+// backend/.env: API-owned secrets (JWT, MAILER_*, PORT). Override so Express
+// auth mail does not inherit Next's root MAILER_* credentials.
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
-dotenv.config();
+dotenv.config({
+    path: path.resolve(__dirname, '.env'),
+    override: true,
+});
 
 const app: Express = express();
 const server = http.createServer(app);

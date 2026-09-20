@@ -602,13 +602,13 @@ single-process, but **not** for load-balanced production. Track here and execute
 Phase 7 Redis (or earlier if you scale out before then). Status also mirrored in
 [`README.md`](../README.md) → _Auth follow-up_.
 
-| Status | Item                                                                                                                            | Why                                                                                                                     |
-| ------ | ------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| [ ]    | **Shared rate-limit store (Redis)** — wire `rate-limit-redis` (or equivalent) for Express auth limiters                         | In-memory counters reset per process and do not share across instances. **Deploy blocker** before multi-instance / ALB. |
-| [ ]    | **Confirm `TRUST_PROXY` + reverse-proxy IPs** in prod (`TRUST_PROXY=1` / `NODE_ENV=production`)                                 | Rate-limit keys must use real client IPs behind the proxy.                                                              |
-| [ ]    | Stateful single-use email-verify tokens (hashed at rest, like password reset)                                                   | Medium — optional hardening.                                                                                            |
-| [ ]    | Consolidate Next `/api/auth` route factories                                                                                    | Low — cleanup after ship.                                                                                               |
-| [ ]    | **Dev email-template preview** — Express (or Next) controller + URL to render each mailer HTML without sending (see note below) | Speeds template QA; must be **dev-only** / gated.                                                                       |
+| Status | Item                                                                                                                   | Why                                                                                                                     |
+| ------ | ---------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| [ ]    | **Shared rate-limit store (Redis)** — wire `rate-limit-redis` (or equivalent) for Express auth limiters                | In-memory counters reset per process and do not share across instances. **Deploy blocker** before multi-instance / ALB. |
+| [ ]    | **Confirm `TRUST_PROXY` + reverse-proxy IPs** in prod (`TRUST_PROXY=1` / `NODE_ENV=production`)                        | Rate-limit keys must use real client IPs behind the proxy.                                                              |
+| [ ]    | Stateful single-use email-verify tokens (hashed at rest, like password reset)                                          | Medium — optional hardening.                                                                                            |
+| [ ]    | Consolidate Next `/api/auth` route factories                                                                           | Low — cleanup after ship.                                                                                               |
+| [x]    | **Dev email-template preview** — Next route + `@repo/mailer` HTML without sending (`GET /api/dev/verify-template?t=…`) | Speeds template QA; **dev-only** / gated (`NODE_ENV !== 'production'` or `ENABLE_EMAIL_PREVIEWS=1`).                    |
 
 ##### Mailer follow-up — email template preview + password-changed mail
 
@@ -619,13 +619,13 @@ Phase 7 Redis (or earlier if you scale out before then). Status also mirrored in
 
 **Still to build (dev tooling)**
 
-- [ ] **Email template preview controller** (local / non-prod only):
-    - Suggested route: `GET /api/dev/email-previews/:template?locale=en`
-    - Templates to cover: `accountVerification`, `forgotPassword`, `emailConfirmation`, `changePassword`
-    - Return branded HTML (`Content-Type: text/html`) using the same `*EmailTemplate` helpers + sample `url` / `to` / coupon fixtures — **do not call `sendMail`**
-    - Gate with `NODE_ENV !== 'production'` (and/or `ENABLE_EMAIL_PREVIEWS=1`); never mount in production builds
-    - Optional: index page listing available template names for quick browser checks
-    - Optional later: Storybook or a Next `/dev/emails` page that proxies the same HTML
+- [x] **Email template preview controller** (local / non-prod only):
+    - Route: `GET /api/dev/verify-template?t=<templateName>&locale=en` (index when `t` omitted)
+    - Templates: `accountVerification`, `forgotPassword`, `emailConfirmation`, `changePassword`, `membershipJoinRequest`, `membershipApproved`, `membershipDeclined`
+    - Return branded HTML (`Content-Type: text/html`) using shared `@repo/mailer` helpers + sample fixtures — **does not call `sendMail`**
+    - Gate with `NODE_ENV !== 'production'` (or `ENABLE_EMAIL_PREVIEWS=1`); never mounted in production unless explicitly enabled
+    - Index page lists available template names for quick browser checks
+    - Shared mailer package: `@repo/mailer` (auth Express + membership tRPC)
 
 ---
 
@@ -775,7 +775,7 @@ Phase 7 Redis (or earlier if you scale out before then). Status also mirrored in
 - [x] Create group + about page
 - [ ] Community feed (posts, comments, likes, categories)
 - [x] Join + pending approvals (membership questions deferred)
-- [ ] Membership emails: owner on join request; joiner on approve/decline (+ optional decline reason)
+- [x] Membership emails: owner on join request; joiner on approve/decline (+ optional decline reason)
 - [ ] Classroom (1+ courses, lessons, progress)
 - [ ] Leaderboards + points
 - [ ] Calendar (basic events)

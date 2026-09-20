@@ -4,11 +4,20 @@ import {
     GROUP_T_MESSAGES,
     MEMBERSHIP_T_MESSAGES,
     groupSlugInputSchema,
+    membershipApproveInputSchema,
     membershipCursorInputSchema,
+    membershipDeclineInputSchema,
+    membershipRequestJoinInputSchema,
     membershipTargetInputSchema,
     membershipUpdateRoleInputSchema,
     serializeMembership,
 } from '@repo/api';
+import {
+    sendMembershipApprovedEmail,
+    sendMembershipDeclinedEmail,
+    sendMembershipJoinRequestEmails,
+} from '@repo/mailer';
+import { resolveEmailLocaleFromHeaders } from '@lib/mail/resolve-email-locale';
 import {
     createTRPCRouter,
     groupAdminProcedure,
@@ -24,6 +33,13 @@ const MEMBER_USER_SELECT = {
     avatarUrl: true,
 } as const;
 
+const MAIL_USER_SELECT = {
+    id: true,
+    email: true,
+    username: true,
+    name: true,
+} as const;
+
 async function findGroupBySlugOrThrow(slug: string) {
     const group = await db.group.findUnique({ where: { slug } });
 
@@ -35,6 +51,19 @@ async function findGroupBySlugOrThrow(slug: string) {
     }
 
     return group;
+}
+
+async function listActiveAdminRecipients(groupId: string) {
+    const rows = await db.groupMembership.findMany({
+        where: {
+            groupId,
+            status: 'active',
+            role: { in: ['owner', 'admin'] },
+        },
+        include: { user: { select: MAIL_USER_SELECT } },
+    });
+
+    return rows.map((row) => row.user);
 }
 
 async function listMembershipsByStatus(opts: {
@@ -75,7 +104,7 @@ async function listMembershipsByStatus(opts: {
 
 export const membershipRouter = createTRPCRouter({
     requestJoin: verifiedEmailProcedure
-        .input(groupSlugInputSchema)
+        .input(membershipRequestJoinInputSchema)
         .mutation(async ({ ctx, input }) => {
             const group = await findGroupBySlugOrThrow(input.slug);
 
@@ -122,6 +151,32 @@ export const membershipRouter = createTRPCRouter({
                 },
             });
 
+            if (status === 'pending') {
+                const recipients = await listActiveAdminRecipients(group.id);
+
+                if (recipients.length > 0) {
+                    try {
+                        await sendMembershipJoinRequestEmails({
+                            recipients,
+                            group: { name: group.name, slug: group.slug },
+                            joiner: {
+                                email: ctx.user.email,
+                                name: ctx.user.name,
+                                username: ctx.user.username,
+                            },
+                            locale:
+                                input.locale ??
+                                resolveEmailLocaleFromHeaders(ctx.headers),
+                        });
+                    } catch (error) {
+                        console.error(
+                            'Failed to send membership join-request emails:',
+                            error,
+                        );
+                    }
+                }
+            }
+
             return serializeMembership(membership);
         }),
 
@@ -165,7 +220,7 @@ export const membershipRouter = createTRPCRouter({
         }),
 
     approve: groupAdminProcedure
-        .input(membershipTargetInputSchema)
+        .input(membershipApproveInputSchema)
         .mutation(async ({ ctx, input }) => {
             const membership = await db.groupMembership.findUnique({
                 where: {
@@ -174,6 +229,7 @@ export const membershipRouter = createTRPCRouter({
                         userId: input.userId,
                     },
                 },
+                include: { user: { select: MAIL_USER_SELECT } },
             });
 
             if (!membership || membership.status !== 'pending') {
@@ -192,11 +248,26 @@ export const membershipRouter = createTRPCRouter({
                 include: { user: { select: MEMBER_USER_SELECT } },
             });
 
+            try {
+                await sendMembershipApprovedEmail({
+                    recipient: membership.user,
+                    group: { name: ctx.group.name, slug: ctx.group.slug },
+                    locale:
+                        input.locale ??
+                        resolveEmailLocaleFromHeaders(ctx.headers),
+                });
+            } catch (error) {
+                console.error(
+                    'Failed to send membership approved email:',
+                    error,
+                );
+            }
+
             return serializeMembership(updated);
         }),
 
     decline: groupAdminProcedure
-        .input(membershipTargetInputSchema)
+        .input(membershipDeclineInputSchema)
         .mutation(async ({ ctx, input }) => {
             const membership = await db.groupMembership.findUnique({
                 where: {
@@ -205,6 +276,7 @@ export const membershipRouter = createTRPCRouter({
                         userId: input.userId,
                     },
                 },
+                include: { user: { select: MAIL_USER_SELECT } },
             });
 
             if (!membership || membership.status !== 'pending') {
@@ -217,6 +289,24 @@ export const membershipRouter = createTRPCRouter({
             await db.groupMembership.delete({
                 where: { id: membership.id },
             });
+
+            const declineReason = input.declineReason?.trim() || undefined;
+
+            try {
+                await sendMembershipDeclinedEmail({
+                    recipient: membership.user,
+                    group: { name: ctx.group.name, slug: ctx.group.slug },
+                    declineReason,
+                    locale:
+                        input.locale ??
+                        resolveEmailLocaleFromHeaders(ctx.headers),
+                });
+            } catch (error) {
+                console.error(
+                    'Failed to send membership declined email:',
+                    error,
+                );
+            }
 
             return { success: true as const };
         }),

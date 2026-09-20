@@ -9,6 +9,12 @@ type SendMailInput = {
     attachments?: Attachment[];
 };
 
+/**
+ * Credentials come from `process.env` only (no file scrape).
+ * - Next: root `.env` → membership emails
+ * - Express: `backend/.env` (overrides root) → auth emails
+ * Set `MAILER_*` on each process that sends mail.
+ */
 function getMailerCredentials() {
     const user = process.env.MAILER_ADDRESS;
     const pass = process.env.MAILER_SECRET;
@@ -39,10 +45,11 @@ export async function sendMail({
     html,
     attachments,
 }: SendMailInput) {
+    const { user } = getMailerCredentials();
     const transporter = createTransporter();
 
     await transporter.sendMail({
-        from: process.env.MAILER_ADDRESS,
+        from: user,
         to,
         subject,
         html,

@@ -11,6 +11,7 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY backend/package.json ./backend/
 COPY packages/database/package.json ./packages/database/
 COPY packages/api/package.json ./packages/api/
+COPY packages/mailer/package.json ./packages/mailer/
 ENV HUSKY=0
 RUN pnpm install --frozen-lockfile
 
@@ -20,6 +21,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/backend/node_modules ./backend/node_modules
 COPY --from=deps /app/packages/database/node_modules ./packages/database/node_modules
 COPY --from=deps /app/packages/api/node_modules ./packages/api/node_modules
+COPY --from=deps /app/packages/mailer/node_modules ./packages/mailer/node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN pnpm build
@@ -43,6 +45,7 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY backend/package.json ./backend/
 COPY packages/database/package.json ./packages/database/
 COPY packages/api/package.json ./packages/api/
+COPY packages/mailer/package.json ./packages/mailer/
 ENV HUSKY=0
 RUN pnpm install --frozen-lockfile
 COPY . .
@@ -59,6 +62,7 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY backend/package.json ./backend/
 COPY packages/database/package.json ./packages/database/
 COPY packages/api/package.json ./packages/api/
+COPY packages/mailer/package.json ./packages/mailer/
 ENV HUSKY=0
 RUN pnpm install --frozen-lockfile
 COPY . .
@@ -71,6 +75,7 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY backend/package.json ./backend/
 COPY packages/database/package.json ./packages/database/
 COPY packages/api/package.json ./packages/api/
+COPY packages/mailer/package.json ./packages/mailer/
 ENV HUSKY=0
 RUN pnpm install --frozen-lockfile
 COPY . .

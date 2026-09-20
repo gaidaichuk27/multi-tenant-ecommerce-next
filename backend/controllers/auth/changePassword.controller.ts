@@ -65,8 +65,8 @@ export async function changePasswordController(
 
         const token = signAccessToken(updatedUser.id, updatedUser.tokenVersion);
 
-        // Best-effort security notification — do not fail the change if SMTP errors.
-        void sendPasswordChangedEmail(
+        // Best-effort security notification — sendPasswordChangedEmail swallows SMTP errors.
+        await sendPasswordChangedEmail(
             { id: updatedUser.id, email: updatedUser.email },
             input.locale,
         );

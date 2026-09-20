@@ -1,10 +1,7 @@
-import { Language } from '@shared/config/locales/types';
+import { Language, STOREFRONT_LOCALES } from '@repo/api';
 
-export const Languages = [
-    Language.UKRAINIAN,
-    Language.ENGLISH,
-    Language.POLISH,
-    Language.DEUTCH,
-] as const satisfies readonly Language[];
+export const Languages = STOREFRONT_LOCALES;
 
 export const LANG_COOKIE_KEY = 'slang';
+
+export { Language };

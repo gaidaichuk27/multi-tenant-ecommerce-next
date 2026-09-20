@@ -1,9 +1,9 @@
 import { Languages } from '@shared/config/locales/const';
-import { Language } from '@shared/config/locales/types';
+import { getPreselectedLocale } from '@shared/config/locales/languageOptions';
 
 const i18nConfig = {
     locales: [...Languages],
-    defaultLocale: Language.ENGLISH,
+    defaultLocale: getPreselectedLocale(),
 };
 
 export default i18nConfig;
