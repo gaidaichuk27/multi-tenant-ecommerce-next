@@ -3,6 +3,7 @@ import { ApiError, AUTH_T_MESSAGES, type MembershipDto } from '@repo/api';
 
 import { getBrowserTrpcClient } from '@lib/trpc/browser-client';
 import { toApiErrorFromTrpc } from '@lib/trpc/map-trpc-error';
+import type { Language } from '@shared/config/locales/types';
 
 async function wrapMembershipMutation<T>(action: () => Promise<T>): Promise<T> {
     try {
@@ -20,9 +21,12 @@ async function wrapMembershipMutation<T>(action: () => Promise<T>): Promise<T> {
     }
 }
 
-export async function requestJoinGroup(slug: string): Promise<MembershipDto> {
+export async function requestJoinGroup(
+    slug: string,
+    locale: Language,
+): Promise<MembershipDto> {
     return wrapMembershipMutation(() =>
-        getBrowserTrpcClient().membership.requestJoin.mutate({ slug }),
+        getBrowserTrpcClient().membership.requestJoin.mutate({ slug, locale }),
     );
 }
 
@@ -35,17 +39,29 @@ export async function leaveGroup(slug: string): Promise<{ success: true }> {
 export async function approveMembership(
     slug: string,
     userId: string,
+    locale: Language,
 ): Promise<MembershipDto> {
     return wrapMembershipMutation(() =>
-        getBrowserTrpcClient().membership.approve.mutate({ slug, userId }),
+        getBrowserTrpcClient().membership.approve.mutate({
+            slug,
+            userId,
+            locale,
+        }),
     );
 }
 
 export async function declineMembership(
     slug: string,
     userId: string,
+    locale: Language,
+    declineReason?: string,
 ): Promise<{ success: true }> {
     return wrapMembershipMutation(() =>
-        getBrowserTrpcClient().membership.decline.mutate({ slug, userId }),
+        getBrowserTrpcClient().membership.decline.mutate({
+            slug,
+            userId,
+            locale,
+            declineReason,
+        }),
     );
 }

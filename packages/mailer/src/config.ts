@@ -1,10 +1,13 @@
+/** Storefront origin for CTA links in emails (same as Next public API URL). */
 export function getStorefrontUrl(): string {
-    return process.env.STOREFRONT_URL ?? 'http://localhost:3000';
+    return (
+        process.env.NEXT_PUBLIC_API_URL ??
+        process.env.STOREFRONT_URL ??
+        'http://localhost:3000'
+    );
 }
 
-export function getDefaultLocale(): string {
-    return process.env.DEFAULT_LOCALE ?? 'en';
-}
+export { getPreselectedLocale as getDefaultLocale } from './languageMeta';
 
 export function getEmailConfirmationCouponCode(): string {
     return process.env.EMAIL_CONFIRMATION_COUPON_CODE ?? 'WELCOME20';

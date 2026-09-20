@@ -53,7 +53,7 @@ export function JoinGroupActions({
     const handleJoin = async () => {
         try {
             setIsSubmitting(true);
-            const membership = await requestJoinGroup(group.slug);
+            const membership = await requestJoinGroup(group.slug, locale);
 
             if (membership.status === 'pending') {
                 toast.success(

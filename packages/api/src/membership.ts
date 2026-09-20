@@ -6,11 +6,23 @@ import {
     type GroupMembershipRoleDto,
     type GroupMembershipStatusDto,
 } from './groups';
+import { storefrontLocaleSchema } from './locales';
+
+export { storefrontLocaleSchema } from './locales';
 
 /** Shared slug input for all group-scoped procedures. Never accept bare groupId from the client. */
 export const groupSlugInputSchema = z.object({
     slug: z.string().min(1),
 });
+
+/** Locale only on mutations that send membership mail. */
+export const membershipMailLocaleSchema = z.object({
+    locale: storefrontLocaleSchema.optional(),
+});
+
+export const membershipRequestJoinInputSchema = groupSlugInputSchema.merge(
+    membershipMailLocaleSchema,
+);
 
 export const membershipUserSummarySchema = z.object({
     id: z.string(),
@@ -45,12 +57,35 @@ export const membershipTargetInputSchema = groupSlugInputSchema.extend({
     userId: z.string().min(1),
 });
 
+export const membershipApproveInputSchema = membershipTargetInputSchema.merge(
+    membershipMailLocaleSchema,
+);
+
+/** Optional note included in the joiner’s decline email (not persisted). */
+export const MEMBERSHIP_DECLINE_REASON_MAX_LENGTH = 500;
+
+export const membershipDeclineInputSchema = membershipTargetInputSchema
+    .merge(membershipMailLocaleSchema)
+    .extend({
+        declineReason: z
+            .string()
+            .trim()
+            .max(MEMBERSHIP_DECLINE_REASON_MAX_LENGTH)
+            .optional(),
+    });
+
 export const membershipUpdateRoleInputSchema =
     membershipTargetInputSchema.extend({
         role: groupMembershipRoleSchema,
     });
 
 export type GroupSlugInput = z.infer<typeof groupSlugInputSchema>;
+export type MembershipRequestJoinInput = z.infer<
+    typeof membershipRequestJoinInputSchema
+>;
+export type MembershipApproveInput = z.infer<
+    typeof membershipApproveInputSchema
+>;
 export type MembershipUserSummaryDto = z.infer<
     typeof membershipUserSummarySchema
 >;
@@ -58,6 +93,9 @@ export type MembershipDto = z.infer<typeof membershipSchema>;
 export type MembershipCursorInput = z.infer<typeof membershipCursorInputSchema>;
 export type MembershipListPageDto = z.infer<typeof membershipListPageSchema>;
 export type MembershipTargetInput = z.infer<typeof membershipTargetInputSchema>;
+export type MembershipDeclineInput = z.infer<
+    typeof membershipDeclineInputSchema
+>;
 export type MembershipUpdateRoleInput = z.infer<
     typeof membershipUpdateRoleInputSchema
 >;

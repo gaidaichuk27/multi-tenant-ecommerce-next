@@ -41,6 +41,7 @@ export async function PendingPageView({
     return (
         <PendingListView
             groupSlug={groupSlug}
+            locale={locale}
             title={t('common:group.pending.title')}
             emptyLabel={t('common:group.pending.empty')}
             approveLabel={t('common:group.pending.approve')}

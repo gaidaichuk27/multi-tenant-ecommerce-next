@@ -3,15 +3,17 @@ import {
     buildStorefrontPath,
     getDefaultLocale,
     getEmailConfirmationCouponCode,
-} from './config';
-import { sendMail } from './sendMail';
-import {
+    sendMail,
     accountVerificationEmailTemplate,
-    attachments,
     changePasswordEmailTemplate,
     emailConfirmationEmailTemplate,
     forgotPasswordEmailTemplate,
-} from './templates';
+    attachments,
+    getAccountVerificationCopy,
+    getChangePasswordCopy,
+    getEmailConfirmationCopy,
+    getForgotPasswordCopy,
+} from '@repo/mailer';
 import { signEmailVerifyToken } from '../jwt';
 
 type AuthEmailUser = {
@@ -30,11 +32,12 @@ export async function sendAccountVerificationEmail(
     const resolvedLocale = resolveEmailLocale(locale);
     const token = signEmailVerifyToken(user.id);
     const url = buildStorefrontPath(resolvedLocale, '/verify-email', { token });
+    const copy = getAccountVerificationCopy(resolvedLocale);
 
     try {
         await sendMail({
             to: user.email,
-            subject: 'Verify your email',
+            subject: copy.subject,
             html: accountVerificationEmailTemplate(
                 url,
                 user.email,
@@ -60,11 +63,12 @@ export async function sendPasswordResetEmail(
     const url = buildStorefrontPath(resolvedLocale, '/password-restore', {
         token,
     });
+    const copy = getForgotPasswordCopy(resolvedLocale);
 
     try {
         await sendMail({
             to: user.email,
-            subject: 'Reset your password',
+            subject: copy.subject,
             html: forgotPasswordEmailTemplate(url, user.email, resolvedLocale),
             attachments,
         });
@@ -87,13 +91,13 @@ export async function sendPasswordChangedEmail(
     locale?: string,
 ) {
     const resolvedLocale = resolveEmailLocale(locale);
-    // Soft link for the template button (home). Support contact lands later.
     const url = buildStorefrontPath(resolvedLocale, '/');
+    const copy = getChangePasswordCopy(resolvedLocale);
 
     try {
         await sendMail({
             to: user.email,
-            subject: 'Your password was changed',
+            subject: copy.subject,
             html: changePasswordEmailTemplate(url, user.email, resolvedLocale),
             attachments,
         });
@@ -108,11 +112,12 @@ export async function sendEmailConfirmedEmail(
 ) {
     const resolvedLocale = resolveEmailLocale(locale);
     const couponCode = getEmailConfirmationCouponCode();
+    const copy = getEmailConfirmationCopy(resolvedLocale);
 
     try {
         await sendMail({
             to: user.email,
-            subject: 'Your email is verified',
+            subject: copy.subject,
             html: emailConfirmationEmailTemplate(couponCode, resolvedLocale),
             attachments,
         });

@@ -31,9 +31,13 @@ services:
             target: runner
         ports:
             - '3000:3000'
+        env_file:
+            - path: .env
+              required: false
         environment:
             NODE_ENV: production
             BACKEND_URL: http://api:8080
+            # Membership mail (@repo/mailer) needs MAILER_* from root .env
         depends_on:
             - api
 
@@ -74,6 +78,7 @@ services:
             - dev_backend_node_modules:/app/backend/node_modules
             - dev_database_node_modules:/app/packages/database/node_modules
             - dev_api_node_modules:/app/packages/api/node_modules
+            - dev_mailer_node_modules:/app/packages/mailer/node_modules
             - dev_next:/app/.next
         env_file:
             - path: .env
@@ -126,5 +131,6 @@ volumes:
     dev_backend_node_modules:
     dev_database_node_modules:
     dev_api_node_modules:
+    dev_mailer_node_modules:
     dev_next:
     storybook_node_modules:

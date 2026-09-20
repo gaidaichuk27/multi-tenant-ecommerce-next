@@ -1,9 +1,11 @@
 import type { Membership } from '@entities/Membership';
 import { Avatar } from '@shared/ui/Avatar';
 import { PendingMemberActions } from '@features/join-group';
+import type { Language } from '@shared/config/locales/types';
 
 interface PendingListViewProps {
     groupSlug: string;
+    locale: Language;
     title: string;
     emptyLabel: string;
     approveLabel: string;
@@ -13,6 +15,7 @@ interface PendingListViewProps {
 
 export function PendingListView({
     groupSlug,
+    locale,
     title,
     emptyLabel,
     approveLabel,
@@ -54,6 +57,7 @@ export function PendingListView({
                             <PendingMemberActions
                                 groupSlug={groupSlug}
                                 userId={member.userId}
+                                locale={locale}
                                 approveLabel={approveLabel}
                                 declineLabel={declineLabel}
                             />

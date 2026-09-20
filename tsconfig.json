@@ -28,6 +28,10 @@
             "@locales/*": ["./src/locales/*"],
             "@providers/*": ["./src/providers/*"],
             "@repo/api": ["./packages/api/src/index.ts"],
+            "@repo/mailer": ["./packages/mailer/src/index.ts"],
+            "@repo/mailer/language-meta": [
+                "./packages/mailer/src/languageMeta.ts"
+            ],
             "@shared/*": ["./src/shared/*"],
             "@services/*": ["./src/services/*"],
             "@styles/*": ["./src/styles/*"],

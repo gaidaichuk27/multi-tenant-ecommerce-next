@@ -1,13 +1,10 @@
 import type { SvgImport } from '@shared/config/types';
+import { Language } from '@repo/api';
+
+export { Language };
+export type { StorefrontLocale } from '@repo/api';
 
 export type LanguageLabels = 'Eng' | 'De' | 'Pl' | 'Укр';
-
-export enum Language {
-    UKRAINIAN = 'ua',
-    ENGLISH = 'en',
-    POLISH = 'pl',
-    DEUTCH = 'de',
-}
 
 export interface LanguageOption {
     label: LanguageLabels;

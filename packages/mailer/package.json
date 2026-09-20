@@ -1,0 +1,26 @@
+{
+    "name": "@repo/mailer",
+    "version": "0.0.0",
+    "private": true,
+    "main": "./src/index.ts",
+    "types": "./src/index.ts",
+    "exports": {
+        ".": {
+            "types": "./src/index.ts",
+            "default": "./src/index.ts"
+        },
+        "./language-meta": {
+            "types": "./src/languageMeta.ts",
+            "default": "./src/languageMeta.ts"
+        }
+    },
+    "dependencies": {
+        "@repo/api": "workspace:*",
+        "nodemailer": "^7.0.5"
+    },
+    "devDependencies": {
+        "@types/node": "^20",
+        "@types/nodemailer": "^6.4.17",
+        "typescript": "^5.9.3"
+    }
+}

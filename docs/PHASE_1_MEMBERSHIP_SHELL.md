@@ -57,10 +57,10 @@ Merge each PR into `develop` before starting the next (or rebase the next onto t
 
 Membership **email notifications** (reuse auth mailer patterns; best-effort send):
 
-- [ ] **Owner/admins** — email when someone `requestJoin`s (especially private → pending), with link to `/{group}/-/pending`
-- [ ] **Joiner** — email when request is **approved** (link to `/{group}`)
-- [ ] **Joiner** — email when request is **declined**
-- [ ] **Decline reason (optional)** — short note from admin on decline; persist (or pass through) and include in the joiner email so they can correct behavior and re-request
-- [ ] Wire into `membership.requestJoin` / `approve` / `decline`; add templates under `backend/lib/mailer/`; respect future notification prefs when those exist
+- [x] **Owner/admins** — email when someone `requestJoin`s (especially private → pending), with link to `/{group}/-/pending`
+- [x] **Joiner** — email when request is **approved** (link to `/{group}`)
+- [x] **Joiner** — email when request is **declined**
+- [x] **Decline reason (optional)** — short note from admin on decline; pass through and include in the joiner email so they can correct behavior and re-request
+- [x] Wire into `membership.requestJoin` / `approve` / `decline`; templates live in `@repo/mailer` (auth wrappers remain in `backend/lib/mailer/auth-emails.ts`); respect future notification prefs when those exist
 
 Also deferred from the original out-of-scope list: membership questions, categories, posts/comments.
