@@ -18,6 +18,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 export { Prisma, PrismaClient };
+export { isPrismaUniqueConstraintError } from './errors';
 export type {
     Comment,
     Group,
@@ -27,6 +28,7 @@ export type {
     GroupSettings,
     GroupVisibility,
     Post,
+    PostLike,
     PostType,
     TestUser,
     User,

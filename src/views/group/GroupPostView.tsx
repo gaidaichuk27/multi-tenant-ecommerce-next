@@ -4,7 +4,7 @@ import { Fragment, useState } from 'react';
 import Link from 'next/link';
 import type { Comment } from '@entities/Comment';
 import type { Post } from '@entities/Post';
-import { CreateCommentForm } from '@features/group-feed';
+import { CreateCommentForm, LikePostButton } from '@features/group-feed';
 import { buildLocalizedPathname } from '@shared/config/locales/locale';
 import type { Language } from '@shared/config/locales/types';
 import { formatPostedAt } from '@shared/lib/formatPostedAt';
@@ -179,6 +179,14 @@ export function GroupPostView({
                         <p className="mt-2 text-sm leading-relaxed whitespace-pre-wrap">
                             {post.body}
                         </p>
+                        <div className="mt-3">
+                            <LikePostButton
+                                groupSlug={groupSlug}
+                                postId={post.id}
+                                likeCount={post.likeCount}
+                                likedByViewer={post.likedByViewer}
+                            />
+                        </div>
                     </div>
                 </div>
             </article>

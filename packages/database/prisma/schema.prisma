@@ -60,6 +60,7 @@ model User {
     groupMemberships  GroupMembership[]
     posts             Post[]
     comments          Comment[]
+    postLikes         PostLike[]
 
     @@map("users")
 }
@@ -128,13 +129,29 @@ model Post {
     createdAt      DateTime @default(now()) @map("created_at") @db.Timestamp(6)
     updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamp(6)
 
-    group    Group     @relation(fields: [groupId], references: [id], onDelete: Cascade)
-    author   User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+    group    Group      @relation(fields: [groupId], references: [id], onDelete: Cascade)
+    author   User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
     comments Comment[]
+    likes    PostLike[]
 
     @@index([groupId, createdAt(sort: Desc)])
     @@index([authorId])
     @@map("posts")
+}
+
+model PostLike {
+    id        String   @id @default(cuid())
+    postId    String   @map("post_id")
+    userId    String   @map("user_id")
+    createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+
+    post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@unique([postId, userId])
+    @@index([postId])
+    @@index([userId])
+    @@map("post_likes")
 }
 
 model Comment {

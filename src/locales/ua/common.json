@@ -198,6 +198,9 @@
     "group.feed.composer.placeholder": "Напишіть щось…",
     "group.feed.composer.submit": "Опублікувати",
     "group.feed.comments_count": "{{count}} коментарів",
+    "group.feed.likes_count": "{{count}} вподобань",
+    "group.feed.like": "Вподобати",
+    "group.feed.unlike": "Прибрати вподобання",
     "group.feed.pinned": "Закріплено",
 
     "group.post.back_to_feed": "Назад до спільноти",

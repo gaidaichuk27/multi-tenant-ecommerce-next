@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { Post } from '@entities/Post';
-import { CreatePostForm } from '@features/group-feed';
+import { CreatePostForm, LikePostButton } from '@features/group-feed';
 import { buildLocalizedPathname } from '@shared/config/locales/locale';
 import type { Language } from '@shared/config/locales/types';
 import { formatPostedAt } from '@shared/lib/formatPostedAt';
@@ -67,16 +67,24 @@ function PostFeedItem({
                     >
                         {post.body}
                     </Link>
-                    {typeof post.commentCount === 'number' ? (
-                        <p className="text-muted-foreground mt-2 text-xs">
-                            <Link
-                                href={href}
-                                className="hover:text-foreground hover:underline"
-                            >
-                                {labels.commentsCount(post.commentCount)}
-                            </Link>
-                        </p>
-                    ) : null}
+                    <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1">
+                        <LikePostButton
+                            groupSlug={groupSlug}
+                            postId={post.id}
+                            likeCount={post.likeCount}
+                            likedByViewer={post.likedByViewer}
+                        />
+                        {typeof post.commentCount === 'number' ? (
+                            <p className="text-muted-foreground text-xs">
+                                <Link
+                                    href={href}
+                                    className="hover:text-foreground hover:underline"
+                                >
+                                    {labels.commentsCount(post.commentCount)}
+                                </Link>
+                            </p>
+                        ) : null}
+                    </div>
                 </div>
             </div>
         </li>
