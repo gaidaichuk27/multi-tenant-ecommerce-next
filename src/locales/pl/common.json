@@ -197,6 +197,9 @@
     "group.feed.composer.placeholder": "Napisz coś…",
     "group.feed.composer.submit": "Opublikuj",
     "group.feed.comments_count": "{{count}} komentarzy",
+    "group.feed.likes_count": "{{count}} polubień",
+    "group.feed.like": "Lubię to",
+    "group.feed.unlike": "Cofnij polubienie",
     "group.feed.pinned": "Przypięty",
 
     "group.post.back_to_feed": "Wróć do społeczności",

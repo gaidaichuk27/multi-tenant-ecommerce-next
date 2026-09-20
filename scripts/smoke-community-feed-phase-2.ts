@@ -80,6 +80,8 @@ async function main() {
         assert.equal(created.body, '[smoke] phase-2 post');
         assert.equal(created.authorId, user.id);
         assert.equal(created.commentCount, 0);
+        assert.equal(created.likeCount, 0);
+        assert.equal(created.likedByViewer, false);
         assert.ok(created.author?.username);
 
         const listed = await caller.post.list({
@@ -93,6 +95,30 @@ async function main() {
             postId: created.id,
         });
         assert.equal(got.id, created.id);
+        assert.equal(got.likeCount, 0);
+        assert.equal(got.likedByViewer, false);
+
+        section('post.like toggle');
+        const liked = await caller.post.like({
+            slug: group.slug,
+            postId: created.id,
+        });
+        assert.equal(liked.liked, true);
+        assert.equal(liked.likeCount, 1);
+
+        const afterLike = await caller.post.get({
+            slug: group.slug,
+            postId: created.id,
+        });
+        assert.equal(afterLike.likeCount, 1);
+        assert.equal(afterLike.likedByViewer, true);
+
+        const unliked = await caller.post.like({
+            slug: group.slug,
+            postId: created.id,
+        });
+        assert.equal(unliked.liked, false);
+        assert.equal(unliked.likeCount, 0);
 
         section('comment.create / list / reply');
         const comment = await caller.comment.create({

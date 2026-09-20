@@ -1,5 +1,5 @@
 import { TRPCError } from '@trpc/server';
-import { db } from '@repo/database';
+import { db, type Prisma } from '@repo/database';
 import {
     POST_T_MESSAGES,
     postCreateInputSchema,
@@ -19,17 +19,60 @@ const AUTHOR_SELECT = {
 
 const MODERATOR_ROLES = new Set(['moderator', 'admin', 'owner']);
 
+/** Points awarded to the post author when someone else likes their post. */
+const LIKE_AUTHOR_POINTS = 1;
+
 function canModerate(role: string) {
     return MODERATOR_ROLES.has(role);
 }
 
-async function findPostInGroupOrThrow(groupId: string, postId: string) {
+function postIncludeForViewer(userId: string) {
+    return {
+        author: { select: AUTHOR_SELECT },
+        _count: { select: { comments: true, likes: true } },
+        likes: {
+            where: { userId },
+            select: { id: true },
+            take: 1,
+        },
+    } as const;
+}
+
+function serializePostRow(row: {
+    id: string;
+    groupId: string;
+    authorId: string;
+    body: string;
+    type: 'text';
+    pinned: boolean;
+    broadcastEmail: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+    author: {
+        id: string;
+        username: string;
+        name: string | null;
+        avatarUrl: string | null;
+    };
+    _count: { comments: number; likes: number };
+    likes: { id: string }[];
+}) {
+    return serializePost({
+        ...row,
+        commentCount: row._count.comments,
+        likeCount: row._count.likes,
+        likedByViewer: row.likes.length > 0,
+    });
+}
+
+async function findPostInGroupOrThrow(
+    groupId: string,
+    postId: string,
+    userId: string,
+) {
     const post = await db.post.findFirst({
         where: { id: postId, groupId },
-        include: {
-            author: { select: AUTHOR_SELECT },
-            _count: { select: { comments: true } },
-        },
+        include: postIncludeForViewer(userId),
     });
 
     if (!post) {
@@ -42,6 +85,48 @@ async function findPostInGroupOrThrow(groupId: string, postId: string) {
     return post;
 }
 
+/**
+ * Adjust author membership points. Only touches active memberships.
+ * Decrements use GREATEST(0, points - n) so concurrent unlikes cannot
+ * overwrite each other or drive points negative.
+ */
+async function adjustAuthorPoints(
+    tx: Prisma.TransactionClient,
+    groupId: string,
+    authorId: string,
+    delta: number,
+) {
+    if (delta === 0) return;
+
+    if (delta > 0) {
+        await tx.groupMembership.updateMany({
+            where: { groupId, userId: authorId, status: 'active' },
+            data: { points: { increment: delta } },
+        });
+        return;
+    }
+
+    await clawBackAuthorPoints(tx, groupId, authorId, Math.abs(delta));
+}
+
+/** Floor author points after removing likes (unlike or post delete). */
+async function clawBackAuthorPoints(
+    tx: Prisma.TransactionClient,
+    groupId: string,
+    authorId: string,
+    amount: number,
+) {
+    if (amount <= 0) return;
+
+    await tx.$executeRaw`
+        UPDATE "group_memberships"
+        SET "points" = GREATEST(0, "points" - ${amount})
+        WHERE "group_id" = ${groupId}
+          AND "user_id" = ${authorId}
+          AND "status" = 'active'
+    `;
+}
+
 export const postRouter = createTRPCRouter({
     list: groupMemberProcedure
         .input(postListInputSchema)
@@ -49,10 +134,7 @@ export const postRouter = createTRPCRouter({
             const limit = input.limit;
             const rows = await db.post.findMany({
                 where: { groupId: ctx.group.id },
-                include: {
-                    author: { select: AUTHOR_SELECT },
-                    _count: { select: { comments: true } },
-                },
+                include: postIncludeForViewer(ctx.userId),
                 orderBy: [
                     { pinned: 'desc' },
                     { createdAt: 'desc' },
@@ -74,12 +156,7 @@ export const postRouter = createTRPCRouter({
                     : null;
 
             return {
-                items: page.map((row) =>
-                    serializePost({
-                        ...row,
-                        commentCount: row._count.comments,
-                    }),
-                ),
+                items: page.map(serializePostRow),
                 nextCursor,
             };
         }),
@@ -90,12 +167,10 @@ export const postRouter = createTRPCRouter({
             const post = await findPostInGroupOrThrow(
                 ctx.group.id,
                 input.postId,
+                ctx.userId,
             );
 
-            return serializePost({
-                ...post,
-                commentCount: post._count.comments,
-            });
+            return serializePostRow(post);
         }),
 
     create: groupMemberProcedure
@@ -108,16 +183,10 @@ export const postRouter = createTRPCRouter({
                     body: input.body,
                     type: 'text',
                 },
-                include: {
-                    author: { select: AUTHOR_SELECT },
-                    _count: { select: { comments: true } },
-                },
+                include: postIncludeForViewer(ctx.userId),
             });
 
-            return serializePost({
-                ...post,
-                commentCount: post._count.comments,
-            });
+            return serializePostRow(post);
         }),
 
     update: groupMemberProcedure
@@ -126,6 +195,7 @@ export const postRouter = createTRPCRouter({
             const existing = await findPostInGroupOrThrow(
                 ctx.group.id,
                 input.postId,
+                ctx.userId,
             );
 
             const isAuthor = existing.authorId === ctx.userId;
@@ -139,16 +209,10 @@ export const postRouter = createTRPCRouter({
             const post = await db.post.update({
                 where: { id: existing.id },
                 data: { body: input.body },
-                include: {
-                    author: { select: AUTHOR_SELECT },
-                    _count: { select: { comments: true } },
-                },
+                include: postIncludeForViewer(ctx.userId),
             });
 
-            return serializePost({
-                ...post,
-                commentCount: post._count.comments,
-            });
+            return serializePostRow(post);
         }),
 
     delete: groupMemberProcedure
@@ -157,6 +221,7 @@ export const postRouter = createTRPCRouter({
             const existing = await findPostInGroupOrThrow(
                 ctx.group.id,
                 input.postId,
+                ctx.userId,
             );
 
             const isAuthor = existing.authorId === ctx.userId;
@@ -167,8 +232,111 @@ export const postRouter = createTRPCRouter({
                 });
             }
 
-            await db.post.delete({ where: { id: existing.id } });
+            await db.$transaction(async (tx) => {
+                // Non-self likes awarded +1 each; claw back before cascade deletes likes.
+                const awardedLikeCount = await tx.postLike.count({
+                    where: {
+                        postId: existing.id,
+                        userId: { not: existing.authorId },
+                    },
+                });
+
+                if (awardedLikeCount > 0) {
+                    await clawBackAuthorPoints(
+                        tx,
+                        ctx.group.id,
+                        existing.authorId,
+                        awardedLikeCount * LIKE_AUTHOR_POINTS,
+                    );
+                }
+
+                await tx.post.delete({ where: { id: existing.id } });
+            });
 
             return { success: true as const };
+        }),
+
+    /**
+     * Idempotent toggle: like if absent, unlike if present.
+     * Awards +1 author membership points on like (not self-likes); floors at 0 on unlike.
+     * Like row mutate + points adjust run in one transaction; points only move when the
+     * like row is actually created/deleted (avoids farming / double-award under races).
+     */
+    like: groupMemberProcedure
+        .input(postGetInputSchema)
+        .mutation(async ({ ctx, input }) => {
+            const post = await db.post.findFirst({
+                where: { id: input.postId, groupId: ctx.group.id },
+                select: { id: true, authorId: true },
+            });
+
+            if (!post) {
+                throw new TRPCError({
+                    code: 'NOT_FOUND',
+                    message: POST_T_MESSAGES.NOT_FOUND,
+                });
+            }
+
+            const awardPoints = post.authorId !== ctx.userId;
+
+            const liked = await db.$transaction(async (tx) => {
+                const existing = await tx.postLike.findUnique({
+                    where: {
+                        postId_userId: {
+                            postId: post.id,
+                            userId: ctx.userId,
+                        },
+                    },
+                    select: { id: true },
+                });
+
+                if (existing) {
+                    const deleted = await tx.postLike.deleteMany({
+                        where: {
+                            postId: post.id,
+                            userId: ctx.userId,
+                        },
+                    });
+
+                    // Concurrent unlike already removed the row — no points change.
+                    if (deleted.count > 0 && awardPoints) {
+                        await adjustAuthorPoints(
+                            tx,
+                            ctx.group.id,
+                            post.authorId,
+                            -LIKE_AUTHOR_POINTS,
+                        );
+                    }
+
+                    return false;
+                }
+
+                // skipDuplicates: unique races must not abort the interactive tx (P2002).
+                const created = await tx.postLike.createMany({
+                    data: [{ postId: post.id, userId: ctx.userId }],
+                    skipDuplicates: true,
+                });
+
+                if (created.count === 0) {
+                    return true;
+                }
+
+                if (awardPoints) {
+                    await adjustAuthorPoints(
+                        tx,
+                        ctx.group.id,
+                        post.authorId,
+                        LIKE_AUTHOR_POINTS,
+                    );
+                }
+
+                return true;
+            });
+
+            const likeCount = await db.postLike.count({
+                where: { postId: post.id },
+            });
+
+            return { liked, likeCount };
         }),
 });

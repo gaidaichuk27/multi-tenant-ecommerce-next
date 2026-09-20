@@ -24,6 +24,8 @@ export const postSchema = z.object({
     updatedAt: z.string(),
     author: membershipUserSummarySchema.optional(),
     commentCount: z.number().int().nonnegative().optional(),
+    likeCount: z.number().int().nonnegative().optional(),
+    likedByViewer: z.boolean().optional(),
 });
 
 export const postListInputSchema = groupSlugInputSchema.extend({
@@ -48,6 +50,12 @@ export const postUpdateInputSchema = postGetInputSchema.extend({
     body: postBodySchema,
 });
 
+/** Result of `post.like` toggle. */
+export const postLikeResultSchema = z.object({
+    liked: z.boolean(),
+    likeCount: z.number().int().nonnegative(),
+});
+
 export type PostTypeDto = (typeof POST_TYPES)[number];
 export type PostDto = z.infer<typeof postSchema>;
 export type PostListInput = z.infer<typeof postListInputSchema>;
@@ -55,6 +63,7 @@ export type PostListPageDto = z.infer<typeof postListPageSchema>;
 export type PostCreateInput = z.infer<typeof postCreateInputSchema>;
 export type PostGetInput = z.infer<typeof postGetInputSchema>;
 export type PostUpdateInput = z.infer<typeof postUpdateInputSchema>;
+export type PostLikeResultDto = z.infer<typeof postLikeResultSchema>;
 
 export function serializePost(post: {
     id: string;
@@ -73,6 +82,8 @@ export function serializePost(post: {
         avatarUrl: string | null;
     } | null;
     commentCount?: number;
+    likeCount?: number;
+    likedByViewer?: boolean;
 }): PostDto {
     return {
         id: post.id,
@@ -89,6 +100,12 @@ export function serializePost(post: {
             : {}),
         ...(typeof post.commentCount === 'number'
             ? { commentCount: post.commentCount }
+            : {}),
+        ...(typeof post.likeCount === 'number'
+            ? { likeCount: post.likeCount }
+            : {}),
+        ...(typeof post.likedByViewer === 'boolean'
+            ? { likedByViewer: post.likedByViewer }
             : {}),
     };
 }

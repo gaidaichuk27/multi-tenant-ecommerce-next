@@ -199,6 +199,9 @@
     "group.feed.composer.placeholder": "Schreib etwas…",
     "group.feed.composer.submit": "Posten",
     "group.feed.comments_count": "{{count}} Kommentare",
+    "group.feed.likes_count": "{{count}} Likes",
+    "group.feed.like": "Gefällt mir",
+    "group.feed.unlike": "Gefällt mir nicht mehr",
     "group.feed.pinned": "Angepinnt",
 
     "group.post.back_to_feed": "Zurück zur Community",

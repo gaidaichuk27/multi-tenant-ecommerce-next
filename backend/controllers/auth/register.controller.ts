@@ -1,20 +1,11 @@
 import type { Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcryptjs';
 import { AUTH_T_MESSAGES, registerInputSchema, serializeUser } from '@repo/api';
-import { db, Prisma } from '@repo/database';
+import { db, isPrismaUniqueConstraintError } from '@repo/database';
 import { sendApiError, sendApiSuccess } from '../../lib/api-response';
 import { signAccessToken } from '../../lib/jwt';
 import { sendAccountVerificationEmail } from '../../lib/mailer/auth-emails';
 import { PASSWORD_SALT_ROUNDS } from './constants';
-
-function isUniqueConstraintError(
-    error: unknown,
-): error is Prisma.PrismaClientKnownRequestError {
-    return (
-        error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === 'P2002'
-    );
-}
 
 export async function registerController(
     req: Request,
@@ -70,7 +61,7 @@ export async function registerController(
                 },
             });
         } catch (error) {
-            if (isUniqueConstraintError(error)) {
+            if (isPrismaUniqueConstraintError(error)) {
                 const target = error.meta?.target;
                 const fields = Array.isArray(target)
                     ? target.map(String)
