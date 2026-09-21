@@ -11,6 +11,7 @@ export type GroupNavLabels = {
     about: string;
     members: string;
     pending: string;
+    reports: string;
 };
 
 interface GroupNavProps {
@@ -18,6 +19,7 @@ interface GroupNavProps {
     locale: Language;
     groupSlug: string;
     showPending: boolean;
+    showReports: boolean;
     labels: GroupNavLabels;
 }
 
@@ -26,6 +28,7 @@ export function GroupNav({
     locale,
     groupSlug,
     showPending,
+    showReports,
     labels,
 }: GroupNavProps) {
     const pathname = usePathname();
@@ -62,6 +65,19 @@ export function GroupNav({
                       label: labels.pending,
                       match: (path: string) =>
                           path.includes(`/${groupSlug}/-/pending`),
+                  },
+              ]
+            : []),
+        ...(showReports
+            ? [
+                  {
+                      href: buildLocalizedPathname(
+                          `/${groupSlug}/-/reports`,
+                          locale,
+                      ),
+                      label: labels.reports,
+                      match: (path: string) =>
+                          path.includes(`/${groupSlug}/-/reports`),
                   },
               ]
             : []),

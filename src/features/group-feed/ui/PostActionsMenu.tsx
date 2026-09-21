@@ -25,6 +25,7 @@ import {
 } from '@shared/ui/Form/Dropdown';
 
 import { EditPostForm } from './EditPostForm';
+import { ReportPostForm } from './ReportPostForm';
 
 interface PostActionsMenuProps {
     locale: Language;
@@ -64,6 +65,7 @@ export function PostActionsMenu({
     const [isPending, setIsPending] = useState(false);
     const [isPinned, setIsPinned] = useState(pinned);
     const [isEditOpen, setIsEditOpen] = useState(false);
+    const [isReportOpen, setIsReportOpen] = useState(false);
 
     useEffect(() => {
         setIsPinned(pinned);
@@ -77,8 +79,10 @@ export function PostActionsMenu({
     const canPin = isMod;
     const canEdit = isAuthor || isMod;
     const canDelete = canEdit;
+    /** Active members can report peers' posts — not their own. */
+    const canReport = isActiveMember && !isAuthor;
 
-    if (!canPin && !canEdit && !canDelete) {
+    if (!canPin && !canEdit && !canDelete && !canReport) {
         return null;
     }
 
@@ -173,6 +177,16 @@ export function PostActionsMenu({
                                 : t('common:group.feed.actions.pin')}
                         </DropdownMenuItem>
                     ) : null}
+                    {canReport ? (
+                        <DropdownMenuItem
+                            disabled={isPending}
+                            onSelect={() => {
+                                setIsReportOpen(true);
+                            }}
+                        >
+                            {t('common:group.feed.actions.report')}
+                        </DropdownMenuItem>
+                    ) : null}
                     {canDelete ? (
                         <DropdownMenuItem
                             variant="destructive"
@@ -194,6 +208,14 @@ export function PostActionsMenu({
                     groupSlug={groupSlug}
                     postId={postId}
                     initialBody={body}
+                />
+            ) : null}
+
+            {isReportOpen ? (
+                <ReportPostForm
+                    onClose={() => setIsReportOpen(false)}
+                    groupSlug={groupSlug}
+                    postId={postId}
                 />
             ) : null}
         </>

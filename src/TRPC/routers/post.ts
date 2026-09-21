@@ -1,16 +1,21 @@
 import { TRPCError } from '@trpc/server';
-import { db, type Prisma } from '@repo/database';
+import { db, isPrismaUniqueConstraintError, type Prisma } from '@repo/database';
 import {
     POST_T_MESSAGES,
     isGroupModeratorRole,
     postCreateInputSchema,
     postGetInputSchema,
     postListInputSchema,
+    postListReportsInputSchema,
+    postReportInputSchema,
+    postResolveReportInputSchema,
     postUpdateInputSchema,
     serializePost,
+    serializePostReport,
 } from '@repo/api';
 import {
     createTRPCRouter,
+    groupAdminProcedure,
     groupMemberProcedure,
     groupModeratorProcedure,
 } from '../init';
@@ -20,6 +25,20 @@ const AUTHOR_SELECT = {
     username: true,
     name: true,
     avatarUrl: true,
+} as const;
+
+const REPORT_INCLUDE = {
+    reporter: { select: AUTHOR_SELECT },
+    resolver: { select: AUTHOR_SELECT },
+    post: {
+        select: {
+            id: true,
+            body: true,
+            authorId: true,
+            createdAt: true,
+            author: { select: AUTHOR_SELECT },
+        },
+    },
 } as const;
 
 /** Points awarded to the post author when someone else likes their post. */
@@ -365,5 +384,154 @@ export const postRouter = createTRPCRouter({
             });
 
             return { liked, likeCount };
+        }),
+
+    /**
+     * Active members can report another member's post (not their own).
+     * One open report per reporter per post; re-report allowed after resolve/dismiss.
+     */
+    report: groupMemberProcedure
+        .input(postReportInputSchema)
+        .mutation(async ({ ctx, input }) => {
+            const post = await db.post.findFirst({
+                where: { id: input.postId, groupId: ctx.group.id },
+                select: { id: true, authorId: true },
+            });
+
+            if (!post) {
+                throw new TRPCError({
+                    code: 'NOT_FOUND',
+                    message: POST_T_MESSAGES.NOT_FOUND,
+                });
+            }
+
+            if (post.authorId === ctx.userId) {
+                throw new TRPCError({
+                    code: 'FORBIDDEN',
+                    message: POST_T_MESSAGES.REPORT_OWN_FORBIDDEN,
+                });
+            }
+
+            const openExisting = await db.postReport.findFirst({
+                where: {
+                    postId: post.id,
+                    reporterId: ctx.userId,
+                    status: 'open',
+                },
+                select: { id: true },
+            });
+
+            if (openExisting) {
+                throw new TRPCError({
+                    code: 'CONFLICT',
+                    message: POST_T_MESSAGES.REPORT_ALREADY_OPEN,
+                });
+            }
+
+            const reason = input.reason?.trim() || null;
+
+            try {
+                const report = await db.postReport.create({
+                    data: {
+                        postId: post.id,
+                        groupId: ctx.group.id,
+                        reporterId: ctx.userId,
+                        reason,
+                        status: 'open',
+                    },
+                    include: REPORT_INCLUDE,
+                });
+
+                return serializePostReport(report);
+            } catch (error) {
+                // Race on partial unique (open report) — treat as already reported.
+                if (isPrismaUniqueConstraintError(error)) {
+                    throw new TRPCError({
+                        code: 'CONFLICT',
+                        message: POST_T_MESSAGES.REPORT_ALREADY_OPEN,
+                    });
+                }
+                throw error;
+            }
+        }),
+
+    /**
+     * Admin/owner moderation queue (same gate as Pending members — not moderators).
+     * Defaults to open reports; pass status to filter.
+     */
+    listReports: groupAdminProcedure
+        .input(postListReportsInputSchema)
+        .query(async ({ ctx, input }) => {
+            const limit = input.limit;
+            const rows = await db.postReport.findMany({
+                where: {
+                    groupId: ctx.group.id,
+                    status: input.status,
+                },
+                include: REPORT_INCLUDE,
+                orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+                take: limit + 1,
+                ...(input.cursor
+                    ? {
+                          cursor: { id: input.cursor },
+                          skip: 1,
+                      }
+                    : {}),
+            });
+
+            const page = rows.length > limit ? rows.slice(0, limit) : rows;
+            const nextCursor =
+                rows.length > limit
+                    ? (page[page.length - 1]?.id ?? null)
+                    : null;
+
+            return {
+                items: page.map(serializePostReport),
+                nextCursor,
+            };
+        }),
+
+    /**
+     * Admin/owner resolve or dismiss an open report.
+     */
+    resolveReport: groupAdminProcedure
+        .input(postResolveReportInputSchema)
+        .mutation(async ({ ctx, input }) => {
+            const existing = await db.postReport.findFirst({
+                where: {
+                    id: input.reportId,
+                    groupId: ctx.group.id,
+                },
+                select: { id: true, status: true },
+            });
+
+            if (!existing) {
+                throw new TRPCError({
+                    code: 'NOT_FOUND',
+                    message: POST_T_MESSAGES.REPORT_NOT_FOUND,
+                });
+            }
+
+            if (existing.status !== 'open') {
+                throw new TRPCError({
+                    code: 'CONFLICT',
+                    message: POST_T_MESSAGES.REPORT_ALREADY_CLOSED,
+                });
+            }
+
+            const note = input.note?.trim() || null;
+
+            const report = await db.postReport.update({
+                where: { id: existing.id },
+                data: {
+                    status: input.action,
+                    resolverId: ctx.userId,
+                    resolveNote: note,
+                    resolvedAt: new Date(),
+                },
+                include: REPORT_INCLUDE,
+            });
+
+            return serializePostReport(report);
         }),
 });
