@@ -1,3 +1,5 @@
-export type CreatePostFormData = {
+export type PostBodyFormData = {
     body: string;
 };
+
+export type CreatePostFormData = PostBodyFormData;

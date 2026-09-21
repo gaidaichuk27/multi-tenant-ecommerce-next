@@ -58,3 +58,13 @@ export async function deletePost(
         getBrowserTrpcClient().post.delete.mutate({ slug, postId }),
     );
 }
+
+export async function updatePost(
+    slug: string,
+    postId: string,
+    body: string,
+): Promise<PostDto> {
+    return wrapPostMutation(() =>
+        getBrowserTrpcClient().post.update.mutate({ slug, postId, body }),
+    );
+}

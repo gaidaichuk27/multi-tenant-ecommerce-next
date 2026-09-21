@@ -204,6 +204,8 @@
     "group.feed.unlike": "Gefällt mir nicht mehr",
     "group.feed.pinned": "Angepinnt",
     "group.feed.actions.menu": "Beitragsaktionen",
+    "group.feed.actions.edit": "Beitrag bearbeiten",
+    "group.feed.actions.save": "Speichern",
     "group.feed.actions.pin": "Beitrag anpinnen",
     "group.feed.actions.unpin": "Beitrag lösen",
     "group.feed.actions.delete": "Beitrag löschen",

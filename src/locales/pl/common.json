@@ -202,6 +202,8 @@
     "group.feed.unlike": "Cofnij polubienie",
     "group.feed.pinned": "Przypięty",
     "group.feed.actions.menu": "Akcje posta",
+    "group.feed.actions.edit": "Edytuj post",
+    "group.feed.actions.save": "Zapisz",
     "group.feed.actions.pin": "Przypnij post",
     "group.feed.actions.unpin": "Odepnij post",
     "group.feed.actions.delete": "Usuń post",
