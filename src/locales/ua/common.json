@@ -202,6 +202,11 @@
     "group.feed.like": "Вподобати",
     "group.feed.unlike": "Прибрати вподобання",
     "group.feed.pinned": "Закріплено",
+    "group.feed.actions.menu": "Дії з постом",
+    "group.feed.actions.pin": "Закріпити пост",
+    "group.feed.actions.unpin": "Відкріпити пост",
+    "group.feed.actions.delete": "Видалити пост",
+    "group.feed.actions.delete_confirm": "Видалити цей пост? Цю дію неможливо скасувати.",
 
     "group.post.back_to_feed": "Назад до спільноти",
     "group.post.comments_heading": "Коментарі",
@@ -222,6 +227,10 @@
     "group.pending.decline_reason_placeholder": "Необов’язкова примітка для заявника…",
     "group.pending.decline_confirm": "Підтвердити відхилення",
     "group.pending.decline_cancel": "Скасувати",
+
+    "modal.cancel": "Скасувати",
+    "modal.confirm": "Підтвердити",
+    "modal.close": "Закрити",
 
     "post.not_found": "Пост не знайдено",
     "post.group_not_found": "Спільноту не знайдено",

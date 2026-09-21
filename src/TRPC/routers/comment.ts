@@ -2,6 +2,7 @@ import { TRPCError } from '@trpc/server';
 import { db } from '@repo/database';
 import {
     COMMENT_T_MESSAGES,
+    isGroupModeratorRole,
     commentCreateInputSchema,
     commentGetInputSchema,
     commentListInputSchema,
@@ -16,12 +17,6 @@ const AUTHOR_SELECT = {
     name: true,
     avatarUrl: true,
 } as const;
-
-const MODERATOR_ROLES = new Set(['moderator', 'admin', 'owner']);
-
-function canModerate(role: string) {
-    return MODERATOR_ROLES.has(role);
-}
 
 async function assertPostInGroup(groupId: string, postId: string) {
     const post = await db.post.findFirst({
@@ -147,7 +142,7 @@ export const commentRouter = createTRPCRouter({
             );
 
             const isAuthor = existing.authorId === ctx.userId;
-            if (!isAuthor && !canModerate(ctx.membership.role)) {
+            if (!isAuthor && !isGroupModeratorRole(ctx.membership.role)) {
                 throw new TRPCError({
                     code: 'FORBIDDEN',
                     message: COMMENT_T_MESSAGES.FORBIDDEN,
@@ -172,7 +167,7 @@ export const commentRouter = createTRPCRouter({
             );
 
             const isAuthor = existing.authorId === ctx.userId;
-            if (!isAuthor && !canModerate(ctx.membership.role)) {
+            if (!isAuthor && !isGroupModeratorRole(ctx.membership.role)) {
                 throw new TRPCError({
                     code: 'FORBIDDEN',
                     message: COMMENT_T_MESSAGES.FORBIDDEN,

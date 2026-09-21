@@ -56,6 +56,11 @@ export const postLikeResultSchema = z.object({
     likeCount: z.number().int().nonnegative(),
 });
 
+/** Result of `post.pin` toggle. */
+export const postPinResultSchema = z.object({
+    pinned: z.boolean(),
+});
+
 export type PostTypeDto = (typeof POST_TYPES)[number];
 export type PostDto = z.infer<typeof postSchema>;
 export type PostListInput = z.infer<typeof postListInputSchema>;
@@ -64,6 +69,7 @@ export type PostCreateInput = z.infer<typeof postCreateInputSchema>;
 export type PostGetInput = z.infer<typeof postGetInputSchema>;
 export type PostUpdateInput = z.infer<typeof postUpdateInputSchema>;
 export type PostLikeResultDto = z.infer<typeof postLikeResultSchema>;
+export type PostPinResultDto = z.infer<typeof postPinResultSchema>;
 
 export function serializePost(post: {
     id: string;

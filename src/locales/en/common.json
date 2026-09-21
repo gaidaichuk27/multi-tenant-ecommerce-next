@@ -202,6 +202,11 @@
     "group.feed.like": "Like",
     "group.feed.unlike": "Unlike",
     "group.feed.pinned": "Pinned",
+    "group.feed.actions.menu": "Post actions",
+    "group.feed.actions.pin": "Pin post",
+    "group.feed.actions.unpin": "Unpin post",
+    "group.feed.actions.delete": "Delete post",
+    "group.feed.actions.delete_confirm": "Delete this post? This cannot be undone.",
 
     "group.post.back_to_feed": "Back to community",
     "group.post.comments_heading": "Comments",
@@ -222,6 +227,10 @@
     "group.pending.decline_reason_placeholder": "Optional note for the requester…",
     "group.pending.decline_confirm": "Confirm decline",
     "group.pending.decline_cancel": "Cancel",
+
+    "modal.cancel": "Cancel",
+    "modal.confirm": "Confirm",
+    "modal.close": "Close",
 
     "post.not_found": "Post not found",
     "post.group_not_found": "Community not found",
