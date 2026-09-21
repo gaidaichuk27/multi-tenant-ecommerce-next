@@ -1,6 +1,7 @@
 import { notFound, redirect } from 'next/navigation';
 import getTranslations from '@/i18n';
 import { isTrpcErrorCode } from '@lib/trpc/errors';
+import { getMineMembership } from '@lib/groups/queries';
 import { listGroupPosts } from '@lib/posts/queries';
 import { buildLocalizedPathname } from '@shared/config/locales/locale';
 import type { Language } from '@shared/config/locales/types';
@@ -20,9 +21,13 @@ export async function GroupFeedPageView({
     const { t } = await getTranslations(locale, i18nNamespaces);
 
     let page;
+    let membership;
 
     try {
-        page = await listGroupPosts(groupSlug);
+        [page, membership] = await Promise.all([
+            listGroupPosts(groupSlug),
+            getMineMembership(groupSlug),
+        ]);
     } catch (error) {
         if (isTrpcErrorCode(error, 'NOT_FOUND')) {
             notFound();
@@ -43,6 +48,9 @@ export async function GroupFeedPageView({
             locale={locale}
             groupSlug={groupSlug}
             posts={page.items}
+            viewerUserId={membership?.userId ?? null}
+            viewerRole={membership?.role ?? null}
+            viewerStatus={membership?.status ?? null}
             labels={{
                 empty: t('common:group.feed.empty'),
                 commentsCount: (count) =>

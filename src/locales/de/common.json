@@ -203,6 +203,11 @@
     "group.feed.like": "Gefällt mir",
     "group.feed.unlike": "Gefällt mir nicht mehr",
     "group.feed.pinned": "Angepinnt",
+    "group.feed.actions.menu": "Beitragsaktionen",
+    "group.feed.actions.pin": "Beitrag anpinnen",
+    "group.feed.actions.unpin": "Beitrag lösen",
+    "group.feed.actions.delete": "Beitrag löschen",
+    "group.feed.actions.delete_confirm": "Diesen Beitrag löschen? Das kann nicht rückgängig gemacht werden.",
 
     "group.post.back_to_feed": "Zurück zur Community",
     "group.post.comments_heading": "Kommentare",
@@ -223,6 +228,10 @@
     "group.pending.decline_reason_placeholder": "Optionale Nachricht für die anfragende Person…",
     "group.pending.decline_confirm": "Ablehnung bestätigen",
     "group.pending.decline_cancel": "Abbrechen",
+
+    "modal.cancel": "Abbrechen",
+    "modal.confirm": "Bestätigen",
+    "modal.close": "Schließen",
 
     "post.not_found": "Beitrag nicht gefunden",
     "post.group_not_found": "Community nicht gefunden",

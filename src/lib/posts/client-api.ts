@@ -4,6 +4,7 @@ import {
     AUTH_T_MESSAGES,
     type PostDto,
     type PostLikeResultDto,
+    type PostPinResultDto,
 } from '@repo/api';
 
 import { getBrowserTrpcClient } from '@lib/trpc/browser-client';
@@ -37,5 +38,23 @@ export async function togglePostLike(
 ): Promise<PostLikeResultDto> {
     return wrapPostMutation(() =>
         getBrowserTrpcClient().post.like.mutate({ slug, postId }),
+    );
+}
+
+export async function pinPost(
+    slug: string,
+    postId: string,
+): Promise<PostPinResultDto> {
+    return wrapPostMutation(() =>
+        getBrowserTrpcClient().post.pin.mutate({ slug, postId }),
+    );
+}
+
+export async function deletePost(
+    slug: string,
+    postId: string,
+): Promise<{ success: true }> {
+    return wrapPostMutation(() =>
+        getBrowserTrpcClient().post.delete.mutate({ slug, postId }),
     );
 }

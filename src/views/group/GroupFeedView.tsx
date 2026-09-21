@@ -1,6 +1,14 @@
 import Link from 'next/link';
+import type {
+    GroupMembershipRoleDto,
+    GroupMembershipStatusDto,
+} from '@repo/api';
 import type { Post } from '@entities/Post';
-import { CreatePostForm, LikePostButton } from '@features/group-feed';
+import {
+    CreatePostForm,
+    LikePostButton,
+    PostActionsMenu,
+} from '@features/group-feed';
 import { buildLocalizedPathname } from '@shared/config/locales/locale';
 import type { Language } from '@shared/config/locales/types';
 import { formatPostedAt } from '@shared/lib/formatPostedAt';
@@ -16,6 +24,9 @@ interface GroupFeedViewProps {
     locale: Language;
     groupSlug: string;
     posts: Post[];
+    viewerUserId: string | null;
+    viewerRole: GroupMembershipRoleDto | null;
+    viewerStatus: GroupMembershipStatusDto | null;
     labels: GroupFeedViewLabels;
 }
 
@@ -23,11 +34,17 @@ function PostFeedItem({
     locale,
     groupSlug,
     post,
+    viewerUserId,
+    viewerRole,
+    viewerStatus,
     labels,
 }: {
     locale: Language;
     groupSlug: string;
     post: Post;
+    viewerUserId: string | null;
+    viewerRole: GroupMembershipRoleDto | null;
+    viewerStatus: GroupMembershipStatusDto | null;
     labels: Pick<GroupFeedViewLabels, 'commentsCount' | 'pinned'>;
 }) {
     const displayName =
@@ -47,19 +64,34 @@ function PostFeedItem({
                     }}
                 />
                 <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                        <p className="truncate font-medium">{displayName}</p>
-                        <time
-                            dateTime={post.createdAt}
-                            className="text-muted-foreground text-xs"
-                        >
-                            {formatPostedAt(post.createdAt)}
-                        </time>
-                        {post.pinned ? (
-                            <span className="bg-muted rounded px-1.5 py-0.5 text-xs font-medium">
-                                {labels.pinned}
-                            </span>
-                        ) : null}
+                    <div className="flex items-start gap-2">
+                        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1">
+                            <p className="truncate font-medium">
+                                {displayName}
+                            </p>
+                            <time
+                                dateTime={post.createdAt}
+                                className="text-muted-foreground text-xs"
+                            >
+                                {formatPostedAt(post.createdAt)}
+                            </time>
+                            {post.pinned ? (
+                                <span className="bg-muted rounded px-1.5 py-0.5 text-xs font-medium">
+                                    {labels.pinned}
+                                </span>
+                            ) : null}
+                        </div>
+                        <PostActionsMenu
+                            locale={locale}
+                            groupSlug={groupSlug}
+                            postId={post.id}
+                            authorId={post.authorId}
+                            pinned={post.pinned}
+                            viewerUserId={viewerUserId}
+                            viewerRole={viewerRole}
+                            viewerStatus={viewerStatus}
+                            surface="feed"
+                        />
                     </div>
                     <Link
                         href={href}
@@ -95,11 +127,17 @@ function PostFeedList({
     locale,
     groupSlug,
     posts,
+    viewerUserId,
+    viewerRole,
+    viewerStatus,
     labels,
 }: {
     locale: Language;
     groupSlug: string;
     posts: Post[];
+    viewerUserId: string | null;
+    viewerRole: GroupMembershipRoleDto | null;
+    viewerStatus: GroupMembershipStatusDto | null;
     labels: Pick<GroupFeedViewLabels, 'commentsCount' | 'pinned'>;
 }) {
     return (
@@ -110,6 +148,9 @@ function PostFeedList({
                     locale={locale}
                     groupSlug={groupSlug}
                     post={post}
+                    viewerUserId={viewerUserId}
+                    viewerRole={viewerRole}
+                    viewerStatus={viewerStatus}
                     labels={labels}
                 />
             ))}
@@ -121,6 +162,9 @@ export function GroupFeedView({
     locale,
     groupSlug,
     posts,
+    viewerUserId,
+    viewerRole,
+    viewerStatus,
     labels,
 }: GroupFeedViewProps) {
     return (
@@ -134,6 +178,9 @@ export function GroupFeedView({
                     locale={locale}
                     groupSlug={groupSlug}
                     posts={posts}
+                    viewerUserId={viewerUserId}
+                    viewerRole={viewerRole}
+                    viewerStatus={viewerStatus}
                     labels={labels}
                 />
             )}

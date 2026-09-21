@@ -2,9 +2,17 @@
 
 import { Fragment, useState } from 'react';
 import Link from 'next/link';
+import type {
+    GroupMembershipRoleDto,
+    GroupMembershipStatusDto,
+} from '@repo/api';
 import type { Comment } from '@entities/Comment';
 import type { Post } from '@entities/Post';
-import { CreateCommentForm, LikePostButton } from '@features/group-feed';
+import {
+    CreateCommentForm,
+    LikePostButton,
+    PostActionsMenu,
+} from '@features/group-feed';
 import { buildLocalizedPathname } from '@shared/config/locales/locale';
 import type { Language } from '@shared/config/locales/types';
 import { formatPostedAt } from '@shared/lib/formatPostedAt';
@@ -26,6 +34,9 @@ interface GroupPostViewProps {
     groupSlug: string;
     post: Post;
     comments: Comment[];
+    viewerUserId: string | null;
+    viewerRole: GroupMembershipRoleDto | null;
+    viewerStatus: GroupMembershipStatusDto | null;
     labels: GroupPostViewLabels;
 }
 
@@ -128,6 +139,9 @@ export function GroupPostView({
     groupSlug,
     post,
     comments,
+    viewerUserId,
+    viewerRole,
+    viewerStatus,
     labels,
 }: GroupPostViewProps) {
     const [replyToId, setReplyToId] = useState<string | null>(null);
@@ -160,21 +174,34 @@ export function GroupPostView({
                         }}
                     />
                     <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                            <p className="truncate font-medium">
-                                {displayName}
-                            </p>
-                            <time
-                                dateTime={post.createdAt}
-                                className="text-muted-foreground text-xs"
-                            >
-                                {formatPostedAt(post.createdAt)}
-                            </time>
-                            {post.pinned ? (
-                                <span className="bg-muted rounded px-1.5 py-0.5 text-xs font-medium">
-                                    {labels.pinned}
-                                </span>
-                            ) : null}
+                        <div className="flex items-start gap-2">
+                            <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1">
+                                <p className="truncate font-medium">
+                                    {displayName}
+                                </p>
+                                <time
+                                    dateTime={post.createdAt}
+                                    className="text-muted-foreground text-xs"
+                                >
+                                    {formatPostedAt(post.createdAt)}
+                                </time>
+                                {post.pinned ? (
+                                    <span className="bg-muted rounded px-1.5 py-0.5 text-xs font-medium">
+                                        {labels.pinned}
+                                    </span>
+                                ) : null}
+                            </div>
+                            <PostActionsMenu
+                                locale={locale}
+                                groupSlug={groupSlug}
+                                postId={post.id}
+                                authorId={post.authorId}
+                                pinned={post.pinned}
+                                viewerUserId={viewerUserId}
+                                viewerRole={viewerRole}
+                                viewerStatus={viewerStatus}
+                                surface="detail"
+                            />
                         </div>
                         <p className="mt-2 text-sm leading-relaxed whitespace-pre-wrap">
                             {post.body}

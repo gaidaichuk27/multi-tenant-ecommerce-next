@@ -11,6 +11,13 @@ export const GROUP_MEMBERSHIP_ROLES = [
     'member',
 ] as const;
 
+/** Roles that can moderate group content (pin, moderate deletes, etc.). */
+export const GROUP_MODERATOR_ROLES = [
+    'moderator',
+    'admin',
+    'owner',
+] as const satisfies ReadonlyArray<(typeof GROUP_MEMBERSHIP_ROLES)[number]>;
+
 /** Single source of truth for group membership statuses (Prisma + API). */
 export const GROUP_MEMBERSHIP_STATUSES = [
     'active',
@@ -83,6 +90,16 @@ export type GroupVisibilityDto = (typeof GROUP_VISIBILITIES)[number];
 export type GroupMembershipRoleDto = (typeof GROUP_MEMBERSHIP_ROLES)[number];
 export type GroupMembershipStatusDto =
     (typeof GROUP_MEMBERSHIP_STATUSES)[number];
+export type GroupModeratorRoleDto = (typeof GROUP_MODERATOR_ROLES)[number];
+
+export function isGroupModeratorRole(
+    role: string | null | undefined,
+): role is GroupModeratorRoleDto {
+    return (
+        role != null &&
+        (GROUP_MODERATOR_ROLES as readonly string[]).includes(role)
+    );
+}
 
 export function serializeGroup(group: {
     id: string;

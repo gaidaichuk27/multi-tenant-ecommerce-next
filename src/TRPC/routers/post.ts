@@ -2,13 +2,18 @@ import { TRPCError } from '@trpc/server';
 import { db, type Prisma } from '@repo/database';
 import {
     POST_T_MESSAGES,
+    isGroupModeratorRole,
     postCreateInputSchema,
     postGetInputSchema,
     postListInputSchema,
     postUpdateInputSchema,
     serializePost,
 } from '@repo/api';
-import { createTRPCRouter, groupMemberProcedure } from '../init';
+import {
+    createTRPCRouter,
+    groupMemberProcedure,
+    groupModeratorProcedure,
+} from '../init';
 
 const AUTHOR_SELECT = {
     id: true,
@@ -17,14 +22,8 @@ const AUTHOR_SELECT = {
     avatarUrl: true,
 } as const;
 
-const MODERATOR_ROLES = new Set(['moderator', 'admin', 'owner']);
-
 /** Points awarded to the post author when someone else likes their post. */
 const LIKE_AUTHOR_POINTS = 1;
-
-function canModerate(role: string) {
-    return MODERATOR_ROLES.has(role);
-}
 
 function postIncludeForViewer(userId: string) {
     return {
@@ -199,7 +198,7 @@ export const postRouter = createTRPCRouter({
             );
 
             const isAuthor = existing.authorId === ctx.userId;
-            if (!isAuthor && !canModerate(ctx.membership.role)) {
+            if (!isAuthor && !isGroupModeratorRole(ctx.membership.role)) {
                 throw new TRPCError({
                     code: 'FORBIDDEN',
                     message: POST_T_MESSAGES.FORBIDDEN,
@@ -225,7 +224,7 @@ export const postRouter = createTRPCRouter({
             );
 
             const isAuthor = existing.authorId === ctx.userId;
-            if (!isAuthor && !canModerate(ctx.membership.role)) {
+            if (!isAuthor && !isGroupModeratorRole(ctx.membership.role)) {
                 throw new TRPCError({
                     code: 'FORBIDDEN',
                     message: POST_T_MESSAGES.FORBIDDEN,
@@ -254,6 +253,34 @@ export const postRouter = createTRPCRouter({
             });
 
             return { success: true as const };
+        }),
+
+    /**
+     * Atomic pin toggle (NOT pinned in SQL) so concurrent mod clicks cannot both
+     * read false and both write true — last-write-wins race on a blind read/update.
+     * Moderators, admins, and owners only.
+     */
+    pin: groupModeratorProcedure
+        .input(postGetInputSchema)
+        .mutation(async ({ ctx, input }) => {
+            const rows = await db.$queryRaw<{ pinned: boolean }[]>`
+                UPDATE "posts"
+                SET "pinned" = NOT "pinned",
+                    "updated_at" = CURRENT_TIMESTAMP
+                WHERE "id" = ${input.postId}
+                  AND "group_id" = ${ctx.group.id}
+                RETURNING "pinned"
+            `;
+
+            const row = rows[0];
+            if (!row) {
+                throw new TRPCError({
+                    code: 'NOT_FOUND',
+                    message: POST_T_MESSAGES.NOT_FOUND,
+                });
+            }
+
+            return { pinned: row.pinned };
         }),
 
     /**

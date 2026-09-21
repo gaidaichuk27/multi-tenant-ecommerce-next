@@ -2,6 +2,7 @@ import { notFound, redirect } from 'next/navigation';
 import getTranslations from '@/i18n';
 import { isTrpcErrorCode } from '@lib/trpc/errors';
 import { listPostComments } from '@lib/comments/queries';
+import { getMineMembership } from '@lib/groups/queries';
 import { getGroupPost } from '@lib/posts/queries';
 import { buildLocalizedPathname } from '@shared/config/locales/locale';
 import type { Language } from '@shared/config/locales/types';
@@ -24,11 +25,13 @@ export async function GroupPostPageView({
 
     let post;
     let commentsPage;
+    let membership;
 
     try {
-        [post, commentsPage] = await Promise.all([
+        [post, commentsPage, membership] = await Promise.all([
             getGroupPost(groupSlug, postId),
             listPostComments(groupSlug, postId),
+            getMineMembership(groupSlug),
         ]);
     } catch (error) {
         if (isTrpcErrorCode(error, 'NOT_FOUND')) {
@@ -51,6 +54,9 @@ export async function GroupPostPageView({
             groupSlug={groupSlug}
             post={post}
             comments={commentsPage.items}
+            viewerUserId={membership?.userId ?? null}
+            viewerRole={membership?.role ?? null}
+            viewerStatus={membership?.status ?? null}
             labels={{
                 backToFeed: t('common:group.post.back_to_feed'),
                 commentsHeading: t('common:group.post.comments_heading'),

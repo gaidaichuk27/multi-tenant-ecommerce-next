@@ -25,7 +25,6 @@ export const MainLayout = ({
                 <Container variant={withContainer}>{children}</Container>
             </Content>
             <Footer />
-            <div id="portal" />
         </div>
     );
 };

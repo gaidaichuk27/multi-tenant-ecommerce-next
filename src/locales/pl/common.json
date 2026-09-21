@@ -201,6 +201,11 @@
     "group.feed.like": "Lubię to",
     "group.feed.unlike": "Cofnij polubienie",
     "group.feed.pinned": "Przypięty",
+    "group.feed.actions.menu": "Akcje posta",
+    "group.feed.actions.pin": "Przypnij post",
+    "group.feed.actions.unpin": "Odepnij post",
+    "group.feed.actions.delete": "Usuń post",
+    "group.feed.actions.delete_confirm": "Usunąć ten post? Tej operacji nie można cofnąć.",
 
     "group.post.back_to_feed": "Wróć do społeczności",
     "group.post.comments_heading": "Komentarze",
@@ -221,6 +226,10 @@
     "group.pending.decline_reason_placeholder": "Opcjonalna wiadomość dla osoby proszącej…",
     "group.pending.decline_confirm": "Potwierdź odrzucenie",
     "group.pending.decline_cancel": "Anuluj",
+
+    "modal.cancel": "Anuluj",
+    "modal.confirm": "Potwierdź",
+    "modal.close": "Zamknij",
 
     "post.not_found": "Nie znaleziono posta",
     "post.group_not_found": "Nie znaleziono społeczności",
