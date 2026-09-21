@@ -203,6 +203,8 @@
     "group.feed.unlike": "Прибрати вподобання",
     "group.feed.pinned": "Закріплено",
     "group.feed.actions.menu": "Дії з постом",
+    "group.feed.actions.edit": "Редагувати пост",
+    "group.feed.actions.save": "Зберегти",
     "group.feed.actions.pin": "Закріпити пост",
     "group.feed.actions.unpin": "Відкріпити пост",
     "group.feed.actions.delete": "Видалити пост",

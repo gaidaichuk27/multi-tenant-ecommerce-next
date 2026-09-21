@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import Link from 'next/link';
 import type {
     GroupMembershipRoleDto,
@@ -145,6 +145,15 @@ export function GroupPostView({
     labels,
 }: GroupPostViewProps) {
     const [replyToId, setReplyToId] = useState<string | null>(null);
+    const [body, setBody] = useState(post.body);
+
+    useEffect(() => {
+        setBody(post.body);
+        // Only re-seed from RSC when the post identity changes. Avoids
+        // router.refresh() overwriting a just-saved body with briefly-stale props.
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- sync on post change only
+    }, [post.id]);
+
     const feedHref = buildLocalizedPathname(`/${groupSlug}`, locale);
     const displayName =
         post.author?.name ?? post.author?.username ?? post.authorId;
@@ -196,15 +205,17 @@ export function GroupPostView({
                                 groupSlug={groupSlug}
                                 postId={post.id}
                                 authorId={post.authorId}
+                                body={body}
                                 pinned={post.pinned}
                                 viewerUserId={viewerUserId}
                                 viewerRole={viewerRole}
                                 viewerStatus={viewerStatus}
                                 surface="detail"
+                                onSaved={setBody}
                             />
                         </div>
                         <p className="mt-2 text-sm leading-relaxed whitespace-pre-wrap">
-                            {post.body}
+                            {body}
                         </p>
                         <div className="mt-3">
                             <LikePostButton

@@ -203,6 +203,8 @@
     "group.feed.unlike": "Unlike",
     "group.feed.pinned": "Pinned",
     "group.feed.actions.menu": "Post actions",
+    "group.feed.actions.edit": "Edit post",
+    "group.feed.actions.save": "Save",
     "group.feed.actions.pin": "Pin post",
     "group.feed.actions.unpin": "Unpin post",
     "group.feed.actions.delete": "Delete post",

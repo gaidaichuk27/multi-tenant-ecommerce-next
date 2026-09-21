@@ -24,17 +24,22 @@ import {
     DropdownMenuTrigger,
 } from '@shared/ui/Form/Dropdown';
 
+import { EditPostForm } from './EditPostForm';
+
 interface PostActionsMenuProps {
     locale: Language;
     groupSlug: string;
     postId: string;
     authorId: string;
+    body: string;
     pinned: boolean;
     viewerUserId: string | null;
     viewerRole: GroupMembershipRoleDto | null;
     viewerStatus: GroupMembershipStatusDto | null;
     /** After delete: refresh on feed, navigate to feed on detail. */
     surface: 'feed' | 'detail';
+    /** Immediate body update in the parent while refresh catches up. */
+    onSaved?: (body: string) => void;
     className?: string;
 }
 
@@ -43,11 +48,13 @@ export function PostActionsMenu({
     groupSlug,
     postId,
     authorId,
+    body,
     pinned,
     viewerUserId,
     viewerRole,
     viewerStatus,
     surface,
+    onSaved,
     className,
 }: PostActionsMenuProps) {
     const { t } = useTranslation(['common']);
@@ -56,6 +63,7 @@ export function PostActionsMenu({
     const { confirm } = useModal();
     const [isPending, setIsPending] = useState(false);
     const [isPinned, setIsPinned] = useState(pinned);
+    const [isEditOpen, setIsEditOpen] = useState(false);
 
     useEffect(() => {
         setIsPinned(pinned);
@@ -67,9 +75,10 @@ export function PostActionsMenu({
         isActiveMember && viewerUserId != null && viewerUserId === authorId;
     const isMod = isActiveMember && isGroupModeratorRole(viewerRole);
     const canPin = isMod;
-    const canDelete = isAuthor || isMod;
+    const canEdit = isAuthor || isMod;
+    const canDelete = canEdit;
 
-    if (!canPin && !canDelete) {
+    if (!canPin && !canEdit && !canDelete) {
         return null;
     }
 
@@ -121,50 +130,72 @@ export function PostActionsMenu({
     };
 
     return (
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className={cn(
-                        'text-muted-foreground size-8 shrink-0',
-                        className,
-                    )}
-                    aria-label={t('common:group.feed.actions.menu')}
-                    disabled={isPending}
-                >
-                    <MoreVertical
-                        className="size-4"
-                        aria-hidden
-                    />
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-                {canPin ? (
-                    <DropdownMenuItem
+        <>
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className={cn(
+                            'text-muted-foreground size-8 shrink-0',
+                            className,
+                        )}
+                        aria-label={t('common:group.feed.actions.menu')}
                         disabled={isPending}
-                        onSelect={() => {
-                            void handlePin();
-                        }}
                     >
-                        {isPinned
-                            ? t('common:group.feed.actions.unpin')
-                            : t('common:group.feed.actions.pin')}
-                    </DropdownMenuItem>
-                ) : null}
-                {canDelete ? (
-                    <DropdownMenuItem
-                        variant="destructive"
-                        disabled={isPending}
-                        onSelect={() => {
-                            void handleDeleteRequest();
-                        }}
-                    >
-                        {t('common:group.feed.actions.delete')}
-                    </DropdownMenuItem>
-                ) : null}
-            </DropdownMenuContent>
-        </DropdownMenu>
+                        <MoreVertical
+                            className="size-4"
+                            aria-hidden
+                        />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    {canEdit ? (
+                        <DropdownMenuItem
+                            disabled={isPending}
+                            onSelect={() => {
+                                setIsEditOpen(true);
+                            }}
+                        >
+                            {t('common:group.feed.actions.edit')}
+                        </DropdownMenuItem>
+                    ) : null}
+                    {canPin ? (
+                        <DropdownMenuItem
+                            disabled={isPending}
+                            onSelect={() => {
+                                void handlePin();
+                            }}
+                        >
+                            {isPinned
+                                ? t('common:group.feed.actions.unpin')
+                                : t('common:group.feed.actions.pin')}
+                        </DropdownMenuItem>
+                    ) : null}
+                    {canDelete ? (
+                        <DropdownMenuItem
+                            variant="destructive"
+                            disabled={isPending}
+                            onSelect={() => {
+                                void handleDeleteRequest();
+                            }}
+                        >
+                            {t('common:group.feed.actions.delete')}
+                        </DropdownMenuItem>
+                    ) : null}
+                </DropdownMenuContent>
+            </DropdownMenu>
+
+            {isEditOpen ? (
+                <EditPostForm
+                    onClose={() => setIsEditOpen(false)}
+                    onSaved={onSaved}
+                    groupSlug={groupSlug}
+                    postId={postId}
+                    initialBody={body}
+                />
+            ) : null}
+        </>
     );
 }
