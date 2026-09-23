@@ -5,6 +5,8 @@ import {
     type PostDto,
     type PostLikeResultDto,
     type PostPinResultDto,
+    type PostReportDto,
+    type PostReportResolveActionDto,
 } from '@repo/api';
 
 import { getBrowserTrpcClient } from '@lib/trpc/browser-client';
@@ -66,5 +68,35 @@ export async function updatePost(
 ): Promise<PostDto> {
     return wrapPostMutation(() =>
         getBrowserTrpcClient().post.update.mutate({ slug, postId, body }),
+    );
+}
+
+export async function reportPost(
+    slug: string,
+    postId: string,
+    reason?: string,
+): Promise<PostReportDto> {
+    return wrapPostMutation(() =>
+        getBrowserTrpcClient().post.report.mutate({
+            slug,
+            postId,
+            ...(reason !== undefined ? { reason } : {}),
+        }),
+    );
+}
+
+export async function resolvePostReport(
+    slug: string,
+    reportId: string,
+    action: PostReportResolveActionDto,
+    note?: string,
+): Promise<PostReportDto> {
+    return wrapPostMutation(() =>
+        getBrowserTrpcClient().post.resolveReport.mutate({
+            slug,
+            reportId,
+            action,
+            ...(note !== undefined ? { note } : {}),
+        }),
     );
 }

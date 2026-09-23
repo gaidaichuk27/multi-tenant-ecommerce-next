@@ -89,6 +89,7 @@ export default async function GroupLayout({
                 about: t('common:group.nav.about'),
                 members: t('common:group.nav.members'),
                 pending: t('common:group.nav.pending'),
+                reports: t('common:group.nav.reports'),
             }}
         >
             {children}

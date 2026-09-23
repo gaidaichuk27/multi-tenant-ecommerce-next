@@ -37,6 +37,12 @@ enum PostType {
     text
 }
 
+enum PostReportStatus {
+    open
+    resolved
+    dismissed
+}
+
 model User {
     id                      String         @id @default(cuid())
     email                   String         @unique @db.VarChar(255)
@@ -61,6 +67,8 @@ model User {
     posts             Post[]
     comments          Comment[]
     postLikes         PostLike[]
+    postReports       PostReport[]       @relation("PostReportReporter")
+    resolvedReports   PostReport[]       @relation("PostReportResolver")
 
     @@map("users")
 }
@@ -81,6 +89,7 @@ model Group {
     settings    GroupSettings?
     memberships GroupMembership[]
     posts       Post[]
+    postReports PostReport[]
 
     @@map("groups")
 }
@@ -129,10 +138,11 @@ model Post {
     createdAt      DateTime @default(now()) @map("created_at") @db.Timestamp(6)
     updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamp(6)
 
-    group    Group      @relation(fields: [groupId], references: [id], onDelete: Cascade)
-    author   User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+    group    Group        @relation(fields: [groupId], references: [id], onDelete: Cascade)
+    author   User         @relation(fields: [authorId], references: [id], onDelete: Cascade)
     comments Comment[]
     likes    PostLike[]
+    reports  PostReport[]
 
     @@index([groupId, createdAt(sort: Desc)])
     @@index([authorId])
@@ -172,6 +182,37 @@ model Comment {
     @@index([parentId])
     @@index([authorId])
     @@map("comments")
+}
+
+/**
+ * Member report against a post in a group.
+ * Partial unique index (post_id, reporter_id) WHERE status = 'open' is applied in
+ * the migration SQL so a user can re-report after resolve/dismiss, but not while open.
+ */
+model PostReport {
+    id          String           @id @default(cuid())
+    postId      String           @map("post_id")
+    groupId     String           @map("group_id")
+    reporterId  String           @map("reporter_id")
+    /** Optional free-text reason from the reporter (max 500 at API). */
+    reason      String?          @db.Text
+    status      PostReportStatus @default(open)
+    resolverId  String?          @map("resolver_id")
+    /** Optional admin note when resolving/dismissing. */
+    resolveNote String?          @map("resolve_note") @db.Text
+    resolvedAt  DateTime?        @map("resolved_at") @db.Timestamp(6)
+    createdAt   DateTime         @default(now()) @map("created_at") @db.Timestamp(6)
+    updatedAt   DateTime         @updatedAt @map("updated_at") @db.Timestamp(6)
+
+    post     Post  @relation(fields: [postId], references: [id], onDelete: Cascade)
+    group    Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+    reporter User  @relation("PostReportReporter", fields: [reporterId], references: [id], onDelete: Cascade)
+    resolver User? @relation("PostReportResolver", fields: [resolverId], references: [id], onDelete: SetNull)
+
+    @@index([groupId, status, createdAt(sort: Desc)])
+    @@index([postId])
+    @@index([reporterId])
+    @@map("post_reports")
 }
 
 // Synced with pgAdmin table: public.test_users

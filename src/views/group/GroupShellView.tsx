@@ -36,6 +36,7 @@ export function GroupShellView({
                 locale={locale}
                 groupSlug={group.slug}
                 showPending={isAdminRole(membership.role)}
+                showReports={isAdminRole(membership.role)}
                 labels={navLabels}
             />
             {children}
