@@ -280,19 +280,19 @@ Legend: **P0** = MVP · **P1** = v1 · **P2** = v2
 
 ### 3.5 Group — member core tabs
 
-| #   | Route                           | Page name                 | Access | Phase | tRPC procedures                                   |
-| --- | ------------------------------- | ------------------------- | ------ | ----- | ------------------------------------------------- |
-| 37  | `/{group}`                      | Community feed (default)  | Member | P0    | `post.list`                                       |
-| 38  | `/{group}?c={categoryId}`       | Feed filtered by category | Member | P0    | `post.list`                                       |
-| 39  | `/{group}/{postId}`             | Single post + comments    | Member | P0    | `post.get`, `comment.list`, `comment.create`      |
-| 40  | `/{group}/classroom`            | Course catalog            | Member | P0    | `course.list`                                     |
-| 41  | `/{group}/classroom/{courseId}` | Course / lesson viewer    | Member | P0    | `course.get`, `lesson.get`, `lesson.markComplete` |
-| 42  | `/{group}/calendar`             | Events calendar           | Member | P1    | `event.list`, `event.rsvp`                        |
-| 43  | `/{group}/-/members`            | Member directory          | Member | P1    | `membership.listMembers`                          |
-| 44  | `/{group}/-/map`                | Member map                | Member | P2    | `membership.listWithLocation`                     |
-| 45  | `/{group}/-/leaderboards`       | Points leaderboard        | Member | P0    | `gamification.getLeaderboard`                     |
-| 46  | `/{group}/-/search`             | Group search              | Member | P1    | `search.group`                                    |
-| 47  | `/{group}/-/rules`              | Group rules               | Member | P0    | `group.getRules`                                  |
+| #   | Route                            | Page name                 | Access | Phase | tRPC procedures                                   |
+| --- | -------------------------------- | ------------------------- | ------ | ----- | ------------------------------------------------- |
+| 37  | `/{group}`                       | Community feed (default)  | Member | P0    | `post.list`                                       |
+| 38  | `/{group}?category={categoryId}` | Feed filtered by category | Member | P0    | `post.list`                                       |
+| 39  | `/{group}/{postId}`              | Single post + comments    | Member | P0    | `post.get`, `comment.list`, `comment.create`      |
+| 40  | `/{group}/classroom`             | Course catalog            | Member | P0    | `course.list`                                     |
+| 41  | `/{group}/classroom/{courseId}`  | Course / lesson viewer    | Member | P0    | `course.get`, `lesson.get`, `lesson.markComplete` |
+| 42  | `/{group}/calendar`              | Events calendar           | Member | P1    | `event.list`, `event.rsvp`                        |
+| 43  | `/{group}/-/members`             | Member directory          | Member | P1    | `membership.listMembers`                          |
+| 44  | `/{group}/-/map`                 | Member map                | Member | P2    | `membership.listWithLocation`                     |
+| 45  | `/{group}/-/leaderboards`        | Points leaderboard        | Member | P0    | `gamification.getLeaderboard`                     |
+| 46  | `/{group}/-/search`              | Group search              | Member | P1    | `search.group`                                    |
+| 47  | `/{group}/-/rules`               | Group rules               | Member | P0    | `group.getRules`                                  |
 
 ### 3.6 Group — admin & moderation
 
@@ -522,7 +522,7 @@ PostgreSQL with `group_id` on community tables and `shop_id` on ecommerce tables
 | `membership_tiers`     | group_id, name, price_cents, interval, benefits                                        |
 | `membership_questions` | group_id, question, answer_type, order                                                 |
 | `membership_answers`   | membership_id, question_id, answer                                                     |
-| `categories`           | group_id, name, permissions, sort_mode                                                 |
+| `categories`           | group_id, name, name_normalized, permissions, sort_order                               |
 | `posts`                | group_id, category_id, author_id, body, type, pinned, broadcast_email                  |
 | `post_likes`           | post_id, user_id                                                                       |
 | `comments`             | post_id, parent_id, author_id, body                                                    |
@@ -633,20 +633,31 @@ Phase 7 Redis (or earlier if you scale out before then). Status also mirrored in
 
 **Goal:** Full community loop.
 
-| Feature               | Pages                     | tRPC                                                                              |
-| --------------------- | ------------------------- | --------------------------------------------------------------------------------- |
-| Community feed        | `/{group}`, `/{group}?c=` | `post.list`, `post.create`                                                        |
-| Single post           | `/{group}/[postId]`       | `post.get`, `comment.*`                                                           |
-| Categories            | Settings tab              | `category.*`                                                                      |
-| Likes + points        | Feed                      | `post.like`, `gamification.addPoints`                                             |
-| Roles                 | Settings → Admins         | `membership.updateRole`                                                           |
-| Join flow + questions | About join modal          | `membership.requestJoin`                                                          |
-| Pending approvals     | `/-/pending`              | `membership.approve/decline`                                                      |
-| Membership emails     | Mailer                    | Notify owner on join request; joiner on approve/decline (optional decline reason) |
-| Rules                 | `/-/rules`                | `group.getRules`                                                                  |
-| Pin / delete / report | Modals                    | `post.pin`, `post.delete`, `post.report`                                          |
+| Feature                                   | Pages                            | tRPC                                                                                |
+| ----------------------------------------- | -------------------------------- | ----------------------------------------------------------------------------------- |
+| Community feed                            | `/{group}`, `/{group}?category=` | `post.list`, `post.create`                                                          |
+| Single post                               | `/{group}/[postId]`              | `post.get`, `comment.*`                                                             |
+| Categories                                | `/{group}/-/categories`          | `category.*`                                                                        |
+| Likes + points                            | Feed                             | `post.like`, `gamification.addPoints`                                               |
+| Roles                                     | Settings → Admins                | `membership.updateRole`                                                             |
+| Join flow + questions                     | About join modal                 | `membership.requestJoin`                                                            |
+| Pending approvals                         | `/-/pending`                     | `membership.approve/decline`                                                        |
+| Membership emails                         | Mailer                           | Notify owner on join request; joiner on approve/decline (optional decline reason)   |
+| Rules                                     | `/-/rules`                       | `group.getRules`                                                                    |
+| Pin / delete / report                     | Modals                           | `post.pin`, `post.delete`, `post.report`                                            |
+| Form autofill (browser password managers) | Auth + all credential forms      | `autoComplete` on inputs (`username` / `email`, `current-password`, `new-password`) |
 
 **Exit criteria:** Member joins, posts, comments, earns points, levels up.
+
+**End of Phase 1 — form autofill hygiene (all forms)**
+
+- [ ] Add correct HTML `autoComplete` (and keep stable `name` / `id` / `type`) on every auth and credential form so browsers can save and autofill:
+    - Sign-in: email → `username` (or `email`); password → `current-password`
+    - Register: email → `email` (or `username`); password → `new-password`; confirm → `new-password`
+    - Password forgot / restore / change: matching `email`, `current-password`, `new-password` as appropriate
+- [ ] Audit other RHForm fields that browsers may fill (name, username) and set `autoComplete` explicitly (`name`, `username`, or `off` when intentional)
+- [ ] Verify Chrome/Safari/Firefox offer “Save password?” and autofill on `/login` and register after a successful submit (incl. localhost)
+- [ ] Do **not** set blanket `autoComplete="off"` on login/register wrappers
 
 ---
 

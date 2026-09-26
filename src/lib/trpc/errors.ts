@@ -27,3 +27,20 @@ export function getTrpcErrorCode(error: unknown): string | null {
 export function isTrpcErrorCode(error: unknown, code: string): boolean {
     return getTrpcErrorCode(error) === code;
 }
+
+export function getTrpcErrorMessage(error: unknown): string | null {
+    if (error instanceof TRPCError) {
+        return error.message;
+    }
+
+    if (
+        typeof error === 'object' &&
+        error !== null &&
+        'message' in error &&
+        typeof (error as { message: unknown }).message === 'string'
+    ) {
+        return (error as { message: string }).message;
+    }
+
+    return null;
+}

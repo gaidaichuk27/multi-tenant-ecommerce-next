@@ -7,6 +7,7 @@ import { MoreVertical } from 'lucide-react';
 import { toast } from 'sonner';
 import {
     isGroupModeratorRole,
+    type CategoryDto,
     type GroupMembershipRoleDto,
     type GroupMembershipStatusDto,
 } from '@repo/api';
@@ -27,20 +28,26 @@ import {
 import { EditPostForm } from './EditPostForm';
 import { ReportPostForm } from './ReportPostForm';
 
+import type { SavedPostFields } from './EditPostForm';
+
 interface PostActionsMenuProps {
     locale: Language;
     groupSlug: string;
     postId: string;
     authorId: string;
     body: string;
+    categoryId?: string | null;
+    categories?: CategoryDto[];
     pinned: boolean;
     viewerUserId: string | null;
     viewerRole: GroupMembershipRoleDto | null;
     viewerStatus: GroupMembershipStatusDto | null;
     /** After delete: refresh on feed, navigate to feed on detail. */
     surface: 'feed' | 'detail';
-    /** Immediate body update in the parent while refresh catches up. */
-    onSaved?: (body: string) => void;
+    /** Immediate body/category update in the parent while refresh catches up. */
+    onSaved?: (saved: SavedPostFields) => void;
+    categoryNoneLabel?: string;
+    categoryLabel?: string;
     className?: string;
 }
 
@@ -50,12 +57,16 @@ export function PostActionsMenu({
     postId,
     authorId,
     body,
+    categoryId = null,
+    categories = [],
     pinned,
     viewerUserId,
     viewerRole,
     viewerStatus,
     surface,
     onSaved,
+    categoryNoneLabel,
+    categoryLabel,
     className,
 }: PostActionsMenuProps) {
     const { t } = useTranslation(['common']);
@@ -66,6 +77,10 @@ export function PostActionsMenu({
     const [isPinned, setIsPinned] = useState(pinned);
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [isReportOpen, setIsReportOpen] = useState(false);
+    const resolvedCategoryNoneLabel =
+        categoryNoneLabel ?? t('common:group.feed.composer.category_none');
+    const resolvedCategoryLabel =
+        categoryLabel ?? t('common:group.feed.composer.category');
 
     useEffect(() => {
         setIsPinned(pinned);
@@ -208,6 +223,10 @@ export function PostActionsMenu({
                     groupSlug={groupSlug}
                     postId={postId}
                     initialBody={body}
+                    initialCategoryId={categoryId}
+                    categories={categories}
+                    categoryNoneLabel={resolvedCategoryNoneLabel}
+                    categoryLabel={resolvedCategoryLabel}
                 />
             ) : null}
 

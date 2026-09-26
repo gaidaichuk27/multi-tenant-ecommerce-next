@@ -61,6 +61,7 @@ async function testContracts() {
         id: 'post_1',
         groupId: 'group_1',
         authorId: 'user_1',
+        categoryId: null,
         body: 'Hello',
         type: 'text',
         pinned: false,

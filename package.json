@@ -40,6 +40,7 @@
         "smoke:feed:pin-delete": "pnpm --filter backend exec tsx --tsconfig ../tsconfig.json --env-file=../.env ../scripts/smoke-post-pin-delete.ts",
         "smoke:feed:update": "pnpm --filter backend exec tsx --tsconfig ../tsconfig.json --env-file=../.env ../scripts/smoke-post-update.ts",
         "smoke:feed:report": "pnpm --filter backend exec tsx --tsconfig ../tsconfig.json --env-file=../.env ../scripts/smoke-post-report.ts",
+        "smoke:feed:categories": "pnpm --filter backend exec tsx --tsconfig ../tsconfig.json --env-file=../.env ../scripts/smoke-category.ts",
         "typecheck:backend": "pnpm --filter backend build",
         "typecheck": "pnpm db:generate && pnpm typecheck:backend",
         "docker:dev": "sh bin/multi dev up",

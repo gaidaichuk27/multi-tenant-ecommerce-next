@@ -16,6 +16,7 @@ export const postSchema = z.object({
     id: z.string(),
     groupId: z.string(),
     authorId: z.string(),
+    categoryId: z.string().nullable(),
     body: z.string(),
     type: postTypeSchema,
     pinned: z.boolean(),
@@ -31,6 +32,8 @@ export const postSchema = z.object({
 export const postListInputSchema = groupSlugInputSchema.extend({
     cursor: z.string().optional(),
     limit: z.number().int().min(1).max(50).default(20),
+    /** When set, only posts in this category (must belong to the group). */
+    categoryId: z.string().min(1).optional(),
 });
 
 export const postListPageSchema = z.object({
@@ -40,6 +43,8 @@ export const postListPageSchema = z.object({
 
 export const postCreateInputSchema = groupSlugInputSchema.extend({
     body: postBodySchema,
+    /** Optional; omit or null for uncategorized. */
+    categoryId: z.string().min(1).nullable().optional(),
 });
 
 export const postGetInputSchema = groupSlugInputSchema.extend({
@@ -48,6 +53,8 @@ export const postGetInputSchema = groupSlugInputSchema.extend({
 
 export const postUpdateInputSchema = postGetInputSchema.extend({
     body: postBodySchema,
+    /** Omit to leave unchanged; null clears; id must belong to the group. */
+    categoryId: z.string().min(1).nullable().optional(),
 });
 
 /** Result of `post.like` toggle. */
@@ -155,6 +162,7 @@ export function serializePost(post: {
     id: string;
     groupId: string;
     authorId: string;
+    categoryId: string | null;
     body: string;
     type: PostTypeDto;
     pinned: boolean;
@@ -175,6 +183,7 @@ export function serializePost(post: {
         id: post.id,
         groupId: post.groupId,
         authorId: post.authorId,
+        categoryId: post.categoryId,
         body: post.body,
         type: post.type,
         pinned: post.pinned,

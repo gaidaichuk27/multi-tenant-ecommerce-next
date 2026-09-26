@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { POST_T_MESSAGES } from '@repo/api';
+import { POST_T_MESSAGES, type CategoryDto } from '@repo/api';
 import { updatePost } from '@lib/posts/client-api';
 import { DEFAULT_CHARACTER_LIMIT } from '@shared/config/forms/characterLimit';
 import { POST_BODY_VALIDATION } from '@shared/config/forms/fieldValidation';
@@ -17,15 +17,25 @@ import { Field, FieldGroup } from '@shared/ui/Form/Field';
 import { Textarea } from '@shared/ui/Form/Textarea';
 import { Modal } from '@shared/ui/Modal';
 
-import type { PostBodyFormData } from '../model/types';
+import type { EditPostFormData } from '../model/types';
+import { PostCategoryField } from './PostCategoryField';
+
+export type SavedPostFields = {
+    body: string;
+    categoryId: string | null;
+};
 
 interface EditPostFormProps {
     onClose: () => void;
     /** Immediate UI update before `router.refresh()` lands. */
-    onSaved?: (body: string) => void;
+    onSaved?: (saved: SavedPostFields) => void;
     groupSlug: string;
     postId: string;
     initialBody: string;
+    initialCategoryId?: string | null;
+    categories?: CategoryDto[];
+    categoryNoneLabel?: string;
+    categoryLabel?: string;
     /** Override default storefront character limit (2000). */
     maxLength?: number;
 }
@@ -40,6 +50,10 @@ export function EditPostForm({
     groupSlug,
     postId,
     initialBody,
+    initialCategoryId = null,
+    categories = [],
+    categoryNoneLabel,
+    categoryLabel,
     maxLength = DEFAULT_CHARACTER_LIMIT,
 }: EditPostFormProps) {
     const { t } = useTranslation(['common']);
@@ -47,18 +61,25 @@ export function EditPostForm({
     const router = useRouter();
     const [submitError, setSubmitError] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const showCategorySelect = categories.length > 0;
+    const resolvedCategoryNoneLabel =
+        categoryNoneLabel ?? t('common:group.feed.composer.category_none');
+    const resolvedCategoryLabel =
+        categoryLabel ?? t('common:group.feed.composer.category');
 
     const {
         register,
         handleSubmit,
+        control,
         reset,
         clearErrors,
         watch,
         formState: { errors, isValid, isDirty },
-    } = useForm<PostBodyFormData>({
+    } = useForm<EditPostFormData>({
         mode: 'onChange',
         defaultValues: {
             body: initialBody,
+            categoryId: initialCategoryId ?? '',
         },
     });
 
@@ -69,17 +90,32 @@ export function EditPostForm({
         onClose();
     };
 
-    const submitFormHandler = async (data: PostBodyFormData) => {
+    const submitFormHandler = async (data: EditPostFormData) => {
         try {
             setIsSubmitting(true);
 
             const nextBody = data.body.trim();
-            await updatePost(groupSlug, postId, nextBody);
+            const categoryId =
+                data.categoryId && data.categoryId.length > 0
+                    ? data.categoryId
+                    : null;
+
+            await updatePost(
+                groupSlug,
+                postId,
+                nextBody,
+                showCategorySelect ? categoryId : undefined,
+            );
 
             setSubmitError(null);
             clearErrors();
             toast.success(t(`common:${POST_T_MESSAGES.UPDATE_SUCCESS}`));
-            onSaved?.(nextBody);
+            onSaved?.({
+                body: nextBody,
+                categoryId: showCategorySelect
+                    ? categoryId
+                    : (initialCategoryId ?? null),
+            });
             onClose();
             router.refresh();
         } catch (error) {
@@ -137,6 +173,16 @@ export function EditPostForm({
                             />
                         </div>
                     </Field>
+
+                    <PostCategoryField
+                        control={control}
+                        name="categoryId"
+                        categories={categories}
+                        categoryLabel={resolvedCategoryLabel}
+                        categoryNoneLabel={resolvedCategoryNoneLabel}
+                        selectId={`edit-post-category-${postId}`}
+                        disabled={isSubmitting}
+                    />
 
                     {submitError ? <ErrorMessage error={submitError} /> : null}
 

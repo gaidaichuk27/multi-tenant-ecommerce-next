@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { POST_T_MESSAGES } from '@repo/api';
+import { POST_T_MESSAGES, type CategoryDto } from '@repo/api';
 import { createPost } from '@lib/posts/client-api';
 import { DEFAULT_CHARACTER_LIMIT } from '@shared/config/forms/characterLimit';
 import { POST_BODY_VALIDATION } from '@shared/config/forms/fieldValidation';
@@ -18,38 +18,74 @@ import { Textarea } from '@shared/ui/Form/Textarea';
 import { cn } from '@lib/utils';
 
 import type { CreatePostFormData } from '../model/types';
+import { PostCategoryField } from './PostCategoryField';
 
 interface CreatePostFormProps {
     className?: string;
     groupSlug: string;
     /** Override default storefront character limit (2000). */
     maxLength?: number;
+    categories?: CategoryDto[];
+    /** Prefill from active feed `?category=` filter (resolved category id). */
+    defaultCategoryId?: string | null;
+    categoryNoneLabel?: string;
+    categoryLabel?: string;
+}
+
+function resolveCategoryId(
+    defaultCategoryId: string | null | undefined,
+    categories: CategoryDto[],
+): string {
+    return defaultCategoryId &&
+        categories.some((category) => category.id === defaultCategoryId)
+        ? defaultCategoryId
+        : '';
 }
 
 export function CreatePostForm({
     className,
     groupSlug,
     maxLength = DEFAULT_CHARACTER_LIMIT,
+    categories = [],
+    defaultCategoryId = null,
+    categoryNoneLabel,
+    categoryLabel,
 }: CreatePostFormProps) {
     const { t } = useTranslation(['common']);
     const getSubmitError = useFormApiError();
     const router = useRouter();
     const [submitError, setSubmitError] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const resolvedCategoryNoneLabel =
+        categoryNoneLabel ?? t('common:group.feed.composer.category_none');
+    const resolvedCategoryLabel =
+        categoryLabel ?? t('common:group.feed.composer.category');
+    const filterCategoryId = resolveCategoryId(defaultCategoryId, categories);
 
     const {
         register,
         handleSubmit,
+        control,
         reset,
         clearErrors,
+        setValue,
         watch,
         formState: { errors, isValid },
     } = useForm<CreatePostFormData>({
         mode: 'onChange',
         defaultValues: {
             body: '',
+            categoryId: filterCategoryId,
         },
     });
+
+    // Chip filter changed — update category only; preserve in-progress body draft.
+    useEffect(() => {
+        setValue('categoryId', filterCategoryId, {
+            shouldDirty: false,
+            shouldValidate: true,
+        });
+    }, [filterCategoryId, setValue]);
 
     const bodyValue = watch('body');
 
@@ -57,11 +93,16 @@ export function CreatePostForm({
         try {
             setIsSubmitting(true);
 
-            await createPost(groupSlug, data.body.trim());
+            const categoryId =
+                data.categoryId && data.categoryId.length > 0
+                    ? data.categoryId
+                    : null;
+
+            await createPost(groupSlug, data.body.trim(), categoryId);
 
             setSubmitError(null);
             clearErrors();
-            reset({ body: '' });
+            reset({ body: '', categoryId: filterCategoryId });
             toast.success(t(`common:${POST_T_MESSAGES.CREATE_SUCCESS}`));
             router.refresh();
         } catch (error) {
@@ -109,6 +150,16 @@ export function CreatePostForm({
                         />
                     </div>
                 </Field>
+
+                <PostCategoryField
+                    control={control}
+                    name="categoryId"
+                    categories={categories}
+                    categoryLabel={resolvedCategoryLabel}
+                    categoryNoneLabel={resolvedCategoryNoneLabel}
+                    selectId="post-category"
+                    disabled={isSubmitting}
+                />
 
                 {submitError ? <ErrorMessage error={submitError} /> : null}
 
