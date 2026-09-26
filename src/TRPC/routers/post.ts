@@ -1,6 +1,12 @@
 import { TRPCError } from '@trpc/server';
-import { db, isPrismaUniqueConstraintError, type Prisma } from '@repo/database';
 import {
+    db,
+    isPrismaForeignKeyErrorOnField,
+    isPrismaUniqueConstraintError,
+    type Prisma,
+} from '@repo/database';
+import {
+    CATEGORY_T_MESSAGES,
     POST_T_MESSAGES,
     isGroupModeratorRole,
     postCreateInputSchema,
@@ -60,6 +66,7 @@ function serializePostRow(row: {
     id: string;
     groupId: string;
     authorId: string;
+    categoryId: string | null;
     body: string;
     type: 'text';
     pinned: boolean;
@@ -81,6 +88,20 @@ function serializePostRow(row: {
         likeCount: row._count.likes,
         likedByViewer: row.likes.length > 0,
     });
+}
+
+async function assertCategoryInGroup(groupId: string, categoryId: string) {
+    const category = await db.category.findFirst({
+        where: { id: categoryId, groupId },
+        select: { id: true },
+    });
+
+    if (!category) {
+        throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: CATEGORY_T_MESSAGES.NOT_FOUND,
+        });
+    }
 }
 
 async function findPostInGroupOrThrow(
@@ -149,9 +170,18 @@ export const postRouter = createTRPCRouter({
     list: groupMemberProcedure
         .input(postListInputSchema)
         .query(async ({ ctx, input }) => {
+            if (input.categoryId) {
+                await assertCategoryInGroup(ctx.group.id, input.categoryId);
+            }
+
             const limit = input.limit;
             const rows = await db.post.findMany({
-                where: { groupId: ctx.group.id },
+                where: {
+                    groupId: ctx.group.id,
+                    ...(input.categoryId
+                        ? { categoryId: input.categoryId }
+                        : {}),
+                },
                 include: postIncludeForViewer(ctx.userId),
                 orderBy: [
                     { pinned: 'desc' },
@@ -194,17 +224,38 @@ export const postRouter = createTRPCRouter({
     create: groupMemberProcedure
         .input(postCreateInputSchema)
         .mutation(async ({ ctx, input }) => {
-            const post = await db.post.create({
-                data: {
-                    groupId: ctx.group.id,
-                    authorId: ctx.userId,
-                    body: input.body,
-                    type: 'text',
-                },
-                include: postIncludeForViewer(ctx.userId),
-            });
+            const categoryId = input.categoryId ?? null;
 
-            return serializePostRow(post);
+            if (categoryId) {
+                await assertCategoryInGroup(ctx.group.id, categoryId);
+            }
+
+            try {
+                const post = await db.post.create({
+                    data: {
+                        groupId: ctx.group.id,
+                        authorId: ctx.userId,
+                        body: input.body,
+                        type: 'text',
+                        categoryId,
+                    },
+                    include: postIncludeForViewer(ctx.userId),
+                });
+
+                return serializePostRow(post);
+            } catch (error) {
+                // Category deleted between assert and write → FK P2003 on categoryId.
+                if (
+                    categoryId &&
+                    isPrismaForeignKeyErrorOnField(error, 'categoryId')
+                ) {
+                    throw new TRPCError({
+                        code: 'NOT_FOUND',
+                        message: CATEGORY_T_MESSAGES.NOT_FOUND,
+                    });
+                }
+                throw error;
+            }
         }),
 
     update: groupMemberProcedure
@@ -224,13 +275,41 @@ export const postRouter = createTRPCRouter({
                 });
             }
 
-            const post = await db.post.update({
-                where: { id: existing.id },
-                data: { body: input.body },
-                include: postIncludeForViewer(ctx.userId),
-            });
+            const nextCategoryId =
+                input.categoryId === undefined
+                    ? undefined
+                    : (input.categoryId ?? null);
 
-            return serializePostRow(post);
+            if (nextCategoryId) {
+                await assertCategoryInGroup(ctx.group.id, nextCategoryId);
+            }
+
+            try {
+                const post = await db.post.update({
+                    where: { id: existing.id },
+                    data: {
+                        body: input.body,
+                        ...(nextCategoryId !== undefined
+                            ? { categoryId: nextCategoryId }
+                            : {}),
+                    },
+                    include: postIncludeForViewer(ctx.userId),
+                });
+
+                return serializePostRow(post);
+            } catch (error) {
+                // Category deleted between assert and write → FK P2003 on categoryId.
+                if (
+                    nextCategoryId &&
+                    isPrismaForeignKeyErrorOnField(error, 'categoryId')
+                ) {
+                    throw new TRPCError({
+                        code: 'NOT_FOUND',
+                        message: CATEGORY_T_MESSAGES.NOT_FOUND,
+                    });
+                }
+                throw error;
+            }
         }),
 
     delete: groupMemberProcedure

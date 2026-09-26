@@ -1,6 +1,7 @@
 import { notFound, redirect } from 'next/navigation';
 import getTranslations from '@/i18n';
 import { isTrpcErrorCode } from '@lib/trpc/errors';
+import { listCategories } from '@lib/categories/queries';
 import { listPostComments } from '@lib/comments/queries';
 import { getMineMembership } from '@lib/groups/queries';
 import { getGroupPost } from '@lib/posts/queries';
@@ -26,12 +27,14 @@ export async function GroupPostPageView({
     let post;
     let commentsPage;
     let membership;
+    let categories;
 
     try {
-        [post, commentsPage, membership] = await Promise.all([
+        [post, commentsPage, membership, categories] = await Promise.all([
             getGroupPost(groupSlug, postId),
             listPostComments(groupSlug, postId),
             getMineMembership(groupSlug),
+            listCategories(groupSlug),
         ]);
     } catch (error) {
         if (isTrpcErrorCode(error, 'NOT_FOUND')) {
@@ -54,6 +57,7 @@ export async function GroupPostPageView({
             groupSlug={groupSlug}
             post={post}
             comments={commentsPage.items}
+            categories={categories}
             viewerUserId={membership?.userId ?? null}
             viewerRole={membership?.role ?? null}
             viewerStatus={membership?.status ?? null}
@@ -64,6 +68,8 @@ export async function GroupPostPageView({
                 reply: t('common:group.post.comment.reply'),
                 cancelReply: t('common:group.post.comment.cancel_reply'),
                 pinned: t('common:group.feed.pinned'),
+                categoryNone: t('common:group.feed.composer.category_none'),
+                categoryLabel: t('common:group.feed.composer.category'),
             }}
         />
     );

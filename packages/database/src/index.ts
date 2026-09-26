@@ -18,8 +18,13 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 export { Prisma, PrismaClient };
-export { isPrismaUniqueConstraintError } from './errors';
+export {
+    isPrismaUniqueConstraintError,
+    isPrismaForeignKeyError,
+    isPrismaForeignKeyErrorOnField,
+} from './errors';
 export type {
+    Category,
     Comment,
     Group,
     GroupMembership,

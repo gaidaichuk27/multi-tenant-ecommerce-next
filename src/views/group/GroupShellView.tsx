@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { isGroupAdminRole } from '@repo/api';
 import type { Group } from '@entities/Group';
 import type { Membership } from '@entities/Membership';
 import { WithMainLayout } from '@hocs/WithMainLayout';
@@ -12,10 +13,6 @@ interface GroupShellViewProps {
     membership: Membership;
     navLabels: GroupNavLabels;
     children: ReactNode;
-}
-
-function isAdminRole(role: Membership['role']) {
-    return role === 'admin' || role === 'owner';
 }
 
 export function GroupShellView({
@@ -35,8 +32,9 @@ export function GroupShellView({
             <GroupNav
                 locale={locale}
                 groupSlug={group.slug}
-                showPending={isAdminRole(membership.role)}
-                showReports={isAdminRole(membership.role)}
+                showPending={isGroupAdminRole(membership.role)}
+                showReports={isGroupAdminRole(membership.role)}
+                showCategories={isGroupAdminRole(membership.role)}
                 labels={navLabels}
             />
             {children}

@@ -18,6 +18,12 @@ export const GROUP_MODERATOR_ROLES = [
     'owner',
 ] as const satisfies ReadonlyArray<(typeof GROUP_MEMBERSHIP_ROLES)[number]>;
 
+/** Roles with group admin capabilities (settings, categories, reports, pending). */
+export const GROUP_ADMIN_ROLES = [
+    'admin',
+    'owner',
+] as const satisfies ReadonlyArray<(typeof GROUP_MEMBERSHIP_ROLES)[number]>;
+
 /** Single source of truth for group membership statuses (Prisma + API). */
 export const GROUP_MEMBERSHIP_STATUSES = [
     'active',
@@ -91,6 +97,7 @@ export type GroupMembershipRoleDto = (typeof GROUP_MEMBERSHIP_ROLES)[number];
 export type GroupMembershipStatusDto =
     (typeof GROUP_MEMBERSHIP_STATUSES)[number];
 export type GroupModeratorRoleDto = (typeof GROUP_MODERATOR_ROLES)[number];
+export type GroupAdminRoleDto = (typeof GROUP_ADMIN_ROLES)[number];
 
 export function isGroupModeratorRole(
     role: string | null | undefined,
@@ -98,6 +105,14 @@ export function isGroupModeratorRole(
     return (
         role != null &&
         (GROUP_MODERATOR_ROLES as readonly string[]).includes(role)
+    );
+}
+
+export function isGroupAdminRole(
+    role: string | null | undefined,
+): role is GroupAdminRoleDto {
+    return (
+        role != null && (GROUP_ADMIN_ROLES as readonly string[]).includes(role)
     );
 }
 

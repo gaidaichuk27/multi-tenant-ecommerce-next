@@ -90,6 +90,7 @@ model Group {
     memberships GroupMembership[]
     posts       Post[]
     postReports PostReport[]
+    categories  Category[]
 
     @@map("groups")
 }
@@ -127,10 +128,37 @@ model GroupMembership {
     @@map("group_memberships")
 }
 
+/**
+ * Feed categories for a group (max 10 enforced in category.create).
+ * `permissions` is schema-ready for later ACL; v1 always uses all_members.
+ * Ordering is manual via `sortOrder` (category.reorder); no sortMode matrix yet.
+ * Uniqueness is case-insensitive via `nameNormalized` (lower(name)).
+ */
+model Category {
+    id             String   @id @default(cuid())
+    groupId        String   @map("group_id")
+    name           String   @db.VarChar(100)
+    /** lower(name) — enforces case-insensitive uniqueness per group. */
+    nameNormalized String   @map("name_normalized") @db.VarChar(100)
+    sortOrder      Int      @default(0) @map("sort_order")
+    /** Reserved: who may post here. v1 = all_members only (no ACL checks yet). */
+    permissions    String   @default("all_members") @db.VarChar(50)
+    createdAt      DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+    updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamp(6)
+
+    group Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+    posts Post[]
+
+    @@unique([groupId, nameNormalized])
+    @@index([groupId, sortOrder])
+    @@map("categories")
+}
+
 model Post {
     id             String   @id @default(cuid())
     groupId        String   @map("group_id")
     authorId       String   @map("author_id")
+    categoryId     String?  @map("category_id")
     body           String   @db.Text
     type           PostType @default(text)
     pinned         Boolean  @default(false)
@@ -140,11 +168,13 @@ model Post {
 
     group    Group        @relation(fields: [groupId], references: [id], onDelete: Cascade)
     author   User         @relation(fields: [authorId], references: [id], onDelete: Cascade)
+    category Category?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
     comments Comment[]
     likes    PostLike[]
     reports  PostReport[]
 
     @@index([groupId, createdAt(sort: Desc)])
+    @@index([groupId, categoryId])
     @@index([authorId])
     @@map("posts")
 }

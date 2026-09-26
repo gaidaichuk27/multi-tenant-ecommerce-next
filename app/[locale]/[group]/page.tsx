@@ -9,6 +9,7 @@ import i18nConfig from '@/i18nConfig';
 
 type GroupFeedPageProps = {
     params: Promise<{ locale: string; group: string }>;
+    searchParams: Promise<{ category?: string | string[] }>;
 };
 
 const i18nNamespaces = ['common'];
@@ -38,16 +39,27 @@ export async function generateMetadata({
     }
 }
 
-export default async function GroupFeedPage({ params }: GroupFeedPageProps) {
+export default async function GroupFeedPage({
+    params,
+    searchParams,
+}: GroupFeedPageProps) {
     const { locale: localeParam, group: groupSlug } = await params;
     const locale: Language = isValidLocale(localeParam)
         ? localeParam
         : i18nConfig.defaultLocale;
 
+    const resolvedSearch = await searchParams;
+    const rawCategory = resolvedSearch.category;
+    const categoryId =
+        typeof rawCategory === 'string' && rawCategory.length > 0
+            ? rawCategory
+            : null;
+
     return (
         <GroupFeedPageView
             locale={locale}
             groupSlug={groupSlug}
+            categoryId={categoryId}
         />
     );
 }

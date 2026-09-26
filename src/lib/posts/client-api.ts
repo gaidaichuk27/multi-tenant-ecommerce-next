@@ -28,9 +28,17 @@ async function wrapPostMutation<T>(action: () => Promise<T>): Promise<T> {
     }
 }
 
-export async function createPost(slug: string, body: string): Promise<PostDto> {
+export async function createPost(
+    slug: string,
+    body: string,
+    categoryId?: string | null,
+): Promise<PostDto> {
     return wrapPostMutation(() =>
-        getBrowserTrpcClient().post.create.mutate({ slug, body }),
+        getBrowserTrpcClient().post.create.mutate({
+            slug,
+            body,
+            ...(categoryId !== undefined ? { categoryId } : {}),
+        }),
     );
 }
 
@@ -65,9 +73,15 @@ export async function updatePost(
     slug: string,
     postId: string,
     body: string,
+    categoryId?: string | null,
 ): Promise<PostDto> {
     return wrapPostMutation(() =>
-        getBrowserTrpcClient().post.update.mutate({ slug, postId, body }),
+        getBrowserTrpcClient().post.update.mutate({
+            slug,
+            postId,
+            body,
+            ...(categoryId !== undefined ? { categoryId } : {}),
+        }),
     );
 }
 

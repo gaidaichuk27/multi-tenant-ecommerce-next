@@ -1,7 +1,10 @@
 export { CreatePostForm } from './ui/CreatePostForm';
 export { CreateCommentForm } from './ui/CreateCommentForm';
-export { EditPostForm } from './ui/EditPostForm';
+export { EditPostForm, type SavedPostFields } from './ui/EditPostForm';
 export { LikePostButton } from './ui/LikePostButton';
 export { PostActionsMenu } from './ui/PostActionsMenu';
 export { ReportPostForm } from './ui/ReportPostForm';
 export { ReportQueueActions } from './ui/ReportQueueActions';
+export { PostCategoryField } from './ui/PostCategoryField';
+export { PostFeedItem } from './ui/PostFeedItem';
+export { GroupPostDetail } from './ui/GroupPostDetail';

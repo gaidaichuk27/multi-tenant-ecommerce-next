@@ -57,6 +57,7 @@ export {
 } from './response';
 export { GROUP_T_MESSAGES, type GroupTMessage } from './group-messages';
 export {
+    GROUP_ADMIN_ROLES,
     GROUP_MEMBERSHIP_ROLES,
     GROUP_MEMBERSHIP_STATUSES,
     GROUP_MODERATOR_ROLES,
@@ -70,9 +71,11 @@ export {
     groupSlugSchema,
     groupVisibilitySchema,
     groupWithRoleSchema,
+    isGroupAdminRole,
     isGroupModeratorRole,
     serializeGroup,
     type CreateGroupInput,
+    type GroupAdminRoleDto,
     type GroupDto,
     type GroupMembershipRoleDto,
     type GroupMembershipStatusDto,
@@ -161,6 +164,31 @@ export {
     type PostTypeDto,
     type PostUpdateInput,
 } from './posts';
+export {
+    CATEGORY_T_MESSAGES,
+    type CategoryTMessage,
+} from './category-messages';
+export {
+    CATEGORY_MAX_PER_GROUP,
+    CATEGORY_NAME_MAX_LENGTH,
+    CATEGORY_PERMISSIONS_ALL_MEMBERS,
+    categoryCreateInputSchema,
+    categoryDeleteInputSchema,
+    categoryListInputSchema,
+    categoryNameSchema,
+    categoryPermissionsSchema,
+    categoryReorderInputSchema,
+    categorySchema,
+    categoryUpdateInputSchema,
+    normalizeCategoryName,
+    serializeCategory,
+    type CategoryCreateInput,
+    type CategoryDeleteInput,
+    type CategoryDto,
+    type CategoryListInput,
+    type CategoryReorderInput,
+    type CategoryUpdateInput,
+} from './categories';
 export { COMMENT_T_MESSAGES, type CommentTMessage } from './comment-messages';
 export {
     commentBodySchema,
